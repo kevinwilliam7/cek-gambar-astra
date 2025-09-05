@@ -1,7 +1,7 @@
 <!-- ========== HEADER ========== -->
 <header
     class="flex flex-wrap md:justify-start md:flex-nowrap z-50 bg-slate-900 px-2 sm:px-5 xl:px-0 dark:bg-slate-950">
-    <div class="max-w-6xl flex flex-wrap basis-full items-center w-full mx-auto py-2.5">
+    <div class="max-w-7xl flex flex-wrap basis-full items-center w-full mx-auto py-2.5">
         <div class="md:order-1 md:w-42 flex items-center">
             <!-- Logo -->
             <a class="flex-none rounded-md text-xl inline-block font-semibold focus:outline-hidden focus:opacity-80"
@@ -99,7 +99,13 @@
                             ? 'bg-white/10'
                             : '' }}"
                             href="{{ route('motor.index') }}">
-                            Motor Honda
+                            Speedo Motor Honda
+                        </a>
+                        <a class="py-1.5 px-2 inline-flex items-center gap-x-2 font-medium text-sm whitespace-nowrap rounded-md border border-transparent text-white hover:text-white/80 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-white/10 {{ request()->routeIs('rekap-kpb.index')
+                            ? 'bg-white/10'
+                            : '' }}"
+                            href="{{ route('rekap-kpb.index') }}">
+                            Rekap KPB
                         </a>
                     </div>
                 </div>

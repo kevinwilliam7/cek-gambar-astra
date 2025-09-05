@@ -29,7 +29,7 @@
                             <div class="flex items-center gap-x-2">
                                 <div class="grow relative">
                                     <input id="search-table1" type="text" class="border-1 py-1.5 sm:py-2 ps-10 pe-8 block w-full rounded-lg sm:text-sm border-gray-300 dark:border-gray-600
-                                    bg-white dark:bg-gray-800
+                                    bg-white dark:bg-neutral-700
                                     text-gray-900 dark:text-gray-100
                                     focus:outline-none
                                     focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0
@@ -37,11 +37,11 @@
                                     transition-shadow duration-150" placeholder="Search data" >
                                     <div class="absolute inset-y-0 end-0 flex items-center z-20 pe-2">
                                         <div class="flex items-center">
-                                            <button type="button" class="hidden flex shrink-0 justify-center items-center size-6 rounded-full text-gray-500 hover:text-cyan-600 focus:outline-hidden focus:text-cyan-600 dark:text-neutral-500 dark:hover:text-cyan-500 dark:focus:text-cyan-500" aria-label="Close">
+                                            <button type="button" class="hidden flex shrink-0 justify-center items-center size-6 rounded-full text-gray-500 hover:text-indigo-600 focus:outline-hidden focus:text-indigo-600 dark:text-neutral-500 dark:hover:text-indigo-500 dark:focus:text-indigo-500" aria-label="Close">
                                                 <span class="sr-only">Close</span>
                                                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
                                             </button>
-                                            <button type="button" class="inline-flex shrink-0 justify-center items-center size-6 text-sm font-medium rounded-full text-white bg-cyan-700 hover:bg-cyan-600 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-cyan-600">
+                                            <button type="button" class="inline-flex shrink-0 justify-center items-center size-6 text-sm font-medium rounded-full text-white bg-indigo-700 hover:bg-indigo-600 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-indigo-600">
                                                 <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                                                 <span class="sr-only">Search</span>
                                             </button>
@@ -53,7 +53,7 @@
                         <!-- End Input -->
 
                         <div class="flex justify-end items-center gap-x-2">
-                            <span class="text-sm">Perpage</span>
+                            {{-- <span class="text-sm">Perpage</span> --}}
                             <select id="page-size-table1" data-hs-select='{
                                 "placeholder": "Select option...",
                                 "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
@@ -251,7 +251,7 @@
                     if (res.data.length === 0) {
                         // 👇 Empty state row
                         let emptyRow = `
-                            <tr>
+                            <tr class="hover:bg-gray-100 dark:hover:bg-neutral-700">
                                 <td colspan="4" class="py-6 text-center text-sm text-gray-500 dark:text-gray-400">
                                     Data tidak ditemukan
                                 </td>
@@ -263,7 +263,7 @@
                     } else {
                         res.data.forEach(item => {
                             let row = `
-                            <tr>
+                            <tr class="hover:bg-gray-100 dark:hover:bg-neutral-700">
                                 <td class="size-px whitespace-nowrap">
                                     <a class="py-3 px-5 block text-sm font-medium text-gray-800 hover:text-indigo-600 dark:text-white"
                                         href="/projects/${item.id}">
@@ -321,7 +321,7 @@
                         });
                         document.getElementById("pagination1-current-page").innerText = res.page;
                         document.getElementById("pagination1-total-page").innerText = res.total_pages;
-                        document.getElementById("pagination1-total-data").innerText = res.total;
+                        document.getElementById("pagination1-total-data").innerText = res.total_filtered;
                     }
                 });
         }

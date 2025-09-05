@@ -12,7 +12,7 @@ class DatatableService
         $perPage = min(max((int) $request->get('per_page', 10), 1), 100);
         $q       = trim($request->get('q', ''));
         $sortBy  = $request->get('sort_by', 'id');
-        $sortDir = $request->get('sort_dir', 'asc');
+        $sortDir = strtolower($request->get('sort_dir', 'asc'));
 
         // search
         if ($q && $searchCols) {
@@ -27,13 +27,17 @@ class DatatableService
         if (!in_array($sortBy, $allowedSort)) {
             $sortBy = $allowedSort[0] ?? 'id';
         }
-        $query->orderBy($sortBy, $sortDir === 'desc' ? 'desc' : 'asc');
+        if (!in_array($sortDir, ['asc','desc'])) {
+            $sortDir = 'asc';
+        }
+        $query->reorder()->orderBy($sortBy, $sortDir);
 
-        $total = $query->getModel()->newQuery()->count();
-        $filtered = (clone $query)->count();
+        $total    = $query->getModel()->newQuery()->count();
+        $filtered = (clone $query)->toBase()->getCountForPagination();
 
         $rows = $query->forPage($page, $perPage)->get();
 
         return compact('rows','page','perPage','total','filtered','sortBy','sortDir','q');
     }
+
 }

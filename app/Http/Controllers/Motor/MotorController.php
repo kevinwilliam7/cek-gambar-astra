@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Motor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Motor;
+use App\Models\RekapKpb;
 use App\Services\DatatableService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class MotorController extends Controller
@@ -14,7 +16,11 @@ class MotorController extends Controller
      */
     public function index()
     {
-        return view('motor.index');
+        $motor = Motor::get()->unique('type_motor');
+        $data = [
+            'motor' => $motor,
+        ];
+        return view('motor.index', compact('data'));
     }
 
     /**
@@ -67,9 +73,9 @@ class MotorController extends Controller
 
     public function datatable(Request $request)
     {
-        $result = DatatableService::apply(Motor::with(['kpb_kriteria']), $request,
+        $result = DatatableService::apply(Motor::with(['kpb_kriteria', 'images']), $request,
             ['kode_nosin','type_motor'],
-            ['order','kode_nosin','type_motor','created_at']
+            ['kode_nosin','type_motor','created_at']
         );
 
         return response()->json([
@@ -78,7 +84,7 @@ class MotorController extends Controller
             'per_page'       => $result['perPage'],
             'total'          => $result['total'],
             'total_filtered' => $result['filtered'],
-            'total_pages'    => ceil($result['total'] / $result['perPage']),
+            'total_pages'    => ceil($result['filtered'] / $result['perPage']),
             'sort_by'        => $result['sortBy'],
             'sort_dir'       => $result['sortDir'],
             'q'              => $result['q'],

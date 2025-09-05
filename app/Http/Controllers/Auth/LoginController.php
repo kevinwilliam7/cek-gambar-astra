@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
-use App\Models\Ahass;
-use App\Services\DatatableService;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class AhassController extends Controller
+class LoginController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        return view('auth.login.index');
     }
 
     /**
@@ -62,25 +61,5 @@ class AhassController extends Controller
     public function destroy(string $id)
     {
         //
-    }
-
-    public function datatable(Request $request)
-    {
-        $result = DatatableService::apply(Ahass::query(), $request,
-            ['nama_ahass','kode_ahass'],
-            ['id','nama_ahass','kode_ahass','created_at']
-        );
-
-        return response()->json([
-            'data'           => $result['rows'],
-            'page'           => $result['page'],
-            'per_page'       => $result['perPage'],
-            'total'          => $result['total'],
-            'total_filtered' => $result['filtered'],
-            'total_pages'    => ceil($result['filtered'] / $result['perPage']),
-            'sort_by'        => $result['sortBy'],
-            'sort_dir'       => $result['sortDir'],
-            'q'              => $result['q'],
-        ]);
     }
 }

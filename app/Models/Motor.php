@@ -11,8 +11,13 @@ class Motor extends Model
 
     protected $guarded = [];
 
-        public function kpb_kriteria()
+    public function kpb_kriteria()
     {
         return $this->hasMany(KpbKriteria::class, 'kode_nosin', 'kode_nosin');
+    }
+
+    public function images()
+    {
+        return $this->morphMany(Image::class, 'imageable');
     }
 }

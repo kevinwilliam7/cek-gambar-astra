@@ -10,44 +10,6 @@
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/erimicel/select2-tailwindcss-theme/dist/select2-tailwindcss-theme-plain.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <style>
-        @media (min-width: 1024px) {
-            #main-wrapper {
-                margin-left: 16rem;
-                /* 64 = 16rem */
-            }
-        }
-
-        .dt-layout-row:has(.dt-search),
-        .dt-layout-row:has(.dt-length),
-        .dt-layout-row:has(.dt-paging) {
-            display: none !important;
-        }
-
-        .dataTables_length {
-            display: none;
-        }
-
-        .dataTables_filter {
-            display: none;
-        }
-
-        .dataTables_paginate {
-            display: none;
-        }
-
-        .dataTables_info {
-            display: none;
-        }
-
-        td.dataTables_empty {
-            padding: 15px;
-            text-align: center;
-            vertical-align: middle;
-            font-weight: normal;
-            font-style: italic;
-        }
-    </style>
 </head>
 
 <body class="bg-gray-50 dark:bg-neutral-900">
@@ -60,9 +22,40 @@
     <!-- ========== END MAIN CONTENT ========== -->
 
     <!-- ========== FOOTER CONTENT ========== -->
-    @include('layouts.footer')
+    {{-- @include('layouts.footer') --}}
     <!-- ========== END FOOTER CONTENT ========== -->
     @yield('js')
+    <script>
+        function showLoadingTable(colspan = 0, message = "Loading...") {
+            return `
+                <tr>
+                    <td colspan="${colspan}" class="py-6 text-center">
+                        <div class="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                            <div class="animate-spin inline-block size-4 border-2 border-current border-t-transparent text-blue-600 rounded-full dark:text-blue-500"
+                                role="status" aria-label="loading">
+                                <span class="sr-only">${message}</span>
+                            </div>
+                            <span>${message}</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function formatDate(dateString) {
+            const bulan = [
+                "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+            ];
+
+            let d = new Date(dateString);
+            let day = String(d.getDate()).padStart(2, '0');
+            let month = bulan[d.getMonth()];
+            let year = d.getFullYear();
+
+            return `${day} ${month} ${year}`;
+        }
+    </script>
 </body>
 
 </html>
