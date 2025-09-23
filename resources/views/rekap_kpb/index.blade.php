@@ -1,7 +1,9 @@
 @extends('layouts.app')
 @section('title', 'Ahass | Astra')
 @section('main-content')
-    <div class="relative px-2 sm:px-5 py-5 before:absolute before:top-0 before:start-0 before:-z-1 before:w-full before:h-112.5 before:bg-slate-900 dark:before:bg-slate-950">
+    <div class="relative px-2 sm:px-5 py-5
+     before:absolute before:top-0 before:start-0 before:-z-1 before:w-full before:h-112.5 before:bg-slate-900 dark:before:bg-slate-950
+     animate-slide-down">
         <div class="max-w-max mx-auto flex flex-col gap-y-5 pt-4 md:pt-16">
             <!-- Header -->
             <div class="mb-4 flex flex-col justify-center gap-y-3 text-center">
@@ -116,7 +118,7 @@
                                                         <div class="flex items-center">
                                                             <label class="p-2 group w-full inline-flex items-center cursor-pointer text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800">
                                                                 <input type="checkbox" name="service_id"
-                                                                    class="shrink-0 size-4.5 border-gray-300 rounded-sm text-indigo-600 checked:border-indigo-600 focus:ring-indigo-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-500 dark:checked:bg-indigo-500 dark:checked:border-indigo-500 dark:focus:ring-offset-gray-800" 
+                                                                    class="shrink-0 size-4.5 border-gray-300 rounded-sm text-indigo-600 checked:border-indigo-600 focus:ring-indigo-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-500 dark:checked:bg-indigo-500 dark:checked:border-indigo-500 dark:focus:ring-offset-gray-800"
                                                                     value="{{ $service_id }}">
                                                                 <span class="ms-2 text-gray-800 dark:text-neutral-400">KPB {{ $service_id }}</span>
                                                                 <span class="ms-auto text-xs text-gray-500 dark:text-neutral-500">(∞)</span>
@@ -136,7 +138,7 @@
                                                             <div class="flex items-center">
                                                                 <label class="p-2 group w-full inline-flex items-center cursor-pointer text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800">
                                                                     <input type="checkbox" name="service_id"
-                                                                        class="shrink-0 size-4.5 border-gray-300 rounded-sm text-indigo-600 checked:border-indigo-600 focus:ring-indigo-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-500 dark:checked:bg-indigo-500 dark:checked:border-indigo-500 dark:focus:ring-offset-gray-800" 
+                                                                        class="shrink-0 size-4.5 border-gray-300 rounded-sm text-indigo-600 checked:border-indigo-600 focus:ring-indigo-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-500 dark:checked:bg-indigo-500 dark:checked:border-indigo-500 dark:focus:ring-offset-gray-800"
                                                                         value="{{ $service_id }}">
                                                                     <span class="ms-2 text-gray-800 dark:text-neutral-400">KPB {{ $service_id }}</span>
                                                                     <span class="ms-auto text-xs text-gray-500 dark:text-neutral-500">(∞)</span>
@@ -673,7 +675,7 @@
             tbody.innerHTML = showLoadingTable(8, "Loading...");
             loadTable1(currentPageTable1 += 1);
         });
-        document.getElementById("search-table1").addEventListener("input", (e) => {
+        document.getElementById("search-table1").addEventListener("change", (e) => {
             let tbody = document.getElementById("tbody1");
             tbody.innerHTML = showLoadingTable(8, "Loading...");
             searchTable1 = e.target.value;

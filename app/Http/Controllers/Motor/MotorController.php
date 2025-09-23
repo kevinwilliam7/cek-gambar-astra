@@ -73,9 +73,13 @@ class MotorController extends Controller
 
     public function datatable(Request $request)
     {
-        $result = DatatableService::apply(Motor::with(['kpb_kriteria', 'images']), $request,
-            ['kode_nosin','type_motor'],
-            ['kode_nosin','type_motor','created_at']
+        $result = DatatableService::apply(Motor::with(['kpb_kriteria', 'images'])->where(function($q) use ($request){
+            if ($request->filled('type_motor')) {
+                $q->whereIn('type_motor', $request->input('type_motor'));
+            }
+        }), $request,
+            ['id', 'kode_nosin','type_motor'],
+            ['id', 'kode_nosin','type_motor','created_at']
         );
 
         return response()->json([

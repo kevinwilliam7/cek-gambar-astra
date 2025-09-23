@@ -331,7 +331,7 @@
         document.getElementById("nextBtnTable1").addEventListener("click", () => {
             loadTable1(currentPageTable1 += 1);
         });
-        document.getElementById("search-table1").addEventListener("input", (e) => {
+        document.getElementById("search-table1").addEventListener("change", (e) => {
             searchTable1 = e.target.value;
             loadTable1(1);
         });

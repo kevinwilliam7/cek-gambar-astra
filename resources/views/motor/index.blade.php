@@ -129,6 +129,51 @@
             <!-- End Footer -->
         </div>
     </div>
+    <!-- Modal -->
+<div
+    x-data="{ modalOpen: false, imageSrc: '', scale: 1 }"
+    x-show="modalOpen"
+    x-transition
+    class="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+>
+  <div class="relative bg-white rounded-lg shadow-lg p-4 max-w-4xl w-full flex flex-col items-center">
+
+    <!-- Close -->
+    <button
+        @click="modalOpen = false; scale = 1"
+        class="absolute top-2 right-2 text-gray-600 hover:text-red-500 text-xl font-bold">
+        ✕
+    </button>
+
+    <!-- Image -->
+    <div class="overflow-hidden">
+      <img
+          :src="imageSrc"
+          :style="`transform: scale(${scale});`"
+          class="transition-transform duration-300 max-h-[80vh] object-contain"
+      />
+    </div>
+
+    <!-- Controls -->
+    <div class="mt-4 flex gap-3">
+      <button
+          @click="if(scale > 0.4) scale -= 0.2"
+          class="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+          ➖ Zoom Out
+      </button>
+      <button
+          @click="scale += 0.2"
+          class="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+          ➕ Zoom In
+      </button>
+      <button
+          @click="scale = 1"
+          class="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+          🔄 Reset
+      </button>
+    </div>
+  </div>
+</div>
     @include('home.partial.modal_cu')
     @include('home.partial.modal_delete')
 @endsection
@@ -145,7 +190,6 @@
             let typeMotorValues = Array.from(
                 document.querySelectorAll('input[name="type_motor"]:checked')
             ).map(c => c.value);
-
             // bikin parameter query
             let params = new URLSearchParams({
                 page: currentPageTable1,
@@ -165,11 +209,54 @@
                     if (res.data.length === 0) {
                         // 👇 Empty state row
                         let emptyRow = `
-                            <tr class="hover:bg-gray-100 dark:hover:bg-neutral-700">
-                                <td colspan="8" class="py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                                    Data tidak ditemukan
-                                </td>
-                            </tr>`;
+                            <div class="p-5 min-h-100 flex flex-col justify-center items-center text-center">
+                                <svg class="w-48 mx-auto mb-4 text-white" width="178" height="90" viewBox="0 0 178 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="27" y="50.5" width="124" height="39" rx="7.5" fill="currentColor" class="fill-white dark:fill-neutral-800"></rect>
+                                <rect x="27" y="50.5" width="124" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-50 dark:stroke-neutral-700/10"></rect>
+                                <rect x="34.5" y="58" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
+                                <rect x="66.5" y="61" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
+                                <rect x="66.5" y="73" width="77" height="6" rx="3" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
+                                <rect x="19.5" y="28.5" width="139" height="39" rx="7.5" fill="currentColor" class="fill-white dark:fill-neutral-800"></rect>
+                                <rect x="19.5" y="28.5" width="139" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-100 dark:stroke-neutral-700/30"></rect>
+                                <rect x="27" y="36" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
+                                <rect x="59" y="39" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
+                                <rect x="59" y="51" width="92" height="6" rx="3" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
+                                <g filter="url(#filter1)">
+                                    <rect x="12" y="6" width="154" height="40" rx="8" fill="currentColor" class="fill-white dark:fill-neutral-800" shape-rendering="crispEdges"></rect>
+                                    <rect x="12.5" y="6.5" width="153" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-100 dark:stroke-neutral-700/60" shape-rendering="crispEdges"></rect>
+                                    <rect x="20" y="14" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700 "></rect>
+                                    <rect x="52" y="17" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
+                                    <rect x="52" y="29" width="106" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
+                                </g>
+                                <defs>
+                                    <filter id="filter1" x="0" y="0" width="178" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                    <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+                                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"></feColorMatrix>
+                                    <feOffset dy="6"></feOffset>
+                                    <feGaussianBlur stdDeviation="6"></feGaussianBlur>
+                                    <feComposite in2="hardAlpha" operator="out"></feComposite>
+                                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"></feColorMatrix>
+                                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1187_14810"></feBlend>
+                                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1187_14810" result="shape"></feBlend>
+                                    </filter>
+                                </defs>
+                                </svg>
+
+                                <div class="max-w-sm mx-auto">
+                                <p class="mt-2 font-medium text-gray-800 dark:text-neutral-200">
+                                    No Data
+                                </p>
+                                <p class="mb-5 text-sm text-gray-500 dark:text-neutral-500">
+                                    No data here yet. We will notify you when there's an update.
+                                </p>
+                                </div>
+                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-xs font-medium rounded-lg border border-transparent bg-pink-600 text-white hover:bg-pink-700 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:ring-2 focus:ring-pink-500">
+                                <svg class="hidden sm:block shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14"></path>
+                                    <path d="M12 5v14"></path>
+                                </svg>Add data
+                                </a>
+                            </div>`;
                         document.getElementById("pagination1-current-page").innerText = 0;
                         document.getElementById("pagination1-total-page").innerText = 0;
                         document.getElementById("pagination1-total-data").innerText = 0;
@@ -186,23 +273,20 @@
                                         <div class="h-full flex flex-col">
                                             <div class="group relative">
                                             <div class="relative">
-                                                <a class="block shrink-0 relative w-full h-48 md:h-64 overflow-hidden rounded-xl focus:outline-hidden" href="../../pro/shop-marketplace/product-detail.html">
+                                                <a class="block shrink-0 relative w-full h-48 md:h-64 overflow-hidden rounded-xl focus:outline-hidden">
                                                 <img class="size-full absolute inset-0 object-cover object-center group-hover:scale-105 group-focus:scale-105 transition-transform duration-500 ease-in-out rounded-xl" src="${img.filename}" alt="Product Image">
                                                 </a>
                                             </div>
 
-                                            <a class="after:z-1 after:absolute after:inset-0" href="../../pro/shop-marketplace/product-detail.html"></a>
+                                            <a class="after:z-1 after:absolute after:inset-0" @click="modalOpen = true; imageSrc='${img.filename}'"></a>
 
                                             <div class="pt-3">
-                                                <h4 class="font-medium text-sm text-gray-800 dark:text-neutral-200">
-                                                iPhone 14 Case
-                                                </h4>
                                                 <div class="mt-1 flex flex-wrap items-center gap-1">
                                                 <span class="font-semibold text-emerald-600 dark:text-emerald-500">
-                                                    $59 <span class="text-sm">USD</span>
+                                                    ${img.deskripsi !== null ? img.deskripsi : 'No Description'}
                                                 </span>
                                                 <span class="text-sm text-gray-500 dark:text-neutral-500">
-                                                    <s>$79</s>
+                                                    ${item.kode_nosin}
                                                 </span>
                                                 </div>
                                             </div>
@@ -258,8 +342,9 @@
                                 }' class="relative">
                                 <!-- Header -->
                                 <div class="mb-2 flex flex-wrap justify-between items-center gap-3">
-                                    <h2 class="font-medium text-lg text-gray-800 dark:text-neutral-200">
-                                    ${item.deskripsi !== null ? item.deskripsi : ''}
+                                    <h2 class="font-small text-lg text-gray-800 dark:text-neutral-200">
+                                    ${item.deskripsi !== null ? '<small>' + `${item.deskripsi}` + '</small><br>' : ''}
+                                    ${item.kpb_kriteria && item.kpb_kriteria.length > 0 ? '<span class="text-sm text-gray-500 dark:text-neutral-500"> \n' + item.kpb_kriteria.map(k => k.kpb_type+': '+k.hari_maksimum+' Hari'+', '+k.km_maksimum+' KM').join(';<br> ') + '</span>' : ''}
                                     </h2>
 
                                     <!-- Nav -->
@@ -298,7 +383,7 @@
                             `;
                             tbody.insertAdjacentHTML("beforeend", row);
                         });
-                        
+
                         console.log(res);
                         document.getElementById("pagination1-current-page").innerText = res.page;
                         document.getElementById("pagination1-total-page").innerText = res.total_pages;
@@ -322,7 +407,7 @@
             }
                     }
                 });
-                
+
         }
         function setSortTable1(column, order) {
             sortByTable1 = column;
@@ -343,7 +428,7 @@
             tbody.innerHTML = showLoadingTable(8, "Loading...");
             loadTable1(currentPageTable1 += 1);
         });
-        document.getElementById("search-table1").addEventListener("input", (e) => {
+        document.getElementById("search-table1").addEventListener("change", (e) => {
             let tbody = document.getElementById("content");
             tbody.innerHTML = showLoadingTable(8, "Loading...");
             searchTable1 = e.target.value;

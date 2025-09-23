@@ -10,6 +10,30 @@
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/erimicel/select2-tailwindcss-theme/dist/select2-tailwindcss-theme-plain.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        @keyframes slide-down {
+            0% {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-slide-down {
+            animation: slide-down 0.5s ease-out forwards;
+        }
+
+        @keyframes fade-up {
+            0% { transform: translateY(40px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .animate-fade-up {
+            animation: fade-up 0.6s ease-out forwards;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 dark:bg-neutral-900">
@@ -25,6 +49,7 @@
     {{-- @include('layouts.footer') --}}
     <!-- ========== END FOOTER CONTENT ========== -->
     @yield('js')
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
         function showLoadingTable(colspan = 0, message = "Loading...") {
             return `
