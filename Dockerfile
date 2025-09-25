@@ -1,6 +1,3 @@
-ENV PORT=8080
-EXPOSE 8080
-
 # Stage 1: build assets
 FROM node:20 AS frontend
 
@@ -46,6 +43,9 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
+# Set port untuk Railway
+ENV PORT=8080
+EXPOSE 8080
 EXPOSE $PORT
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
