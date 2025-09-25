@@ -1,20 +1,26 @@
-# Stage 1: build assets
+# Stage 1: Node untuk build asset
 FROM node:20 AS frontend
-
 WORKDIR /app
+
+# copy file config vite + tailwind
 COPY package*.json vite.config.* postcss.config.* tailwind.config.* ./
+
 RUN npm install
+
+# copy source code yang dibutuhkan
 COPY resources ./resources
 COPY public ./public
+
+# build asset
 RUN npm run build
 
+
+# Stage 2: PHP untuk aplikasi
 FROM php:8.2-fpm
 
-COPY --from=frontend /app/public/build ./public/build
-
-# Install dependencies (termasuk nginx dan supervisor)
+# install extension php
 RUN apt-get update && apt-get install -y \
-    nginx supervisor \
+    nginx \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libpng-dev \
@@ -24,30 +30,25 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     curl \
+    supervisor \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install gd pdo pdo_mysql pdo_pgsql bcmath zip \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+    && docker-php-ext-install gd pdo pdo_mysql pdo_pgsql zip
 
 WORKDIR /var/www
+
 COPY . .
 
-# Copy nginx config
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+# copy hasil build frontend ke public/build
+COPY --from=frontend /app/public/build ./public/build
 
-# Copy supervisor config
-COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# izin storage & bootstrap
+RUN chmod -R 777 storage bootstrap/cache
 
-RUN composer install --no-dev --optimize-autoloader
+# config nginx & supervisor
+COPY ./docker/nginx.conf /etc/nginx/nginx.conf
+COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
-    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
-
-# Set port untuk Railway
 ENV PORT=8080
 EXPOSE 8080
-EXPOSE $PORT
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/usr/bin/supervisord"]
