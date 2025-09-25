@@ -10,6 +10,8 @@ RUN npm run build
 
 FROM php:8.2-fpm
 
+COPY --from=frontend /app/public/build ./public/build
+
 # Install dependencies (termasuk nginx dan supervisor)
 RUN apt-get update && apt-get install -y \
     nginx supervisor \
