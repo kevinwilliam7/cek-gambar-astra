@@ -1,24 +1,27 @@
-# Stage 1: Node untuk build asset
+# ================================
+# Stage 1: Build frontend assets
+# ================================
 FROM node:20 AS frontend
 WORKDIR /app
 
-# copy file config vite + tailwind
+# Copy dependency list dan install
 COPY package*.json vite.config.* postcss.config.* tailwind.config.* ./
-
 RUN npm install
 
-# copy source code yang dibutuhkan
+# Copy resource Laravel yang dibutuhkan
 COPY resources ./resources
 COPY public ./public
 
-# build asset
+# Build Vite assets
 RUN npm run build
 
 
-# Stage 2: PHP untuk aplikasi
+# ================================
+# Stage 2: PHP + Nginx + Supervisor
+# ================================
 FROM php:8.2-fpm
 
-# install extension php
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     nginx \
     libfreetype6-dev \
@@ -31,24 +34,33 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     supervisor \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install gd pdo pdo_mysql pdo_pgsql zip
+ && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+ && docker-php-ext-install gd pdo pdo_mysql pdo_pgsql zip bcmath \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
+# Copy source Laravel
 COPY . .
 
-# copy hasil build frontend ke public/build
+# Copy hasil build frontend ke public/build
 COPY --from=frontend /app/public/build ./public/build
 
-# izin storage & bootstrap
-RUN chmod -R 777 storage bootstrap/cache
+# Install dependency Laravel
+RUN composer install --no-dev --optimize-autoloader \
+ && php artisan config:clear \
+ && php artisan route:clear \
+ && php artisan view:clear
 
-# config nginx & supervisor
+# Permissions untuk Laravel
+RUN chown -R www-data:www-data storage bootstrap/cache \
+ && chmod -R 775 storage bootstrap/cache
+
+# Copy konfigurasi Nginx & Supervisor
 COPY ./docker/nginx.conf /etc/nginx/nginx.conf
 COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-ENV PORT=8080
-EXPOSE 8080
-
-CMD ["/usr/bin/supervisord"]
+# Rail
