@@ -1,3 +1,6 @@
+ENV PORT=8080
+EXPOSE 8080
+
 # Stage 1: build assets
 FROM node:20 AS frontend
 
