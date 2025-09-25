@@ -1,3 +1,13 @@
+# Stage 1: build assets
+FROM node:20 AS frontend
+
+WORKDIR /app
+COPY package*.json vite.config.* postcss.config.* tailwind.config.* ./
+RUN npm install
+COPY resources ./resources
+COPY public ./public
+RUN npm run build
+
 FROM php:8.2-fpm
 
 # Install dependencies (termasuk nginx dan supervisor)
