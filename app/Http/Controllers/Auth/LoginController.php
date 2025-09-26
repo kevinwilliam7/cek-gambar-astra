@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -28,7 +30,17 @@ class LoginController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $email = $request->email;
+        $password = $request->password;
+        // dd(Hash::check($password, $user->password));
+        if (auth()->attempt(['email' => $email, 'password' => $password])) {
+            $request->session()->regenerate();
+            return redirect()->intended('home');
+        } else {
+            return back()->withErrors([
+                'email' => 'The provided credentials do not match our records.',
+            ])->onlyInput('email');
+        }
     }
 
     /**

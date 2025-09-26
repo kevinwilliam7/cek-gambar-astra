@@ -518,7 +518,57 @@
                         // 👇 Empty state row
                         let emptyRow = `
                             <tr class="hover:bg-gray-100 dark:hover:bg-neutral-700">
-                                <td colspan="8" class="py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                <td colspan="8" class="hidden md:table-cell py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                    <div class="animate-slide-down p-5 min-h-100 flex flex-col justify-center items-center text-center">
+                                        <svg class="w-48 mx-auto mb-4 text-white" width="178" height="90" viewBox="0 0 178 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <rect x="27" y="50.5" width="124" height="39" rx="7.5" fill="currentColor" class="fill-white dark:fill-neutral-800"></rect>
+                                            <rect x="27" y="50.5" width="124" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-50 dark:stroke-neutral-700/10"></rect>
+                                            <rect x="34.5" y="58" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
+                                            <rect x="66.5" y="61" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
+                                            <rect x="66.5" y="73" width="77" height="6" rx="3" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
+                                            <rect x="19.5" y="28.5" width="139" height="39" rx="7.5" fill="currentColor" class="fill-white dark:fill-neutral-800"></rect>
+                                            <rect x="19.5" y="28.5" width="139" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-100 dark:stroke-neutral-700/30"></rect>
+                                            <rect x="27" y="36" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
+                                            <rect x="59" y="39" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
+                                            <rect x="59" y="51" width="92" height="6" rx="3" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
+                                            <g filter="url(#filter1)">
+                                                <rect x="12" y="6" width="154" height="40" rx="8" fill="currentColor" class="fill-white dark:fill-neutral-800" shape-rendering="crispEdges"></rect>
+                                                <rect x="12.5" y="6.5" width="153" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-100 dark:stroke-neutral-700/60" shape-rendering="crispEdges"></rect>
+                                                <rect x="20" y="14" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700 "></rect>
+                                                <rect x="52" y="17" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
+                                                <rect x="52" y="29" width="106" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
+                                            </g>
+                                            <defs>
+                                                <filter id="filter1" x="0" y="0" width="178" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+                                                <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"></feColorMatrix>
+                                                <feOffset dy="6"></feOffset>
+                                                <feGaussianBlur stdDeviation="6"></feGaussianBlur>
+                                                <feComposite in2="hardAlpha" operator="out"></feComposite>
+                                                <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"></feColorMatrix>
+                                                <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1187_14810"></feBlend>
+                                                <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1187_14810" result="shape"></feBlend>
+                                                </filter>
+                                            </defs>
+                                        </svg>
+
+                                        <div class="max-w-sm mx-auto">
+                                            <p class="mt-2 font-medium text-gray-800 dark:text-neutral-200">
+                                                No Data
+                                            </p>
+                                            <p class="mb-5 text-sm text-gray-500 dark:text-neutral-500">
+                                                No data here yet. We will notify you when there's an update.
+                                            </p>
+                                        </div>
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-xs font-medium rounded-lg border border-transparent bg-pink-600 text-white hover:bg-pink-700 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:ring-2 focus:ring-pink-500">
+                                            <svg class="hidden sm:block shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M5 12h14"></path>
+                                                <path d="M12 5v14"></path>
+                                            </svg>Add data
+                                        </a>
+                                    </div>
+                                </td>
+                                <td colspan="5" class="table-cell md:hidden py-6 text-center text-sm text-gray-500 dark:text-gray-400">
                                     Data tidak ditemukan
                                 </td>
                             </tr>`;
@@ -529,7 +579,7 @@
                     } else {
                         res.data.forEach(item => {
                             let row = `
-                            <tr class="hover:bg-gray-100 dark:hover:bg-neutral-700">
+                            <tr class="animate-slide-down hover:bg-gray-100 dark:hover:bg-neutral-700">
                                 <td class="size-px whitespace-nowrap">
                                     <div class="ps-6 py-3">
                                         <label for="hs-at-with-checkboxes-1" class="flex">

@@ -23,7 +23,7 @@
         }
 
         .animate-slide-down {
-            animation: slide-down 0.5s ease-out forwards;
+            animation: slide-down 1.0s ease-out forwards;
         }
 
         @keyframes fade-up {
