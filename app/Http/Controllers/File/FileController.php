@@ -1,32 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Home;
+namespace App\Http\Controllers\File;
 
 use App\Http\Controllers\Controller;
-use App\Models\Ahass;
-use App\Models\Motor;
-use App\Models\RekapKpb;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
-class HomeController extends Controller
+class FileController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $wilayah = Ahass::select('wilayah')
-            ->distinct()
-            ->pluck('wilayah');
-        $jenis_dealer = Ahass::select('jenis_dealer')
-            ->distinct()
-            ->pluck('jenis_dealer');
-        $data = [
-            'wilayah' => $wilayah,
-            'jenis_dealer' => $jenis_dealer,
-        ];
-        return view('home.index', compact('data'));
+        return view('files.index');
     }
 
     /**

@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
 
 class LoginController extends Controller
 {
@@ -33,7 +36,7 @@ class LoginController extends Controller
         $email = $request->email;
         $password = $request->password;
         // dd(Hash::check($password, $user->password));
-        if (auth()->attempt(['email' => $email, 'password' => $password])) {
+        if (Auth::attempt(['email' => $email, 'password' => $password])) {
             $request->session()->regenerate();
             return redirect()->intended('home');
         } else {
@@ -43,35 +46,51 @@ class LoginController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function logout()
     {
-        //
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return redirect('/login');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function redirectToProvider()
     {
-        //
+        return Socialite::driver('google')->redirect();
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function handleProviderCallback()
     {
-        //
-    }
+        try {
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+            $user = Socialite::driver('google')->user();
+
+            $finduser = User::where('gauth_id', $user->id)->first();
+
+            if($finduser){
+
+                Auth::login($finduser);
+
+                return redirect('/dashboard');
+
+            }else{
+                $newUser = User::create([
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'gauth_id'=> $user->id,
+                    'gauth_type'=> 'google',
+                    'password' => encrypt('admin@123')
+                ]);
+
+                Auth::login($newUser);
+
+                return redirect('/dashboard');
+            }
+
+        } catch (Exception $e) {
+            return back()->withErrors([
+                'email' => 'The provided credentials do not match our records.',
+            ])->onlyInput('email');
+        }
     }
 }

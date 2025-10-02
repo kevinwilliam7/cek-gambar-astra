@@ -1,15 +1,17 @@
 @extends('layouts.app')
 @section('title', 'Ahass | Astra')
 @section('main-content')
-    <div class="relative px-2 sm:px-5 py-5 before:absolute before:top-0 before:start-0 before:-z-1 before:w-full before:h-112.5 before:bg-slate-900 dark:before:bg-slate-950">
-        <div class="max-w-6xl mx-auto flex flex-col gap-y-5 pt-4 md:pt-16">
+    <div class="relative px-2 sm:px-5 py-5
+     before:absolute before:top-0 before:start-0 before:-z-1 before:w-full before:h-112.5 before:bg-slate-900 dark:before:bg-slate-950
+     animate-slide-down">
+        <div class="max-w-max mx-auto flex flex-col gap-y-5 pt-4 md:pt-16">
             <!-- Header -->
             <div class="mb-4 flex flex-col justify-center gap-y-3 text-center">
                 <h1 class="text-2xl md:text-3xl font-semibold text-white">
-                    Astra Honda Authorized Service Station
+                    Astra Honda Authorized Service Station (AHASS)
                 </h1>
                 <p class="text-sm text-white/70">
-                    Bengkel resmi sepeda motor Honda
+                    Data Ahass Record
                 </p>
             </div>
             <!-- End Header -->
@@ -90,142 +92,251 @@
                     <div
                         class="mt-2 flex flex-nowrap gap-2 md:gap-3 overflow-x-auto [&amp;::-webkit-scrollbar]:h-1 [&amp;::-webkit-scrollbar-thumb]:rounded-full [&amp;::-webkit-scrollbar-track]:bg-gray-100 [&amp;::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&amp;::-webkit-scrollbar-track]:bg-neutral-700 dark:[&amp;::-webkit-scrollbar-thumb]:bg-neutral-500">
                         <div class="flex">
-                            <div class="flex bg-gray-100 hover:bg-gray-200 rounded-lg transition p-1 dark:bg-neutral-700 dark:hover:bg-neutral-600">
-                                <nav class="flex gap-x-1" aria-label="Tabs" role="tablist" aria-orientation="horizontal">
-                                <button type="button" class="hs-tab-active:bg-white hs-tab-active:text-gray-700 hs-tab-active:dark:bg-neutral-800 hs-tab-active:dark:text-neutral-400 dark:hs-tab-active:bg-gray-800 py-3 px-4 inline-flex items-center gap-x-2 bg-transparent text-sm text-gray-500 hover:text-gray-700 focus:outline-hidden focus:text-gray-700 font-medium rounded-lg hover:hover:text-blue-600 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:text-white dark:focus:text-white active" id="segment-item-1" aria-selected="true" data-hs-tab="#segment-1" aria-controls="segment-1" role="tab">
-                                    Astra Honda Authorized Service Station
-                                </button>
-                                </nav>
+                            <!-- Filter Bar -->
+                            <div class="flex flex-wrap  items-center gap-2">
+                                <!-- Dropdown Wilayah -->
+                                <div class="hs-dropdown [--auto-close:inside] inline-block">
+                                    <!-- Nosin Button -->
+                                    <button id="hs-pro-shsfbctd" type="button" class="hs-dropdown-toggle py-1 px-3 flex items-center gap-x-1 border border-gray-200 text-sm text-start text-gray-800 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:rounded-full hover dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
+                                    Wilayah
+                                    <span id="indicator-wilayah" class="hidden relative flex h-2 w-2 ms-2">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+                                    </span>
+                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                    </button>
+                                    <!-- End Category Button -->
+
+                                    <!-- Dropdown Menu -->
+                                    <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 w-full hidden z-20 max-w-xs bg-white rounded-xl shadow-xl before:absolute before:-top-4 before:start-0 before:w-full before:h-5 dark:bg-neutral-900" role="menu" aria-orientation="vertical" aria-labelledby="hs-pro-shsfbctd">
+                                        <div class="p-4 sm:p-6">
+                                            <!-- List -->
+                                            <div class="space-y-0.5">
+                                                @foreach($data['wilayah'] as $key_wilayah => $wilayah)
+                                                    @if($key_wilayah  < 4)
+                                                        <!-- Checkbox langsung tampil -->
+                                                        <div class="flex items-center">
+                                                            <label class="p-2 group w-full inline-flex items-center cursor-pointer text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800">
+                                                                <input type="checkbox" name="wilayah"
+                                                                    class="shrink-0 size-4.5 border-gray-300 rounded-sm text-indigo-600 checked:border-indigo-600 focus:ring-indigo-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-500 dark:checked:bg-indigo-500 dark:checked:border-indigo-500 dark:focus:ring-offset-gray-800"
+                                                                    value="{{ $wilayah }}">
+                                                                <span class="ms-2 text-gray-800 dark:text-neutral-400">{{ $wilayah }}</span>
+                                                                <span class="ms-auto text-xs text-gray-500 dark:text-neutral-500">(∞)</span>
+                                                            </label>
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                            <!-- End List -->
+
+                                            <!-- Collapse -->
+                                            <div id="hs-pro-shfcc-heading" class="hs-collapse hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="hs-pro-shfcc">
+                                                <div class="space-y-0.5">
+                                                    @foreach($data['wilayah'] as $key_wilayah => $wilayah)
+                                                        @if($key_wilayah >= 4)
+                                                            <!-- Checkbox dalam collapse -->
+                                                            <div class="flex items-center">
+                                                                <label class="p-2 group w-full inline-flex items-center cursor-pointer text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800">
+                                                                    <input type="checkbox" name="wilayah"
+                                                                        class="shrink-0 size-4.5 border-gray-300 rounded-sm text-indigo-600 checked:border-indigo-600 focus:ring-indigo-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-500 dark:checked:bg-indigo-500 dark:checked:border-indigo-500 dark:focus:ring-offset-gray-800"
+                                                                        value="{{ $wilayah }}">
+                                                                    <span class="ms-2 text-gray-800 dark:text-neutral-400">{{ $wilayah }}</span>
+                                                                    <span class="ms-auto text-xs text-gray-500 dark:text-neutral-500">(∞)</span>
+                                                                </label>
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                            <!-- End Collapse -->
+
+                                            <div class="mt-1">
+                                                <button type="button"
+                                                    class="hs-collapse-toggle inline-flex items-center gap-x-1.5 text-[13px] text-gray-800 underline underline-offset-4 hover:text-indigo-600 focus:outline-hidden focus:text-indigo-600 dark:text-neutral-200 dark:hover:text-indigo-400 dark:focus:text-indigo-400"
+                                                    id="hs-pro-shfcc"
+                                                    aria-expanded="false"
+                                                    aria-controls="hs-pro-shfcc-heading"
+                                                    data-hs-collapse="#hs-pro-shfcc-heading">
+                                                    <span class="hs-collapse-open:hidden">Show more</span>
+                                                    <span class="hs-collapse-open:block hidden">Show less</span>
+                                                    <svg class="hs-collapse-open:rotate-180 shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- End Dropdown Menu -->
+
+                                </div>
+                                <!-- End Dropdown Service ID -->
+
+                                <!-- Dropdown Jenis Dealer -->
+                                <div class="hs-dropdown [--auto-close:inside] inline-block">
+                                    <!-- Jenis Dealer Button -->
+                                    <button id="hs-pro-shscld" type="button" class="hs-dropdown-toggle py-1 px-3 flex items-center gap-x-1 border border-gray-200 text-sm text-start text-gray-800 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
+                                    Jenis Dealer
+                                    <span id="indicator-jenis_dealer" class="hidden relative flex h-2 w-2 ms-2">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                                    </span>
+                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                    </button>
+                                    <!-- End Jenis Dealer Button -->
+
+                                    <!-- Dropdown Menu -->
+                                    <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 w-full hidden z-20 w-full max-w-xs bg-white rounded-xl shadow-xl before:absolute before:-top-4 before:start-0 before:w-full before:h-5 dark:bg-neutral-900" role="menu" aria-orientation="vertical" aria-labelledby="hs-pro-shscld">
+                                    <div class="p-4 sm:p-6">
+                                        <!-- Grid -->
+                                        <div class="space-y-0.5">
+                                            @foreach($data['jenis_dealer'] as $jenis_dealer)
+                                                <!-- Radio -->
+                                                <label for="hs-pro-shflocss-{{ $jenis_dealer }}" class="p-2 group w-full inline-flex items-center cursor-pointer text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800">
+                                                    <input type="checkbox" class="shrink-0 size-4.5 bg-black border-black rounded-sm focus:ring-0 focus:ring-offset-0 checked:text-black disabled:opacity-50 disabled:pointer-events-none" id="hs-pro-shflocss-{{ $jenis_dealer }}" name="jenis_dealer" value="{{ $jenis_dealer }}">
+                                                    <span class="ms-2 text-gray-800 dark:text-neutral-400">{{$jenis_dealer}}</span>
+                                                    <span class="ms-auto text-xs text-gray-500 dark:text-neutral-500">(∞)</span>
+                                                </label>
+                                                <!-- End Radio -->
+                                            @endforeach
+                                        </div>
+                                        <!-- End Grid -->
+                                    </div>
+                                    </div>
+                                    <!-- End Dropdown Menu -->
+                                </div>
+                                <!-- End Dropdown Jenis Dealer -->
                             </div>
+                            <!-- End Filter Bar -->
+                        </div>
+                        <div class="ml-auto flex items-center">
+                            <button id="clear-filters"
+                                class="py-1 px-3 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700">
+                                Clear
+                            </button>
                         </div>
                     </div>
                     <!-- End Grid -->
                 </div>
                 <!-- End Body -->
 
-                <div id="segment-1" role="tabpanel" aria-labelledby="segment-item-1">
-                    <!-- Table Content -->
-                    <div class="overflow-x-auto [&amp;::-webkit-scrollbar]:h-2 [&amp;::-webkit-scrollbar-thumb]:rounded-full [&amp;::-webkit-scrollbar-track]:bg-gray-100 [&amp;::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&amp;::-webkit-scrollbar-track]:bg-neutral-700 dark:[&amp;::-webkit-scrollbar-thumb]:bg-neutral-500">
-                        <div class="min-w-full inline-block align-middle">
-                            <!-- Table -->
-                            <table id="table1"
-                                class="min-w-full divide-y divide-gray-200 border-t border-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
-                                <thead id="thead1" class="bg-gray-50 dark:bg-neutral-700/50">
-                                    @php($table1_headers = ['Nama Ahass', 'Kode Ahass', 'Created At', 'Action'])
-                                    <tr>
-                                        @foreach ($table1_headers as $table1_header)
-                                            <th scope="col" class="min-w-62.5 {{ $table1_header === 'Action' ? 'text-right justify-end' : 'text-left' }}">
-                                                <!-- Sort Dropdown -->
-                                                <div class="hs-dropdown relative inline-flex w-full cursor-pointer">
-                                                    <button id="hs-pro-ptpn" type="button"
-                                                        class="px-5 py-2.5 text-start w-full flex items-center gap-x-1 text-sm text-nowrap whitespace-nowrap font-normal text-gray-500 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-500 dark:focus:bg-neutral-700 {{ $table1_header === 'Action' ? 'justify-end text-right' : 'text-left w-full text-start' }}"
-                                                        aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
-                                                        {{ $table1_header }}
-                                                        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
-                                                            width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                            stroke-linejoin="round">
-                                                            <path d="m7 15 5 5 5-5"></path>
-                                                            <path d="m7 9 5-5 5 5"></path>
-                                                        </svg>
-                                                    </button>
+                <!-- Table Content -->
+                <div class="overflow-x-auto [&amp;::-webkit-scrollbar]:h-2 [&amp;::-webkit-scrollbar-thumb]:rounded-full [&amp;::-webkit-scrollbar-track]:bg-gray-100 [&amp;::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&amp;::-webkit-scrollbar-track]:bg-neutral-700 dark:[&amp;::-webkit-scrollbar-thumb]:bg-neutral-500">
+                    <div class="min-w-full inline-block align-middle">
+                        <!-- Table -->
+                        <table id="table1"
+                            class="min-w-full divide-y divide-gray-200 border-t border-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
+                            <thead id="thead1" class="bg-gray-50 dark:bg-neutral-700/50">
+                                @php($table1_headers = [['', ''], ['Nama Ahass', 'nama_ahass'], ['Kode Ahass', 'kode_ahass'], ['Nama Ahass TTPK', 'nama_ahass_ttpk'], ['Wilayah', 'wilayah'], ['Jenis Dealer', 'jenis_dealer']])
+                                <tr>
+                                    @foreach ($table1_headers as $table1_header)
+                                        <th scope="col" class="{{ $table1_header[0] === '' ? '' : 'min-w-52' }} {{ $table1_header[0] === 'Action' ? 'text-right justify-end' : 'text-left' }}">
+                                            <!-- Sort Dropdown -->
+                                            <div class="hs-dropdown relative inline-flex w-full cursor-pointer">
+                                                <button id="hs-pro-ptpn" type="button"
+                                                    class="px-5 py-2.5 text-start w-full flex items-center gap-x-1 text-sm text-nowrap whitespace-nowrap font-normal text-gray-500 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-500 dark:focus:bg-neutral-700 {{ $table1_header[0] === 'Action' ? 'justify-end text-right' : 'text-left w-full text-start' }}"
+                                                    aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
+                                                    {{ $table1_header[0] }}
+                                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
+                                                        width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <path d="m7 15 5 5 5-5"></path>
+                                                        <path d="m7 9 5-5 5 5"></path>
+                                                    </svg>
+                                                </button>
 
-                                                    <!-- Dropdown -->
-                                                    <div class="hs-dropdown-menu hs-dropdown-open:opacity-100 w-40 transition-[opacity,margin] duration opacity-0 hidden z-10 bg-white rounded-xl shadow-xl dark:bg-neutral-900"
-                                                        role="menu" aria-orientation="vertical"
-                                                        aria-labelledby="hs-pro-ptpn" tabindex="-1">
-                                                        <div class="p-1">
-                                                            <button type="button"
-                                                                class="w-full flex items-center gap-x-3 py-1.5 px-2 rounded-lg text-[13px] font-normal text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-300 focus:outline-hidden focus:bg-gray-100 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
-                                                                <svg class="shrink-0 size-3.5"
-                                                                    xmlns="http://www.w3.org/2000/svg" width="24"
-                                                                    height="24" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                                    <path d="m5 12 7-7 7 7"></path>
-                                                                    <path d="M12 19V5"></path>
-                                                                </svg>
-                                                                Sort ascending
-                                                            </button>
-                                                            <button type="button"
-                                                                class="w-full flex items-center gap-x-3 py-1.5 px-2 rounded-lg text-[13px] font-normal text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-300 focus:outline-hidden focus:bg-gray-100 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
-                                                                <svg class="shrink-0 size-3.5"
-                                                                    xmlns="http://www.w3.org/2000/svg" width="24"
-                                                                    height="24" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                                    <path d="M12 5v14"></path>
-                                                                    <path d="m19 12-7 7-7-7"></path>
-                                                                </svg>
-                                                                Sort descending
-                                                            </button>
-                                                            <div class="my-1 border-t border-gray-200 dark:border-neutral-800">
-                                                            </div>
+                                                <!-- Dropdown -->
+                                                <div class="hs-dropdown-menu hs-dropdown-open:opacity-100 w-40 transition-[opacity,margin] duration opacity-0 hidden z-10 bg-white rounded-xl shadow-xl dark:bg-neutral-900"
+                                                    role="menu" aria-orientation="vertical"
+                                                    aria-labelledby="hs-pro-ptpn" tabindex="-1">
+                                                    <div class="p-1">
+                                                        <button type="button" onclick="setSortTable1('{{ $table1_header[1] }}', 'asc')"
+                                                            class="w-full flex items-center gap-x-3 py-1.5 px-2 rounded-lg text-[13px] font-normal text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-300 focus:outline-hidden focus:bg-gray-100 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
+                                                            <svg class="shrink-0 size-3.5"
+                                                                xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                height="24" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="m5 12 7-7 7 7"></path>
+                                                                <path d="M12 19V5"></path>
+                                                            </svg>
+                                                            Sort ascending
+                                                        </button>
+                                                        <button type="button" onclick="setSortTable1('{{ $table1_header[1] }}', 'desc')"
+                                                            class="w-full flex items-center gap-x-3 py-1.5 px-2 rounded-lg text-[13px] font-normal text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-300 focus:outline-hidden focus:bg-gray-100 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
+                                                            <svg class="shrink-0 size-3.5"
+                                                                xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                height="24" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M12 5v14"></path>
+                                                                <path d="m19 12-7 7-7-7"></path>
+                                                            </svg>
+                                                            Sort descending
+                                                        </button>
+                                                        <div class="my-1 border-t border-gray-200 dark:border-neutral-800">
                                                         </div>
                                                     </div>
-                                                    <!-- End Dropdown -->
                                                 </div>
-                                                <!-- End Sort Dropdown -->
-                                            </th>
-                                        @endforeach
-                                    </tr>
-                                </thead>
-                                <tbody id="tbody1" class="divide-y divide-gray-200 dark:divide-neutral-700">
-                                    <tr><td colspan="4" class="py-6 text-center text-sm text-gray-500 dark:text-gray-400">Loading...</td></tr>
-                                </tbody>
-                            </table>
-                            <!-- End Table -->
-                        </div>
+                                                <!-- End Dropdown -->
+                                            </div>
+                                            <!-- End Sort Dropdown -->
+                                        </th>
+                                    @endforeach
+                                </tr>
+                            </thead>
+                            <tbody id="tbody1" class="divide-y divide-gray-200 dark:divide-neutral-700">
+                            </tbody>
+                        </table>
+                        <!-- End Table -->
                     </div>
-                    <!-- End Table Content -->
+                </div>
+                <!-- End Table Content -->
 
+                <!-- Footer -->
+                <div class="py-3 px-5 border-t border-gray-200 dark:border-neutral-800">
                     <!-- Footer -->
-                    <div class="py-3 px-5 border-t border-gray-200 dark:border-neutral-800">
-                        <!-- Footer -->
-                        <div class="grid grid-cols-2 items-center gap-y-2 sm:gap-y-0 sm:gap-x-5">
-                            <p class="text-sm text-gray-800 dark:text-neutral-200">
-                                <span id="pagination1-total-data" class="font-medium">0</span>
-                                <span class="text-gray-500 dark:text-neutral-500">results</span>
-                            </p>
+                    <div class="grid grid-cols-2 items-center gap-y-2 sm:gap-y-0 sm:gap-x-5">
+                        <p class="text-sm text-gray-800 dark:text-neutral-200">
+                            <span id="pagination1-total-data" class="font-medium">0</span>
+                            <span class="text-gray-500 dark:text-neutral-500">results</span>
+                        </p>
 
-                            <!-- Pagination -->
-                            <nav class="flex justify-end items-center gap-x-1" aria-label="Pagination">
-                                <button id="prevBtnTable1" type="button"
-                                    class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-2 text-sm rounded-lg text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 dark:text-white dark:hover:bg-white/10 dark:focus:bg-neutral-700"
-                                    aria-label="Previous">
-                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m15 18-6-6 6-6"></path>
-                                    </svg>
-                                    <span class="sr-only">Previous</span>
-                                </button>
-                                <div class="flex items-center gap-x-1">
-                                    <span id="pagination1-current-page"
-                                        class="min-h-9.5 min-w-9.5 flex justify-center items-center bg-gray-100 text-gray-800 py-2 px-3 text-sm rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:text-white"
-                                        aria-current="page">0</span>
-                                    <span
-                                        class="min-h-9.5 flex justify-center items-center text-gray-500 py-2 px-1.5 text-sm dark:text-neutral-500">of</span>
-                                    <span id="pagination1-total-page"
-                                        class="min-h-9.5 flex justify-center items-center text-gray-500 py-2 px-1.5 text-sm dark:text-neutral-500">0</span>
-                                </div>
-                                <button id="nextBtnTable1" type="button"
-                                    class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-2 text-sm rounded-lg text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 dark:text-white dark:hover:bg-white/10 dark:focus:bg-neutral-700"
-                                    aria-label="Next">
-                                    <span class="sr-only">Next</span>
-                                    <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m9 18 6-6-6-6"></path>
-                                    </svg>
-                                </button>
-                            </nav>
-                            <!-- End Pagination -->
-                        </div>
-                        <!-- End Footer -->
+                        <!-- Pagination -->
+                        <nav class="flex justify-end items-center gap-x-1" aria-label="Pagination">
+                            <button id="prevBtnTable1" type="button"
+                                class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-2 text-sm rounded-lg text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 dark:text-white dark:hover:bg-white/10 dark:focus:bg-neutral-700"
+                                aria-label="Previous">
+                                <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
+                                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m15 18-6-6 6-6"></path>
+                                </svg>
+                                <span class="sr-only">Previous</span>
+                            </button>
+                            <div class="flex items-center gap-x-1">
+                                <span id="pagination1-current-page"
+                                    class="min-h-9.5 min-w-9.5 flex justify-center items-center bg-gray-100 text-gray-800 py-2 px-3 text-sm rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:text-white"
+                                    aria-current="page">0</span>
+                                <span
+                                    class="min-h-9.5 flex justify-center items-center text-gray-500 py-2 px-1.5 text-sm dark:text-neutral-500">of</span>
+                                <span id="pagination1-total-page"
+                                    class="min-h-9.5 flex justify-center items-center text-gray-500 py-2 px-1.5 text-sm dark:text-neutral-500">0</span>
+                            </div>
+                            <button id="nextBtnTable1" type="button"
+                                class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-2 text-sm rounded-lg text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 dark:text-white dark:hover:bg-white/10 dark:focus:bg-neutral-700"
+                                aria-label="Next">
+                                <span class="sr-only">Next</span>
+                                <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
+                                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m9 18 6-6-6-6"></path>
+                                </svg>
+                            </button>
+                        </nav>
+                        <!-- End Pagination -->
                     </div>
                     <!-- End Footer -->
                 </div>
+                <!-- End Footer -->
             </div>
             <!-- End Bar Chart in Card -->
         </div>
@@ -238,12 +349,33 @@
         let currentPageTable1 = 1;
         let perPageTable1 = document.getElementById("page-size-table1").value;
         let searchTable1 = "";
+        let sortByTable1 = 'buy_date';
+        let sortDirTable1 = 'desc';
+        let jenisDealerValues = [];
+        let wilayahValues = [];
+
         function loadTable1(currentPageTable1) {
-            fetch("{{ route('datatable.ahass') }}?"+ new URLSearchParams({
+            let jenisDealerValues = Array.from(
+                document.querySelectorAll('input[name="jenis_dealer"]:checked')
+            ).map(c => c.value);
+            let wilayahValues = Array.from(
+                document.querySelectorAll('input[name="wilayah"]:checked')
+            ).map(c => c.value);
+
+            // bikin parameter query
+            let params = new URLSearchParams({
                 page: currentPageTable1,
                 per_page: perPageTable1,
                 q: searchTable1,
-            })) // route ke controller serverside
+                sort_by: sortByTable1,
+                sort_dir: sortDirTable1,
+            });
+
+            // tambahin filter jenis_dealer[]
+            jenisDealerValues.forEach(v => params.append("jenis_dealer[]", v));
+            // tambahin filter wilayah[]
+            wilayahValues.forEach(v => params.append("wilayah[]", v));
+            fetch("{{ route('datatable.ahass') }}?"+ params.toString())// route ke controller serverside
                 .then(res => res.json())
                 .then(res => {
                     let tbody = document.getElementById("tbody1");
@@ -252,7 +384,57 @@
                         // 👇 Empty state row
                         let emptyRow = `
                             <tr class="hover:bg-gray-100 dark:hover:bg-neutral-700">
-                                <td colspan="4" class="py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                <td colspan="8" class="hidden md:table-cell py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                    <div class="animate-slide-down p-5 min-h-100 flex flex-col justify-center items-center text-center">
+                                        <svg class="w-48 mx-auto mb-4 text-white" width="178" height="90" viewBox="0 0 178 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <rect x="27" y="50.5" width="124" height="39" rx="7.5" fill="currentColor" class="fill-white dark:fill-neutral-800"></rect>
+                                            <rect x="27" y="50.5" width="124" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-50 dark:stroke-neutral-700/10"></rect>
+                                            <rect x="34.5" y="58" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
+                                            <rect x="66.5" y="61" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
+                                            <rect x="66.5" y="73" width="77" height="6" rx="3" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
+                                            <rect x="19.5" y="28.5" width="139" height="39" rx="7.5" fill="currentColor" class="fill-white dark:fill-neutral-800"></rect>
+                                            <rect x="19.5" y="28.5" width="139" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-100 dark:stroke-neutral-700/30"></rect>
+                                            <rect x="27" y="36" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
+                                            <rect x="59" y="39" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
+                                            <rect x="59" y="51" width="92" height="6" rx="3" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
+                                            <g filter="url(#filter1)">
+                                                <rect x="12" y="6" width="154" height="40" rx="8" fill="currentColor" class="fill-white dark:fill-neutral-800" shape-rendering="crispEdges"></rect>
+                                                <rect x="12.5" y="6.5" width="153" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-100 dark:stroke-neutral-700/60" shape-rendering="crispEdges"></rect>
+                                                <rect x="20" y="14" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700 "></rect>
+                                                <rect x="52" y="17" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
+                                                <rect x="52" y="29" width="106" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
+                                            </g>
+                                            <defs>
+                                                <filter id="filter1" x="0" y="0" width="178" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                                <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+                                                <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"></feColorMatrix>
+                                                <feOffset dy="6"></feOffset>
+                                                <feGaussianBlur stdDeviation="6"></feGaussianBlur>
+                                                <feComposite in2="hardAlpha" operator="out"></feComposite>
+                                                <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"></feColorMatrix>
+                                                <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1187_14810"></feBlend>
+                                                <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1187_14810" result="shape"></feBlend>
+                                                </filter>
+                                            </defs>
+                                        </svg>
+
+                                        <div class="max-w-sm mx-auto">
+                                            <p class="mt-2 font-medium text-gray-800 dark:text-neutral-200">
+                                                No Data
+                                            </p>
+                                            <p class="mb-5 text-sm text-gray-500 dark:text-neutral-500">
+                                                No data here yet. We will notify you when there's an update.
+                                            </p>
+                                        </div>
+                                        <a class="py-2 px-3 inline-flex items-center gap-x-2 text-xs font-medium rounded-lg border border-transparent bg-pink-600 text-white hover:bg-pink-700 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:ring-2 focus:ring-pink-500">
+                                            <svg class="hidden sm:block shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M5 12h14"></path>
+                                                <path d="M12 5v14"></path>
+                                            </svg>Add data
+                                        </a>
+                                    </div>
+                                </td>
+                                <td colspan="5" class="table-cell md:hidden py-6 text-center text-sm text-gray-500 dark:text-gray-400">
                                     Data tidak ditemukan
                                 </td>
                             </tr>`;
@@ -263,21 +445,33 @@
                     } else {
                         res.data.forEach(item => {
                             let row = `
-                            <tr class="hover:bg-gray-100 dark:hover:bg-neutral-700">
+                            <tr class="animate-slide-down hover:bg-gray-100 dark:hover:bg-neutral-700">
                                 <td class="size-px whitespace-nowrap">
-                                    <a class="py-3 px-5 block text-sm font-medium text-gray-800 hover:text-indigo-600 dark:text-white"
-                                        href="/projects/${item.id}">
-                                        <div class="flex items-center gap-x-4">
-                                            <svg class="shrink-0 size-5" width="32" height="32" viewBox="0 0 32 32" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M16 1C10 1 5 1 0 1C0 7 6 13 13 15L14 15C14 12 16 4 17 2C16.5 2 16 2 16 1Z" fill="#A49DFF"></path>
-                                                <path d="M17 2C17 2 25 8 29 16C30 11 31 6 32 1C27 1 22 1 17 2Z" fill="#28289A"></path>
-                                            </svg>
-                                            <div class="grow ps-4 border-s border-gray-200 dark:border-neutral-700">
-                                                ${item.nama_ahass}
-                                            </div>
+                                    <div class="ps-6 py-3">
+                                        <label for="hs-at-with-checkboxes-1" class="flex">
+                                        <input type="checkbox" class="shrink-0 border-gray-300 rounded-sm text-blue-600 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-600 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800" id="hs-at-with-checkboxes-1">
+                                        <span class="sr-only">Checkbox</span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td class="size-px whitespace-nowrap">
+                                    <div class="flex items-center gap-x-3 py-3 px-5">
+                                        <span class="relative size-9 shrink-0 bg-gray-100 rounded-full dark:bg-neutral-700">
+                                            <img class="absolute inset-0 size-full object-cover rounded-full px-2 py-2" src="https://images.seeklogo.com/logo-png/31/2/honda-logo-png_seeklogo-310689.png" alt="Post Image">
+                                        </span>
+                                        <div class="grow">
+                                            <a class="font-medium text-gray-800 underline-offset-2 hover:underline hover:decoration-2 hover:text-indigo-700 focus:outline-hidden focus:underline focus:decoration-2 focus:text-indigo-700 dark:text-neutral-200 dark:hover:text-indigo-400 dark:focus:text-indigo-400" href="#">
+                                            ${item.nama_ahass_ttpk}
+                                            </a>
+                                            <ul class="flex flex-wrap items-center whitespace-nowrap gap-1.5">
+                                            <li class="inline-flex items-center relative text-xs text-gray-500 pe-2 last:pe-0 last:after:hidden after:absolute after:top-1/2 after:end-0 after:inline-block after:size-[3px] after:bg-gray-400 after:rounded-full after:-translate-y-1/2 dark:text-neutral-500 dark:after:bg-neutral-600">
+                                                <p class="text-xs text-gray-500 dark:text-neutral-400">
+                                                Kode Ahass: ${item.kode_ahass}
+                                                </p>
+                                            </li>
+                                            </ul>
                                         </div>
-                                    </a>
+                                    </div>
                                 </td>
                                 <td class="size-px whitespace-nowrap">
                                     <div class="py-3 px-5">
@@ -289,56 +483,123 @@
                                 <td class="size-px whitespace-nowrap">
                                     <div class="py-3 px-5">
                                         <span class="text-sm text-gray-800 dark:text-white">
-                                            ${item.created_at}
+                                            ${item.nama_ahass}
                                         </span>
                                     </div>
                                 </td>
-                                <td class="size-px whitespace-nowrap text-right">
-                                    <div class="flex gap-x-2 justify-end px-5">
-                                        <button id="btnEdit${item.id}" type="button" class="py-2 px-2.5 inline-flex items-center gap-x-1.5 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" data-hs-overlay="#hs-pro-dminvm">
-                                            <svg class="text-orange-500 shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                                            <path d="M12 20h9"/>
-                                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
-                                            </svg>
-                                        </button>
-                                        <button id="btnDelete${item.id}" aria-haspopup="dialog" aria-expanded="false" aria-controls="hs-danger-alert" data-hs-overlay="#hs-danger-alert" type="button" class="size-8.5 inline-flex justify-center items-center gap-x-2 rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                                            <svg class="text-red-500 shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                                            <polyline points="3 6 5 6 21 6"></polyline>
-                                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                                            <path d="M10 11v6"></path>
-                                            <path d="M14 11v6"></path>
-                                            <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
-                                            </svg>
-                                        </button>
+                                <td class="size-px whitespace-nowrap">
+                                    <div class="flex items-center gap-x-3 py-3">
+                                        <div class="grow">
+                                            <a class="font-medium text-gray-800 underline-offset-2 hover:underline hover:decoration-2 hover:text-indigo-700 focus:outline-hidden focus:underline focus:decoration-2 focus:text-indigo-700 dark:text-neutral-200 dark:hover:text-indigo-400 dark:focus:text-indigo-400" href="#">
+                                            ${item.wilayah}
+                                            </a>
+                                            <ul class="flex flex-wrap items-center whitespace-nowrap gap-1.5">
+                                            <li class="inline-flex items-center relative text-xs text-gray-500 pe-2 last:pe-0 last:after:hidden after:absolute after:top-1/2 after:end-0 after:inline-block after:size-[3px] after:bg-gray-400 after:rounded-full after:-translate-y-1/2 dark:text-neutral-500 dark:after:bg-neutral-600">
+                                                <p class="text-xs text-gray-500 dark:text-neutral-400">
+                                                Kalimantan Barat
+                                                </p>
+                                            </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="size-px whitespace-nowrap">
+                                    <div class="py-3 px-5">
+                                        <div class="flex flex-col">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="shrink-0 size-2 inline-block ${item.jenis_dealer === 'H23' ? 'bg-red-500' : item.jenis_dealer === 'H123' ? 'bg-violet-500' : 'bg-orange-500'} rounded-full"></span>
+                                                <span class="block text-sm text-gray-800 dark:text-neutral-200">
+                                                ${item.jenis_dealer}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>`;
                             tbody.insertAdjacentHTML("beforeend", row);
                         });
+                        console.log(res);
                         document.getElementById("pagination1-current-page").innerText = res.page;
                         document.getElementById("pagination1-total-page").innerText = res.total_pages;
                         document.getElementById("pagination1-total-data").innerText = res.total_filtered;
+                        if(res.page === 1){
+                            document.getElementById("prevBtnTable1").setAttribute("disabled", "true");
+                        } else {
+                            document.getElementById("prevBtnTable1").removeAttribute("disabled");
+                        }
+
+                        if(res.page === res.total_pages){
+                            document.getElementById("nextBtnTable1").setAttribute("disabled", "true");
+                        } else {
+                            document.getElementById("nextBtnTable1").removeAttribute("disabled");
+                        }
                     }
                 });
         }
+        function setSortTable1(column, order) {
+            sortByTable1 = column;
+            sortDirTable1 = order;
+            let tbody = document.getElementById("tbody1");
+            tbody.innerHTML = showLoadingTable(8, "Loading...");
+            loadTable1(1); // refresh dari page 1
+        }
         document.getElementById("prevBtnTable1").addEventListener("click", () => {
-            if (currentPageTable1 > 1) loadTable1(currentPageTable1 -= 1);
+            if (currentPageTable1 > 1) {
+                let tbody = document.getElementById("tbody1");
+                tbody.innerHTML = showLoadingTable(8, "Loading...");
+                loadTable1(currentPageTable1 -= 1);
+            }
         });
         document.getElementById("nextBtnTable1").addEventListener("click", () => {
+            let tbody = document.getElementById("tbody1");
+            tbody.innerHTML = showLoadingTable(8, "Loading...");
             loadTable1(currentPageTable1 += 1);
         });
         document.getElementById("search-table1").addEventListener("change", (e) => {
+            let tbody = document.getElementById("tbody1");
+            tbody.innerHTML = showLoadingTable(8, "Loading...");
             searchTable1 = e.target.value;
             loadTable1(1);
         });
         document.getElementById("page-size-table1").addEventListener("change", function () {
+            let tbody = document.getElementById("tbody1");
+            tbody.innerHTML = showLoadingTable(8, "Loading...");
             perPageTable1 = this.value;
             loadTable1(1);
         });
+
+        ['wilayah', 'jenis_dealer', 'tahun', 'bulan'].forEach(name => {
+            document.querySelectorAll(`input[name="${name}"]`).forEach(cb => {
+                cb.addEventListener('change', () => {
+                    let checked = document.querySelectorAll(`input[name="${name}"]:checked`).length > 0;
+                    let indicator = document.getElementById(`indicator-${name}`);
+                    if (indicator) {
+                        indicator.classList.toggle('hidden', !checked);
+                    }
+
+                    let tbody = document.getElementById("tbody1");
+                    tbody.innerHTML = showLoadingTable(8, "Loading...");
+                    loadTable1(1);
+                });
+            });
+        });
+
+        document.getElementById('clear-filters').addEventListener('click', function () {
+            // Uncheck semua checkbox
+            document.querySelectorAll('input[type="checkbox"][name="wilayah"], input[type="checkbox"][name="jenis_dealer"]').forEach(cb => {
+                cb.checked = false;
+            });
+
+            // Sembunyikan semua indicator
+            ['wilayah', 'jenis_dealer'].forEach(field => {
+                document.getElementById(`indicator-${field}`).classList.add('hidden');
+            });
+
+            let tbody = document.getElementById("tbody1");
+            tbody.innerHTML = showLoadingTable(8, "Loading...");
+            loadTable1(1);
+        });
+
         loadTable1();
     </script>
 

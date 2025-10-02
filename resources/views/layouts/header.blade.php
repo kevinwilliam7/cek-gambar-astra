@@ -5,7 +5,7 @@
         <div class="md:order-1 md:w-42 flex items-center">
             <!-- Logo -->
             <a class="flex-none rounded-md text-xl inline-block font-semibold focus:outline-hidden focus:opacity-80"
-                href="../../pro/project/index.html" aria-label="Preline">
+                href="{{ route('home.index') }}" aria-label="Preline">
                 <img src="{{ asset('images/logo.png') }}" alt="Laravel Logo" class="w-28 h-auto">
 
             </a>
@@ -37,6 +37,17 @@
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
                             My account
+                        </a>
+                        <a class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
+                            href="{{ route('logout') }}">
+                            <svg class="shrink-0 mt-0.5 size-4" xmlns="http://www.w3.org/2000/svg"
+                                width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            Logout
                         </a>
                     </div>
                     <div class="px-4 py-3.5 border-gray-200 dark:border-neutral-800">
@@ -89,7 +100,7 @@
                     class="overflow-hidden overflow-y-auto max-h-[75vh] [&amp;::-webkit-scrollbar]:w-2 [&amp;::-webkit-scrollbar-thumb]:rounded-full [&amp;::-webkit-scrollbar-track]:bg-white/10 [&amp;::-webkit-scrollbar-thumb]:bg-white/30 dark:[&amp;::-webkit-scrollbar-track]:bg-neutral-700 dark:[&amp;::-webkit-scrollbar-thumb]:bg-neutral-500">
                     <div
                         class="flex flex-col md:flex-row md:justify-center md:items-center md:gap-y-0 md:gap-x-2 pt-2 md:pt-0">
-                        <a class="py-1.5 px-2 inline-flex items-center gap-x-2 font-medium text-sm whitespace-nowrap rounded-md border border-transparent text-white hover:text-white/80 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-white/10 {{ request()->routeIs('home.index')
+                        <a class="py-1.5 px-2 inline-flex items-center gap-x-2 font-medium text-sm whitespace-nowrap rounded-md border border-transparent text-white hover:text-white/80 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-white/10 {{ request()->routeIs('home.index') || request()->routeIs('index')
                             ? 'bg-white/10'
                             : '' }}"
                             href="{{ route('home.index') }}">

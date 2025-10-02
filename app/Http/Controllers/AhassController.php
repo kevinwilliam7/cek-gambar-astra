@@ -66,9 +66,16 @@ class AhassController extends Controller
 
     public function datatable(Request $request)
     {
-        $result = DatatableService::apply(Ahass::query(), $request,
-            ['nama_ahass','kode_ahass'],
-            ['id','nama_ahass','kode_ahass','created_at']
+        $result = DatatableService::apply(Ahass::where(function($q) use ($request) {
+                if ($request->filled('wilayah')) {
+                    $q->whereIn('wilayah', $request->input('wilayah', []));
+                }
+                if ($request->filled('jenis_dealer')) {
+                    $q->whereIn('jenis_dealer', $request->input('jenis_dealer', []));
+                }
+            }), $request,
+            ['nama_ahass','kode_ahass', 'nama_ahass_ttpk','wilayah','jenis_dealer'],
+            ['id','nama_ahass','kode_ahass', 'nama_ahass_ttpk', 'wilayah', 'jenis_dealer', 'created_at']
         );
 
         return response()->json([

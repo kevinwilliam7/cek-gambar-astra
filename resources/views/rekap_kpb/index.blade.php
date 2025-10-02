@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Ahass | Astra')
+@section('title', 'Ahass | Rekap KPB')
 @section('main-content')
     <div class="relative px-2 sm:px-5 py-5
      before:absolute before:top-0 before:start-0 before:-z-1 before:w-full before:h-112.5 before:bg-slate-900 dark:before:bg-slate-950
