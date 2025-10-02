@@ -375,7 +375,7 @@
             jenisDealerValues.forEach(v => params.append("jenis_dealer[]", v));
             // tambahin filter wilayah[]
             wilayahValues.forEach(v => params.append("wilayah[]", v));
-            fetch("{{ route('datatable.ahass') }}?"+ params.toString())// route ke controller serverside
+            fetch("{{ url('/datatable/ahass') }}?"+ params.toString())// route ke controller serverside
                 .then(res => res.json())
                 .then(res => {
                     let tbody = document.getElementById("tbody1");

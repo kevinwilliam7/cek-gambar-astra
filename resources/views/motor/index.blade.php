@@ -201,7 +201,7 @@
 
             // tambahin filter type_motor[]
             typeMotorValues.forEach(v => params.append("type_motor[]", v));
-            fetch("{{ route('datatable.motor') }}?"+ params.toString())// route ke controller serverside
+            fetch("{{ url('/datatable/motor') }}?"+ params.toString())// route ke controller serverside
                 .then(res => res.json())
                 .then(res => {
                     let tbody = document.getElementById("content");

@@ -509,7 +509,7 @@
             tahunValues.forEach(v => params.append("tahun[]", v));
             // tambahin filter bulan[]
             bulanValues.forEach(v => params.append("bulan[]", v));
-            fetch("{{ route('datatable.rekap-kpb') }}?"+ params.toString())// route ke controller serverside
+            fetch("{{ url('/datatable/rekap-kpb') }}?"+ params.toString())// route ke controller serverside
                 .then(res => res.json())
                 .then(res => {
                     let tbody = document.getElementById("tbody1");
