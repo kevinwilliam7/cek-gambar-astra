@@ -44,7 +44,7 @@ class RekapKpbController extends Controller
             ],
             [
                 'value' => '05',
-                'label' => 'Mei'    
+                'label' => 'Mei'
             ],
             [
                 'value' => '06',
@@ -152,13 +152,13 @@ class RekapKpbController extends Controller
                 }
                 if ($request->filled('service_id')) {
                     $q->whereIn('service_id', $request->input('service_id', []));
-                }   
+                }
                 if ($request->filled('tahun')) {
                     $values = $request->input('tahun', []);
 
                     $q->where(function ($query) use ($values) {
                         foreach ($values as $val) {
-                            $query->orWhere('month', 'ILIKE', "%_{$val}%");
+                            $query->orWhere('month', 'ILIKE', "%_{$val}");
                         }
                     });
                 }
@@ -167,7 +167,7 @@ class RekapKpbController extends Controller
 
                     $q->where(function ($query) use ($values) {
                         foreach ($values as $val) {
-                            $query->orWhere('month', 'ILIKE', "%{$val}_%");
+                            $query->orWhere('month', 'ILIKE', "{$val}_%");
                         }
                     });
                 }
