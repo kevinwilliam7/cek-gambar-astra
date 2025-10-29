@@ -36,8 +36,8 @@ class ExportRekapRejectSoCommand extends Command
         $year_file  = $this->argument('year');
 
         // 2 storage path: fisik & digital
-        $folderPathFisik   = storage_path("assets/cek_kpb/kpb_so_{$month_file}_{$year_file}/fisik");
-        $folderPathDigital = storage_path("assets/cek_kpb/kpb_so_{$month_file}_{$year_file}/digital");
+        $folderPathFisik   = storage_path("assets/list_kpb/kpb_so_{$month_file}_{$year_file}/fisik");
+        $folderPathDigital = storage_path("assets/list_kpb/kpb_so_{$month_file}_{$year_file}/digital");
 
         // Baca file masing-masing folder
         $rowsFisik   = $this->readFolderFisik($folderPathFisik, "Fisik");
@@ -212,7 +212,7 @@ class ExportRekapRejectSoCommand extends Command
                     $colMap = [];
                     foreach ($header as $idx => $colName) {
                         $colName = strtolower(trim($colName));
-                        if (in_array($colName, ['no. surat klaim', 'no_mesin','kpb_type','tanggal_beli', 'tglb star', 'tanggal_claim', 'tgls star', 'km', 'km star', 'noted'])) {
+                        if (in_array($colName, ['no. surat klaim', 'no_mesin','kpb_type','tanggal_beli', 'tanggal_claim', 'km', 'noted'])) {
                             $colMap[$colName] = $idx;
                         }
                         if (isset($colMap['noted'])) {
@@ -230,11 +230,8 @@ class ExportRekapRejectSoCommand extends Command
                                             'engine'       => $row[$colMap['no_mesin']] ?? null,
                                             'service_ke'   => $row[$colMap['kpb_type']] ?? null,
                                             'tgl_beli'     => $row[$colMap['tanggal_beli']] ?? null,
-                                            'tglb_star'    => $row[$colMap['tglb star']] ?? null,
                                             'tgl_service'  => $row[$colMap['tanggal_claim']] ?? null,
-                                            'tgls_star'    => $row[$colMap['tgls star']] ?? null,
                                             'km'           => $row[$colMap['km']] ?? null,
-                                            'km_star'      => $row[$colMap['km star']] ?? null,
                                             'noted'        => $ket ?? null,
                                         ];
                                     }

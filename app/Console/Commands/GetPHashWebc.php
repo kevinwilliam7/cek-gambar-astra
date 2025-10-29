@@ -34,17 +34,22 @@ class GetPHashWebc extends Command
         })->orWhere(function($q){
             $q->whereNull('phash')->where('no_rangka', '!=', 'Belum Divalidasi');
         })
-        ->where('kode_ahass', '02723')
+        ->whereNull('phash')
         ->get();
         foreach($data as $key => $item) {
-            $url = $item->filename;
-            $temp = tempnam(sys_get_temp_dir(), 'img');
-            file_put_contents($temp, file_get_contents($url));
-            $hash = $hasher->hash($temp);
-            $item->update([
-                'phash' => $hash->toHex()
-            ]);
-            $this->info(($key+1).'. PHASH '.$item->nomor_mesin.' '.$item->type_motor.' '.$item->no_polisi);
+            try {
+                $url = $item->filename;
+                $temp = tempnam(sys_get_temp_dir(), 'img');
+                file_put_contents($temp, file_get_contents($url));
+                $hash = $hasher->hash($temp);
+                $item->update([
+                    'phash' => $hash->toHex()
+                ]);
+                $this->info(($key+1).'. PHASH '.$item->nomor_mesin.' '.$item->type_motor.' '.$item->no_polisi);
+            } catch(\Exception $e) {
+                $this->error('Gagal mendapatkan PHASH '.$item->nomor_mesin.' '.$item->type_motor.' '.$item->no_polisi);
+                continue;
+            }
         }
     }
 }

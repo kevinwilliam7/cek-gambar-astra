@@ -4,107 +4,126 @@ namespace App\Console\Commands;
 
 use App\Models\AstraWebc;
 use Illuminate\Console\Command;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\File;
 
 class DuplikasiGambar extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'app:duplikasi-gambar';
+    protected $signature = 'app:duplikasi-gambar {month} {year}';
+    protected $description = 'Untuk Mengecek Duplikasi Gambar / Foto Motor (interaktif pilih file)';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Untuk Mengecek Duplikasi Gambar / Foto Motor';
-
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-        //cara kevin william
-        $json = file_get_contents(storage_path('assets/08_2025/indo_motor_354_digital.json'));
-        $data = json_decode($json, true);
-        $number = 0;
-        foreach($data as $item) {
-            $a = AstraWebc::where('nomor_mesin', $item['No Engine'])->where('kpb_type', 'KPB'.$item['Service Ke-'])->first();
-            $webc = AstraWebc::where('phash', $a->phash)->where('km', $item['Km'])->get();
-            if($webc->count() > 1) {
-                $number += 1;
-                $this->info(($number).' '.$a->nomor_mesin.' '.$a->kpb_type.' Ketemu '.($webc->count() - 1).' Foto Sama '.$a->phash.' Link Foto: '.$a->filename);
-                $this->info('   Detail:');
-                foreach($webc as $w) {
-                    // dd($item["Km"], $w->km);
-                    if($w->nomor_mesin == $item['No Engine'] && $w->kpb_type == 'KPB'.$item['Service Ke-']) {
+        $month = $this->argument('month');
+        $year = $this->argument('year');
+        $baseDir = storage_path("assets/sedang_cek_kpb/{$month}_{$year}");
 
-                    } else {
-                        $this->info('   - '.$w->nomor_mesin.' '.$w->kpb_type.' '.$w->no_polisi.' '.$w->filename);
-                    }
-                }
-            }  else {
-                // $number += 1;
-                // $this->info(($number).' '.$a->nomor_mesin.' '.$a->kpb_type);
+        if (!File::exists($baseDir)) {
+            $this->error("❌ Folder tidak ditemukan: {$baseDir}");
+            return Command::FAILURE;
+        }
+
+        // Ambil semua file Excel di folder
+        $files = collect(File::allFiles($baseDir))
+            ->filter(fn($f) => str_ends_with($f->getFilename(), '.xls'))
+            ->values()
+            ->toArray();
+
+        if (empty($files)) {
+            $this->error("❌ Tidak ada file .xls ditemukan di: {$baseDir}");
+            return Command::FAILURE;
+        }
+
+        // Pilih file berdasarkan nama saja
+        $choices = array_map(fn($f) => $f->getFilename(), $files);
+        $chosen = $this->choice('📄 Pilih file Excel untuk diperiksa:', $choices);
+
+        // Dapatkan file yang cocok dari koleksi
+        $file = collect($files)->first(fn($f) => $f->getFilename() === $chosen);
+        $filePath = $file->getPathname();
+
+        $this->info("📂 File terpilih: {$filePath}");
+
+        // Coba load spreadsheet
+        try {
+            $spreadsheet = IOFactory::load($filePath);
+        } catch (\Exception $e) {
+            $this->error("❌ Gagal membaca file Excel: {$e->getMessage()}");
+            return Command::FAILURE;
+        }
+
+        // Pastikan sheet ke-2 ada
+        if ($spreadsheet->getSheetCount() < 2) {
+            $this->error("❌ File tidak memiliki Sheet2 (index 1)");
+            return Command::FAILURE;
+        }
+
+        $sheet = $spreadsheet->getSheet(1);
+        $rows = $sheet->toArray(null, true, true, true);
+
+        $this->info("🔍 Membaca Sheet2 (" . count($rows) . " baris)...");
+
+        $duplikasi = [];
+        $progress = $this->output->createProgressBar(count($rows) - 1);
+        $progress->start();
+
+        foreach (array_slice($rows, 1) as $row) {
+            $noEngine = trim($row['A'] ?? '');
+            $serviceKe = trim($row['B'] ?? '');
+            $km = trim($row['C'] ?? '');
+
+            if (!$noEngine || !$serviceKe) {
+                $progress->advance();
+                continue;
             }
+
+            $a = AstraWebc::where('nomor_mesin', $noEngine)
+                ->where('kpb_type', 'KPB' . $serviceKe)
+                ->first();
+
+            if (!$a) {
+                $progress->advance();
+                continue;
+            }
+
+            $duplicates = AstraWebc::where('phash', $a->phash)
+                // ->where('km', $km)
+                ->get();
+
+            if ($duplicates->count() > 1) {
+                $duplikasi[] = [
+                    'nomor_mesin' => $a->nomor_mesin,
+                    'kpb_type' => $a->kpb_type,
+                    'jumlah_duplikat' => $duplicates->count() - 1,
+                    'phash' => $a->phash,
+                    'filename' => $a->filename,
+                    'detail' => $duplicates->map(fn($w) => "{$w->nomor_mesin} {$w->kpb_type} {$w->no_polisi} {$w->filename}")->toArray(),
+                ];
+            }
+
+            $progress->advance();
         }
 
-        // //cara chatgpt
-        // $json = file_get_contents(storage_path('assets/08_2025/indo_motor_354_digital.json'));
-        // $data = json_decode($json, true);
-        // $number = 0;
+        $progress->finish();
+        $this->newLine(2);
 
-        // foreach ($data as $item) {
-        //     $a = AstraWebc::where('nomor_mesin', $item['No Engine'])
-        //         ->where('kpb_type', 'KPB'.$item['Service Ke-'])
-        //         ->first();
+        if (empty($duplikasi)) {
+            $this->info("✅ Tidak ditemukan duplikasi gambar.");
+        } else {
+            $this->info("⚠️  Ditemukan " . count($duplikasi) . " duplikasi:\n");
 
-        //     if (! $a || ! $a->phash) {
-        //         continue;
-        //     }
+            foreach ($duplikasi as $i => $item) {
+                $this->line(($i + 1) . ". {$item['nomor_mesin']} {$item['kpb_type']} → {$item['jumlah_duplikat']} duplikat ({$item['phash']})");
+                $this->line("   📷 Link Foto: {$item['filename']}");
+                foreach ($item['detail'] as $d) {
+                    $this->line("   └─ {$d}");
+                }
+                $this->newLine();
+            }
 
-        //     // ambil semua record lain untuk dibandingkan
-        //     $webcList = AstraWebc::where('id', '!=', $a->id)->get();
-
-        //     $duplicates = [];
-        //     foreach ($webcList as $w) {
-        //         if ($w->phash && $this->isSimilarPhash($a->phash, $w->phash, 10)) {
-        //             $duplicates[] = $w;
-        //         }
-        //     }
-
-        //     if (count($duplicates) > 0) {
-        //         $number++;
-        //         $this->info("{$number} {$a->nomor_mesin} {$a->kpb_type} Ketemu ".count($duplicates)." Foto Mirip {$a->phash} Link Foto: {$a->filename}");
-        //         $this->info('   Detail:');
-        //         foreach ($duplicates as $w) {
-        //             $this->info("   - {$w->nomor_mesin} {$w->kpb_type} {$w->no_polisi} {$w->filename} (phash: {$w->phash})");
-        //         }
-        //     }
-        // }
-    }
-
-    /**
-     * Hitung jarak Hamming antar dua phash hex.
-     */
-    private function hammingDistance(string $hash1, string $hash2): int
-    {
-        $len = min(strlen($hash1), strlen($hash2));
-        $dist = 0;
-        for ($i = 0; $i < $len; $i++) {
-            $xor = hexdec($hash1[$i]) ^ hexdec($hash2[$i]);
-            $dist += substr_count(decbin($xor), '1');
+            $this->info("✅ Selesai! Total duplikasi ditemukan: " . count($duplikasi));
         }
-        return $dist;
-    }
 
-    /**
-     * Cek apakah dua phash mirip dengan ambang batas tertentu.
-     */
-    private function isSimilarPhash(string $hash1, string $hash2, int $threshold = 10): bool
-    {
-        return $this->hammingDistance($hash1, $hash2) <= $threshold;
+        return Command::SUCCESS;
     }
 }

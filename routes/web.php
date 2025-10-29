@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AhassController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CekKpbController;
 use App\Http\Controllers\Home\AhassDatatableController;
 use App\Http\Controllers\Home\HomeController as HomeHomeController;
 use App\Http\Controllers\Motor\MotorController as MotorMotorController;
@@ -32,6 +33,10 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('rekap-kpb')->name('rekap-kpb.')->group(function () {
         Route::get('/', [RekapKpbController::class, 'index'])->name('index');
     });
+    Route::prefix('cek-kpb')->name('cek-kpb.')->group(function () {
+        Route::get('/', [CekKpbController::class, 'index'])->name('index');
+        Route::post('/store', [CekKpbController::class, 'store'])->name('store');
+    });
     Route::prefix('file')->name('file.')->group(function () {
         Route::get('/', [FileFileController::class, 'index'])->name('index');
     });
@@ -39,5 +44,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/ahass', [AhassController::class, 'datatable'])->name('ahass');
         Route::get('/motor', [MotorMotorController::class, 'datatable'])->name('motor');
         Route::get('/rekap-kpb', [RekapKpbController::class, 'datatable'])->name('rekap-kpb');
+        Route::get('/cek-kpb', [CekKpbController::class, 'datatable'])->name('cek-kpb');
     });
 });

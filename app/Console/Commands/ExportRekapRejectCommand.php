@@ -25,8 +25,8 @@ class ExportRekapRejectCommand extends Command
         $next_month_name = \Carbon\Carbon::createFromDate($year_file, $month_file, 1)->addMonth()->translatedFormat('F');
 
         // 2 storage path: fisik & digital
-        $folderPathFisik   = storage_path("assets/cek_kpb/kpb_{$month_file}_{$year_file}/fisik");
-        $folderPathDigital = storage_path("assets/cek_kpb/kpb_{$month_file}_{$year_file}/digital");
+        $folderPathFisik   = storage_path("assets/list_kpb/kpb_{$month_file}_{$year_file}/fisik");
+        $folderPathDigital = storage_path("assets/list_kpb/kpb_{$month_file}_{$year_file}/digital");
 
         // Baca file masing-masing folder
         $rowsFisik   = $this->readFolder($folderPathFisik, "Fisik");

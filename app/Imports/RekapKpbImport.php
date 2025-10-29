@@ -24,8 +24,6 @@ class RekapKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading
     public function onRow(Row $row)
     {
         $data = $row->toArray();
-        // dd($data);
-
         RekapKpb::updateOrCreate(
             [
                 'month' => $this->month . '_' . $this->year,
