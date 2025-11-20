@@ -132,7 +132,7 @@ class CekKpbController extends Controller
     public function datatable(Request $request)
     {
         $result = DatatableService::apply(
-            CekKpb::with(['notes'])->where(function($q) use ($request) {
+            CekKpb::with(['notes', 'user'])->where(function($q) use ($request) {
                 if ($request->filled('status_description')) {
                     $q->whereIn('status_description', $request->input('status_description', []));
                 }
@@ -169,8 +169,8 @@ class CekKpbController extends Controller
                 }
             }),
             $request,
-            ['ahass_name', 'ahass_code', 'service_id', 'frame', 'engine', 'km', 'service_date', 'buy_date', 'status_description'],
-            ['ahass_name', 'ahass_code', 'service_id', 'frame', 'engine', 'km', 'service_date', 'buy_date', 'status_description']
+            ['file_name', 'md_code', 'md_name', 'engine', 'km', 'user_id'],
+            ['file_name', 'md_code', 'md_name', 'engine', 'km', 'user_id']
         );
 
         return response()->json([

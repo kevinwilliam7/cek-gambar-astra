@@ -22,4 +22,9 @@ class CekKpb extends Model
     {
         return $this->morphMany(Note::class, 'notable');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'id', 'user_id');
+    }
 }

@@ -369,7 +369,7 @@
                         <table id="table1"
                             class="min-w-full divide-y divide-gray-200 border-t border-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
                             <thead id="thead1" class="bg-gray-50 dark:bg-neutral-700/50">
-                                @php($table1_headers = [['', ''], ['Nama Ahass', 'ahass_name'], ['Service ID', 'service_id'], ['Nomor Mesin', 'engine'], ['Notes', 'notes']])
+                                @php($table1_headers = [['', ''], ['Nama File', 'ahass_name'], ['Service ID', 'service_id'], ['Nomor Mesin', 'engine'], ['Notes', 'notes']])
                                 <tr>
                                     @foreach ($table1_headers as $table1_header)
                                         <th scope="col"
@@ -710,7 +710,7 @@
                                             <ul class="flex flex-wrap items-center whitespace-nowrap gap-1.5">
                                             <li class="inline-flex items-center relative text-xs text-gray-500 pe-2 last:pe-0 last:after:hidden after:absolute after:top-1/2 after:end-0 after:inline-block after:size-[3px] after:bg-gray-400 after:rounded-full after:-translate-y-1/2 dark:text-neutral-500 dark:after:bg-neutral-600">
                                                 <p class="text-xs text-gray-500 dark:text-neutral-400">
-                                                User: ${item.id_user}
+                                                User: ${item.user?.name}
                                                 </p>
                                             </li>
                                             </ul>
@@ -746,7 +746,7 @@
                                             <div class="flex items-center gap-1.5">
                                                 <span class="shrink-0 size-2 inline-block rounded-full"></span>
                                                 <span class="block text-sm text-gray-800 dark:text-neutral-200">
-                                                ${item.notes[0]['message']}
+                                                ${item.notes[0]?.message}
                                                 </span>
                                             </div>
                                         </div>

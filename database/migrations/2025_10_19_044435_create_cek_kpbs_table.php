@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('cek_kpbs', function (Blueprint $table) {
             $table->id();
             $table->string('md_code')->default('Q01');
-            $table->string('md_name')->nullable('HSO CABANG PONTIANAK');
+            $table->string('md_name')->default('HSO CABANG PONTIANAK');
             $table->string('file_name')->nullable();
             $table->string('engine');
             $table->integer('service_id');

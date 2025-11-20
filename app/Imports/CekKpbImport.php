@@ -4,12 +4,12 @@ namespace App\Imports;
 
 use App\Models\CekKpb;
 use App\Models\CekKpbProgress;
+use App\Models\KpbKriteria;
 use App\Models\RekapKpb;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -27,7 +27,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
         $this->context = $context;
         $this->fileName = $fileName;
         $this->job_id = $job_id;
-        $this->user_id = null;
+        $this->user_id = $user_id;
     }
 
     /**
@@ -66,7 +66,6 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
             // Pastikan jumlah kolom sama dengan header
             $data = array_combine($headers, $values);
             $tgl_beli = isset($data['Bulan Beli']) ? $data['Tgl Beli'].'/'.$data['Bulan Beli'].'/'.$data['Tahun Beli'] : $data['Tgl Beli'];
-            Log::info($tgl_beli ?? 'Tanggal Beli kosong');
             $formattedTglBeli = $this->formatTanggalExcel($tgl_beli);
             $formattedTglService = $this->formatTanggalExcel($data['Tgl Service']);
 
@@ -78,8 +77,10 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
             $this->checkEngineLength($data, $rowNum, $formattedTglBeli, $formattedTglService);
             // Panggil fungsi cek tgl beli sama dengan tgl service
             $this->checkBuyDateEqualsServiceDate($data, $rowNum, $formattedTglBeli, $formattedTglService);
-
-
+            // Panggil fungsi cek tgl service yang melebihi batas maksimal
+            $this->checkServiceDateExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
+            // Panggil fungsi cek km yang melebihi batas maksimal
+            $this->checkKmExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
         }
 
         $this->log("✅ Total baris dibaca: {($rowNum-1)}");
@@ -303,13 +304,13 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
      * Untuk mengecek KPB 2, 3, 4 untuk dicompare dengan database rekap
      */
     protected function checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService) {
-        if($data['Service Ke-'] > 1) {
+        // if($data['Service Ke-'] > 1) {
             $rekap_kpbs = RekapKpb::where('engine', $data['No Engine'] ?? null)->orderBy('service_id', 'DESC')->first();
 
             // if($rekap_kpbs === null) {
             //     if ($this->context instanceof Command) {
             //         $this->log("⚠️ Bariss {$rowNum}: No Engine {$data['No Engine']} - {$formattedTglBeli} - {$data['Service Ke-']} - Data KPB sebelumnya tidak ditemukan di database.");
-            //         continue;
+            //         return;
             //     } else {
             //         $cekKpb = CekKpb::updateOrCreate(
             //             [
@@ -362,11 +363,32 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
             foreach($getKmRekaps as $key => $getKmRekap) {
                 //Buat cek KM untuk service sekarang apakah KM lebih besar dari service setelahnya
                 if($getKmRekap['service_id'] > $data['Service Ke-']) {
-                    continue;
-                }
+                    if($data['Km'] > $getKmRekap['km']) {
+                        if($this->context instanceof Command) {
+                            $this->log("⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - KM Service di Excel ({$data['Km']}) lebih besar dari KM Service setelahnya di database ".$getKmRekap['km']." pada KPB ".$getKmRekap['service_id']);
+                        } else {
+                            $cekKpb = CekKpb::updateOrCreate(
+                                [
+                                    'engine' => $data['No Engine'],
+                                    'service_id' => $data['Service Ke-'],
+                                    'file_name' => $this->fileName,
+                                ],
+                                [
+                                    'buy_date' => $formattedTglBeli,
+                                    'service_date' => $formattedTglService,
+                                    'km' => $data['Km'],
+                                    'user_id' => $this->user_id,
+                                ]
+                            );
+                            $cekKpb->notes()->create([
+                                'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - KM Service di Excel ({$data['Km']}) lebih besar dari KM Service setelahnya di database ".$getKmRekap['km']." pada KPB ".$getKmRekap['service_id'],
+                            ]);
+                        }
+                    }
+                }0
                 //Buat cek KM untuk service sekarang apakah KM lebih kecil dari service sebelumnya
                 else {
-                    if($data['Km'] <= $getKmRekap['km']) {
+                    if($data['Km'] <= $getKmRekap['km'] && $data['Service Ke-'] > 1) {
                         if ($this->context instanceof Command) {
                             $this->log("⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - KM Service di Excel ({$data['Km']}) lebih kecil atau sama dengan KM Service sebelumnya di database ".$getKmRekap['km']);
                         } else {
@@ -399,15 +421,36 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
             foreach($getTglServiceRekaps as $key => $getTglServiceRekap) {
                 //Buat cek Tanggal service untuk service sekarang apakah Tanggal service lebih besar dari service setelahnya
                 if($getTglServiceRekap['service_id'] > $data['Service Ke-']) {
-                    continue;
+                    if($formattedTglService > $getTglServiceRekap['service_date']) {
+                        if($this->context instanceof Command) {
+                            $this->log("⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Tgl Service di Excel ($formattedTglService) lebih besar dari Tgl Service setelahnya di database ".$this->formatTanggalExcel($getTglServiceRekap['service_date'])." pada KPB ".$getTglServiceRekap['service_id']);
+                        } else {
+                            $cekKpb = CekKpb::updateOrCreate(
+                                [
+                                    'engine' => $data['No Engine'],
+                                    'service_id' => $data['Service Ke-'],
+                                    'file_name' => $this->fileName,
+                                ],
+                                [
+                                    'buy_date' => $formattedTglBeli,
+                                    'service_date' => $formattedTglService,
+                                    'km' => $data['Km'],
+                                    'user_id' => $this->user_id,
+                                ]
+                            );
+                            $cekKpb->notes()->create([
+                                'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Tgl Service di Excel (".$this->formatTanggalExcel($data['Tgl Service']).") lebih besar dari Tgl Service setelahnya di database ".$this->formatTanggalExcel($getTglServiceRekap['service_date'])." pada KPB ".$getTglServiceRekap['service_id'],
+                            ]);
+                        }
+                    }
                 }
                 //Buat cek Tanggal service untuk service sekarang apakah Tanggal service lebih kecil dari service sebelumnya
                 else {
-                    if($formattedTglService <= $getTglServiceRekap['service_date']) {
+                    if($formattedTglService <= $getTglServiceRekap['service_date'] && $data['Service Ke-'] > 1) {
                         if ($this->context instanceof Command) {
                             $this->log("⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Tgl Service di Excel ($formattedTglService) lebih kecil atau sama dengan Tgl Service sebelumnya di database ".$this->formatTanggalExcel($getTglServiceRekap['service_date']));
                         } else {
-                            $cekKpb = CekKpb::create(
+                            $cekKpb = CekKpb::updateOrCreate(
                                 [
                                     'engine' => $data['No Engine'],
                                     'service_id' => $data['Service Ke-'],
@@ -425,6 +468,158 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                             ]);
                         }
                     }
+                }
+            }
+        // }
+    }
+
+    /**
+     * Untuk mengecek tanggal service yang melebihi batas maksimal
+     */
+    private function checkServiceDateExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService){
+        $enginePrefix = substr($data['No Engine'], 0, 5);
+        $kriteriaKpb = KpbKriteria::where('kode_nosin', $enginePrefix)->where('kpb_type', 'ilike', '%'.$data['Service Ke-'].'%')->first();
+        $selisihObj = (new \DateTime($formattedTglBeli))->diff(new \DateTime($formattedTglService));
+        $selisihHari = $selisihObj->days * ($selisihObj->invert ? -1 : 1);
+        if($kriteriaKpb === null) {
+            if($this->context instanceof Command) {
+                $this->log("⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Kriteria KPB tidak ditemukan untuk pengecekan Tanggal Service maksimum.");
+            } else {
+                $cekKpb = CekKpb::updateOrCreate(
+                    [
+                        'engine' => $data['No Engine'],
+                        'service_id' => $data['Service Ke-'],
+                        'file_name' => $this->fileName,
+                    ],
+                    [
+                        'buy_date' => $formattedTglBeli,
+                        'service_date' => $formattedTglService,
+                        'km' => $data['Km'],
+                        'user_id' => $this->user_id,
+                    ]
+                );
+                $cekKpb->notes()->create([
+                    'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Kriteria KPB tidak ditemukan untuk pengecekan Tanggal Service maksimum.",
+                ]);
+            }
+        } else {
+            if($selisihHari <= 0) {
+                if ($this->context instanceof Command) {
+                    $this->log("⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Tgl Service di Excel ({$formattedTglService}) lebih kecil atau sama dengan Tgl Beli ({$formattedTglBeli})");
+                } else {
+                    $cekKpb = CekKpb::updateOrCreate(
+                        [
+                            'engine' => $data['No Engine'],
+                            'service_id' => $data['Service Ke-'],
+                            'file_name' => $this->fileName,
+                        ],
+                        [
+                            'buy_date' => $formattedTglBeli,
+                            'service_date' => $formattedTglService,
+                            'km' => $data['Km'],
+                            'user_id' => $this->user_id,
+                        ]
+                    );
+                    $cekKpb->notes()->create([
+                        'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Tgl Service di Excel ({$formattedTglService}) lebih kecil atau sama dengan Tgl Beli ({$formattedTglBeli})",
+                    ]);
+                }
+            } else {
+                if($selisihHari > $kriteriaKpb->hari_maksimum) {
+                    if ($this->context instanceof Command) {
+                        $this->log("⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Selisih Hari ($selisihHari hari) melebihi batas maksimum ({$kriteriaKpb->hari_maksimum} hari)");
+                    } else {
+                        $cekKpb = CekKpb::updateOrCreate(
+                            [
+                                'engine' => $data['No Engine'],
+                                'service_id' => $data['Service Ke-'],
+                                'file_name' => $this->fileName,
+                            ],
+                            [
+                                'buy_date' => $formattedTglBeli,
+                                'service_date' => $formattedTglService,
+                                'km' => $data['Km'],
+                                'user_id' => $this->user_id,
+                            ]
+                        );
+                        $cekKpb->notes()->create([
+                            'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Selisih Hari ($selisihHari hari) melebihi batas maksimum ({$kriteriaKpb->hari_maksimum} hari)",
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Untuk mengecek km yang melebihi batas maksimal
+     */
+    private function checkKmExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService){
+        $enginePrefix = substr($data['No Engine'], 0, 5);
+        $kriteriaKpb = KpbKriteria::where('kode_nosin', $enginePrefix)->where('kpb_type', 'ilike', '%'.$data['Service Ke-'].'%')->first();
+        if($kriteriaKpb === null) {
+            if($this->context instanceof Command) {
+                $this->log("⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Kriteria KPB tidak ditemukan untuk pengecekan KM maksimum.");
+            } else {
+                $cekKpb = CekKpb::updateOrCreate(
+                    [
+                        'engine' => $data['No Engine'],
+                        'service_id' => $data['Service Ke-'],
+                        'file_name' => $this->fileName,
+                    ],
+                    [
+                        'buy_date' => $formattedTglBeli,
+                        'service_date' => $formattedTglService,
+                        'km' => $data['Km'],
+                        'user_id' => $this->user_id,
+                    ]
+                );
+                $cekKpb->notes()->create([
+                    'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Kriteria KPB tidak ditemukan untuk pengecekan KM maksimum.",
+                ]);
+            }
+        } else {
+            if($data['Km'] > $kriteriaKpb->km_maksimum) {
+                if ($this->context instanceof Command) {
+                    $this->log("⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - KM Service di Excel ({$data['Km']}) melebihi batas maksimum ({$kriteriaKpb->km_maksimum} KM)");
+                } else {
+                    $cekKpb = CekKpb::updateOrCreate(
+                        [
+                            'engine' => $data['No Engine'],
+                            'service_id' => $data['Service Ke-'],
+                            'file_name' => $this->fileName,
+                        ],
+                        [
+                            'buy_date' => $formattedTglBeli,
+                            'service_date' => $formattedTglService,
+                            'km' => $data['Km'],
+                            'user_id' => $this->user_id,
+                        ]
+                    );
+                    $cekKpb->notes()->create([
+                        'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - KM Service di Excel ({$data['Km']}) melebihi batas maksimum ({$kriteriaKpb->km_maksimum} KM)",
+                    ]);
+                }
+            } else if($data['Km'] <= 1) {
+                if ($this->context instanceof Command) {
+                    $this->log("⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - KM Service di Excel ({$data['Km']}) tidak valid.");
+                } else {
+                    $cekKpb = CekKpb::updateOrCreate(
+                        [
+                            'engine' => $data['No Engine'],
+                            'service_id' => $data['Service Ke-'],
+                            'file_name' => $this->fileName,
+                        ],
+                        [
+                            'buy_date' => $formattedTglBeli,
+                            'service_date' => $formattedTglService,
+                            'km' => $data['Km'],
+                            'user_id' => $this->user_id,
+                        ]
+                    );
+                    $cekKpb->notes()->create([
+                        'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - KM Service di Excel ({$data['Km']}) tidak valid.",
+                    ]);
                 }
             }
         }

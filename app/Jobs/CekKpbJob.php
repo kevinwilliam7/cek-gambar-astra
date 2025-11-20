@@ -34,7 +34,7 @@ class CekKpbJob implements ShouldQueue
 
         Log::info("🚀 Memulai import excel di background: {$this->path} {$this->job?->getJobId()}");
         try {
-            ExcelCekKpbHelper::processExcelWithFormula($this->path, CekKpbImport::class, null, $this->fileName, $this->job?->getJobId());
+            ExcelCekKpbHelper::processExcelWithFormula($this->path, CekKpbImport::class, null, $this->fileName, $this->job?->getJobId(), $this->user_id);
             Log::info("✅ Import selesai: {$this->path}");
         } catch (\Throwable $e) {
             Log::error("❌ Gagal import {$this->path}: " . $e->getMessage());

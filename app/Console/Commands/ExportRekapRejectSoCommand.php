@@ -56,7 +56,7 @@ class ExportRekapRejectSoCommand extends Command
         // Sheet Digital
         $sheetDigital = $export->createSheet();
         $sheetDigital->setTitle('DATA REJECT DIGITAL');
-        $headerDigital = ['No.', 'Nama AHASS','Nomor Surat','Engine','Service Ke','Tgl Beli', 'Tgl Beli Star', 'Tgl Service', 'Tgl Service Star', 'KM', 'KM Star', 'Ket'];
+        $headerDigital = ['No.', 'Nama AHASS','Nomor Surat','Engine','Service Ke','Tgl Beli', 'Tgl Service', 'KM', 'Ket'];
         $sheetDigital->fromArray($headerDigital, null, 'A1');
         $sheetDigital->fromArray($rowsDigital, null, 'A2');
 
@@ -188,68 +188,94 @@ class ExportRekapRejectSoCommand extends Command
             return [];
         }
 
-        $files = File::files($folderPath);
-        $fileKe = 0;
+        // Ambil semua file, abaikan file sementara Excel (~$...)
+        $files = collect(File::files($folderPath))
+            ->reject(fn($f) => str_starts_with($f->getFilename(), '~$'));
 
+        $fileKe = 0;
         $penomoranExcel = 0;
+
         foreach ($files as $file) {
             try {
                 $fileKe++;
                 $reader = IOFactory::createReaderForFile($file->getRealPath());
                 $spreadsheet = $reader->load($file->getRealPath());
-                // Ambil jumlah sheet
-                $jumlahSheet = $spreadsheet->getSheetCount();
-                // Ambil nama file (tanpa path)
-                $namaFile = basename($file->getRealPath());
-                // Ambil list nama sheet
-                $namaSheets = $spreadsheet->getSheetNames();
-                foreach($namaSheets as $sheet){
-                    // dd($sheet);
-                    $sheet2 = $spreadsheet->getSheetByName($sheet)->toArray();
-                    $header = $sheet2[0];
 
-                    // mapping kolom
+                $namaFile = basename($file->getRealPath());
+                $namaSheets = $spreadsheet->getSheetNames();
+
+                // 🔍 Log untuk memastikan jumlah sheet
+                $this->info("File {$namaFile} punya sheet: " . implode(', ', $namaSheets));
+
+                foreach ($namaSheets as $sheetName) {
+                    $sheet2 = $spreadsheet->getSheetByName($sheetName)->toArray();
+
+                    // Skip sheet kosong
+                    if (count($sheet2) <= 1) {
+                        $this->warn("Lewati sheet kosong: {$sheetName} di file {$namaFile}");
+                        continue;
+                    }
+
+                    $header = $sheet2[0];
                     $colMap = [];
+
+                    // 🔍 Mapping kolom (case-insensitive)
                     foreach ($header as $idx => $colName) {
                         $colName = strtolower(trim($colName));
-                        if (in_array($colName, ['no. surat klaim', 'no_mesin','kpb_type','tanggal_beli', 'tanggal_claim', 'km', 'noted'])) {
+                        if (in_array($colName, [
+                            'no. surat klaim', 'no_mesin', 'kpb_type',
+                            'tanggal_beli', 'tanggal_claim', 'km', 'noted'
+                        ])) {
                             $colMap[$colName] = $idx;
                         }
-                        if (isset($colMap['noted'])) {
-                            foreach ($sheet2 as $i => $row) {
-                                if ($i === 0) continue;
+                    }
 
-                                $ket = $row[$colMap['noted']] ?? null;
-                                $no_mesin = $row[$colMap['no_mesin']] ?? null;
-                                if (!str_contains(strtolower($ket), 'ok')) {
-                                    if (!empty(trim($no_mesin))) {
-                                        $rowsData[] = [
-                                            'No.' => $penomoranExcel+=1,
-                                            'nama_ahass'   => preg_replace('/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/', '', ($this->cleanValue($namaFile) ?? '-')),
-                                            'nomor_surat' => isset($colMap['no. surat klaim']) ? ($row[$colMap['no. surat klaim']] ?? '-') : '-',
-                                            'engine'       => $row[$colMap['no_mesin']] ?? null,
-                                            'service_ke'   => $row[$colMap['kpb_type']] ?? null,
-                                            'tgl_beli'     => $row[$colMap['tanggal_beli']] ?? null,
-                                            'tgl_service'  => $row[$colMap['tanggal_claim']] ?? null,
-                                            'km'           => $row[$colMap['km']] ?? null,
-                                            'noted'        => $ket ?? null,
-                                        ];
-                                    }
-                                }
+                    // Pastikan minimal kolom 'noted' dan 'no_mesin' ada
+                    if (!isset($colMap['noted']) || !isset($colMap['no_mesin'])) {
+                        $this->warn("Lewati sheet {$sheetName} di file {$namaFile} (kolom tidak lengkap)");
+                        continue;
+                    }
+
+                    // ✅ Loop baris dimulai di sini — hanya sekali per sheet
+                    foreach ($sheet2 as $i => $row) {
+                        if ($i === 0) continue;
+
+                        $ket = $row[$colMap['noted']] ?? null;
+                        $no_mesin = $row[$colMap['no_mesin']] ?? null;
+
+                        if (!str_contains(strtolower($ket ?? ''), 'ok')) {
+                            if (!empty(trim($no_mesin))) {
+                                $rowsData[] = [
+                                    'No.'          => ++$penomoranExcel,
+                                    'nama_ahass'   => preg_replace(
+                                        '/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/',
+                                        '',
+                                        ($this->cleanValue($namaFile) ?? '-')
+                                    ),
+                                    'nomor_surat'  => isset($colMap['no. surat klaim'])
+                                        ? ($row[$colMap['no. surat klaim']] ?? '-')
+                                        : '-',
+                                    'engine'       => $row[$colMap['no_mesin']] ?? null,
+                                    'service_ke'   => $row[$colMap['kpb_type']] ?? null,
+                                    'tgl_beli'     => $row[$colMap['tanggal_beli']] ?? null,
+                                    'tgl_service'  => $row[$colMap['tanggal_claim']] ?? null,
+                                    'km'           => $row[$colMap['km']] ?? null,
+                                    'noted'        => $ket ?? null,
+                                ];
                             }
                         }
                     }
                 }
 
-                $this->info("Berhasil baca file {$label} ke-{$fileKe}: " . $file->getFilename());
-
+                $this->info("✅ Berhasil baca file {$label} ke-{$fileKe}: " . $file->getFilename());
             } catch (\Throwable $e) {
-                $this->error("Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
+                $this->error("❌ Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
             }
         }
 
         return $rowsData;
     }
+
 
     /**
      * Bersihkan nilai dari teks nama file
