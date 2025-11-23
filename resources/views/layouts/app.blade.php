@@ -49,6 +49,7 @@
     {{-- @include('layouts.footer') --}}
     <!-- ========== END FOOTER CONTENT ========== -->
     @yield('js')
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
         function showLoadingTable(colspan = 0, message = "Loading...") {

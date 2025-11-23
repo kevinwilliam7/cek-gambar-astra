@@ -36,6 +36,8 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('cek-kpb')->name('cek-kpb.')->group(function () {
         Route::get('/', [CekKpbController::class, 'index'])->name('index');
         Route::post('/store', [CekKpbController::class, 'store'])->name('store');
+        Route::get('/getAllJobs', [CekKpbController::class, 'getProgressJobList'])->name('getAllJobs');
+        Route::get('/getProgressJob/{id}', [CekKpbController::class, 'getProgressJob'])->name('getProgressJob');
     });
     Route::prefix('file')->name('file.')->group(function () {
         Route::get('/', [FileFileController::class, 'index'])->name('index');

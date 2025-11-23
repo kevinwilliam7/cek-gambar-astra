@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\CekKpbJob;
 use App\Models\CekKpb;
+use App\Models\CekKpbProgress;
 use App\Models\FailedJob;
 use App\Models\Job;
 use App\Models\Motor;
@@ -18,27 +19,42 @@ class CekKpbController extends Controller
      */
     public function index()
     {
-        $pendingJobs = Job::get();
+        return view('cek_kpb.index');
+    }
+
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    public function getProgressJobList()
+    {
+        $pendingJobs = Job::with('cek_kpb_progress')->get();
         $failedUuids = FailedJob::pluck('uuid')->toArray();
 
         $jobs = $pendingJobs->map(function ($job) use ($failedUuids) {
             $payload = json_decode($job->payload, true);
 
             $info = [
+                'id' => $job['id'],
                 'uuid' => $payload['uuid'] ?? $job->uuid ?? '-',
                 'job_name' => class_basename($payload['displayName'] ?? ''),
                 'file_name' => null,
                 'status' => 'Processing',
+                'detail' => $job->cek_kpb_progress,
                 'created_at' => isset($payload['createdAt'])
                     ? date('Y-m-d H:i:s', $payload['createdAt'])
                     : $job->created_at,
             ];
 
+            // Ambil file_name dari payload command
             try {
                 if (!empty($payload['data']['command'])) {
                     $command = unserialize($payload['data']['command']);
-
-                    // Gunakan reflection untuk ambil nilai properti privat `path`
                     $ref = new \ReflectionClass($command);
 
                     if ($ref->hasProperty('path')) {
@@ -62,16 +78,67 @@ class CekKpbController extends Controller
             return (object) $info;
         });
 
-        return view('cek_kpb.index', compact('jobs'));
+        return response()->json($jobs);
     }
 
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function getProgressJob($jobId)
     {
-        //
+        $failedUuids = FailedJob::pluck('uuid')->toArray();
+
+        // Ambil job dengan relasi cek_kpb_progress
+        // $job = Job::with('cek_kpb_progress')->find($jobId);
+        $cek_kpb_progress = CekKpbProgress::where('job_id', $jobId)->with('job')->first();
+        $job = $cek_kpb_progress ? $cek_kpb_progress->job : null;
+
+        if (!$cek_kpb_progress) {
+            return response()->json(null, 404); // job tidak ditemukan
+        }
+
+        // Ambil payload dan buat info object
+        $payload = json_decode($job?->payload, true);
+
+        $info = [
+            'uuid' => $payload['uuid'] ?? $job->uuid ?? '-',
+            'detail' => $cek_kpb_progress,
+        ];
+
+        // Ambil file_name dari payload
+        try {
+            if (!empty($payload['data']['command'])) {
+                $command = unserialize($payload['data']['command']);
+                $ref = new \ReflectionClass($command);
+
+                if ($ref->hasProperty('path')) {
+                    $prop = $ref->getProperty('path');
+                    $prop->setAccessible(true);
+                    $path = $prop->getValue($command);
+                    $info['file_name'] = basename($path);
+                } else {
+                    $info['file_name'] = '(path kosong)';
+                }
+            }
+        } catch (\Throwable $e) {
+            $info['file_name'] = '[Error unserialize]';
+        }
+
+        // Tentukan status
+        if (in_array($info['uuid'], $failedUuids)) {
+            $info['status'] = 'failed';
+        }
+
+        // Hitung progress
+        $progress = $cek_kpb_progress->progress ?? 0;
+        $total = $cek_kpb_progress->total ?? 0.0000001;
+        $percent = ($total > 0) ? ($progress / $total * 100) : 0;
+
+        return response()->json([
+            'uuid' => $info['uuid'],
+            'file_name' => $cek_kpb_progress->file_name ?? $info['file_name'] ?? null,
+            'progress' => $progress,
+            'total' => $total,
+            'percent' => $percent,
+        ]);
     }
 
     /**

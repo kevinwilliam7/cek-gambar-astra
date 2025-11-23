@@ -65,22 +65,26 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
             $values = $row->toArray();
             // Pastikan jumlah kolom sama dengan header
             $data = array_combine($headers, $values);
-            $tgl_beli = isset($data['Bulan Beli']) ? $data['Tgl Beli'].'/'.$data['Bulan Beli'].'/'.$data['Tahun Beli'] : $data['Tgl Beli'];
-            $formattedTglBeli = $this->formatTanggalExcel($tgl_beli);
-            $formattedTglService = $this->formatTanggalExcel($data['Tgl Service']);
+            if(is_numeric($data['Service Ke-'])) {
+                $tgl_beli = isset($data['Bulan Beli']) ? $data['Tgl Beli'].'/'.$data['Bulan Beli'].'/'.$data['Tahun Beli'] : $data['Tgl Beli'];
+                $formattedTglBeli = $this->formatTanggalExcel($tgl_beli);
+                $formattedTglService = $this->formatTanggalExcel($data['Tgl Service']);
 
-            //Panggil fungsi cek KPB compare rekap
-            $this->checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService);
-            // Panggil fungsi cek duplikat engine dengan tgl beli berbeda
-            $this->checkDuplicateEngine($data, $rowNum, $formattedTglBeli, $formattedTglService);
-            // Panggil fungsi cek panjang nosin
-            $this->checkEngineLength($data, $rowNum, $formattedTglBeli, $formattedTglService);
-            // Panggil fungsi cek tgl beli sama dengan tgl service
-            $this->checkBuyDateEqualsServiceDate($data, $rowNum, $formattedTglBeli, $formattedTglService);
-            // Panggil fungsi cek tgl service yang melebihi batas maksimal
-            $this->checkServiceDateExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
-            // Panggil fungsi cek km yang melebihi batas maksimal
-            $this->checkKmExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                //Panggil fungsi cek KPB compare rekap
+                $this->checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                // Panggil fungsi cek duplikat engine dengan tgl beli berbeda
+                $this->checkDuplicateEngine($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                // Panggil fungsi cek panjang nosin
+                $this->checkEngineLength($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                // Panggil fungsi cek tgl beli sama dengan tgl service
+                $this->checkBuyDateEqualsServiceDate($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                // Panggil fungsi cek tgl service yang melebihi batas maksimal
+                $this->checkServiceDateExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                // Panggil fungsi cek km yang melebihi batas maksimal
+                $this->checkKmExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
+            } else {
+                // Log::info($data['Service Ke-'].' Bukan numeric');
+            }
         }
 
         $this->log("✅ Total baris dibaca: {($rowNum-1)}");
@@ -385,7 +389,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                             ]);
                         }
                     }
-                }0
+                }
                 //Buat cek KM untuk service sekarang apakah KM lebih kecil dari service sebelumnya
                 else {
                     if($data['Km'] <= $getKmRekap['km'] && $data['Service Ke-'] > 1) {

@@ -211,7 +211,7 @@
                                         <p class="text-sm text-gray-500 dark:text-neutral-400">
                                             Monitor progress and keep your excel KPB queue proccess
                                         </p>
-                                        @foreach ($jobs as $job)
+                                        {{-- @foreach ($jobs as $job)
                                             <!-- List Group -->
                                             <div class="mt-5 flex flex-col">
                                                 <!-- Item -->
@@ -231,12 +231,28 @@
                                                                 </path>
                                                             </svg>
                                                         </div>
-
                                                         <div class="grow">
                                                             <p class="text-sm text-gray-800 dark:text-neutral-200">
                                                                 {{ $job->file_name }}
                                                             </p>
-                                                            <small>{{ $job->uuid }}</small>
+                                                            <div class="mt-2 flex flex-col gap-x-3">
+
+                                                                <!-- TEXT (Kasih ID unik berdasarkan job_id) -->
+                                                                <span id="percent-text-{{ $job->detail?->job_id }}"
+                                                                    class="block mb-1.5 text-xs text-gray-500 dark:text-neutral-400">
+                                                                    {{ number_format( ($job->detail?->progress / ($job->detail?->total ?? 1)) * 100, 1) }}% ·
+                                                                    {{ $job->detail?->progress ?? 0 }} / {{ $job->detail?->total ?? 0 }} Checked
+                                                                </span>
+
+                                                                <!-- PROGRESS BAR -->
+                                                                <div class="flex w-full h-1 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-700">
+                                                                    <div id="percent-bar-{{ $job->detail?->job_id }}"
+                                                                        class="flex flex-col justify-center overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap dark:bg-neutral-200"
+                                                                        style="width: {{ ($job->detail?->progress / ($job->detail->total ?? 1)) * 100 }}%">
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
                                                         </div>
 
                                                         <div>
@@ -251,7 +267,11 @@
                                                 <!-- End Item -->
                                             </div>
                                             <!-- End List Group -->
-                                        @endforeach
+                                        @endforeach --}}
+
+                                        <div id="jobs-container">
+                                            <!-- JS akan generate semua job di sini -->
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- End Accordion Content -->
@@ -487,14 +507,109 @@
                 <!-- End Footer -->
             </div>
             <!-- End Bar Chart in Card -->
-
-
         </div>
     </div>
     @include('cek_kpb.partial.modal_upload')
+    @include('cek_kpb.partial.modal')
 @endsection
 @section('js')
     <script>
+        const jobsContainer = document.getElementById('jobs-container');
+        // Render semua job ke DOM
+        function renderJobs(jobs) {
+            jobsContainer.innerHTML = '';
+
+            jobs.forEach(job => {
+                const progress = job.cek_kpb_progress ?? {};
+                const jobId = progress.job_id ?? job.id;
+                const total = progress.total ?? 0;
+                const current = progress.progress ?? 0;
+                const percent = ((current / total) * 100).toFixed(1);
+
+                const html = `
+                <div class="mt-5 flex flex-col">
+                    <div class="py-2.5 border-t border-dashed border-gray-200 dark:border-neutral-700">
+                        <div class="flex items-center gap-3">
+                            <div class="grow">
+                                <p class="text-sm text-gray-800 dark:text-neutral-200">${job.file_name ?? '(belum ada file)'}</p>
+                                <div class="mt-2 flex flex-col gap-x-3">
+                                    <span id="percent-text-${jobId}" class="block mb-1.5 text-xs text-gray-500 dark:text-neutral-400">
+                                        ${percent}% · ${current} / ${total} Checked
+                                    </span>
+                                    <div class="flex w-full h-1 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-700">
+                                        <div id="percent-bar-${jobId}"
+                                            class="flex flex-col justify-center overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap dark:bg-neutral-200"
+                                            style="width: ${percent}%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+
+                jobsContainer.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        // Polling semua job progress
+        async function refreshProgressMultiple(jobIds) {
+            const interval = setInterval(async () => {
+                try {
+                    const results = await Promise.all(jobIds.map(async jobId => {
+                        try {
+                            const res = await fetch(`/cek-kpb/getProgressJob/${jobId}`);
+                            if (!res.ok) return { jobId, done: true }; // fallback 100%
+
+                            const data = await res.json();
+                            const percent = data.progress >= data.total ? 100 : data.percent.toFixed(1);
+
+                            const textEl = document.getElementById(`percent-text-${jobId}`);
+                            const barEl = document.getElementById(`percent-bar-${jobId}`);
+
+                            if (textEl) textEl.innerText = `${percent}% · ${data.progress} / ${data.total} Checked`;
+                            if (barEl) barEl.style.width = percent + '%';
+
+                            if(data.progress >= data.total) {
+                                // Job selesai, fetch ulang semua job untuk update status
+                                fetch('/cek-kpb/getAllJobs')
+                                    .then(res => res.json())
+                                    .then(jobs => {
+                                        renderJobs(jobs);
+                                        const jobIds = jobs.map(job => job.cek_kpb_progress?.job_id ?? job.id);
+                                        refreshProgressMultiple(jobIds);
+                                    })
+                                    .catch(err => console.error('Error fetching jobs', err));
+                                return { jobId, done: data.progress >= data.total };
+                            }
+                        } catch {
+                            // error fetch → anggap done
+                            return { jobId, done: true };
+                        }
+                    }));
+
+                    // Hentikan interval jika semua job selesai
+                    const allDone = results.every(r => r.done);
+                    if (allDone) clearInterval(interval);
+
+                } catch (err) {
+                    console.error('Error polling jobs');
+                }
+            }, 1000);
+        }
+        // Ambil semua job dari server
+        fetch('/cek-kpb/getAllJobs')
+            .then(res => res.json())
+            .then(jobs => {
+                renderJobs(jobs);
+
+                // Ambil semua job_id dari cek_kpb_progress untuk polling
+                const jobIds = jobs.map(job => job.cek_kpb_progress?.job_id ?? job.id);
+                refreshProgressMultiple(jobIds);
+            })
+            .catch(err => console.error('Error fetching jobs', err));
+
         const checkKpbSubmit = document.getElementById('checkKpbSubmit');
         let selectedFiles = [];
 
@@ -547,7 +662,18 @@
 
         checkKpbSubmit.addEventListener('click', function() {
             if (selectedFiles.length === 0) {
-                alert('⚠️ Silakan pilih minimal satu file Excel untuk diunggah.');
+                document.getElementById('hs-task-created-alert-label').innerText = 'Tidak ada file yang dipilih!';
+                document.getElementById('hs-task-created-alert-icon').innerHTML = '';
+                document.getElementById('hs-task-created-alert-content').innerText = 'Silakan pilih minimal satu file Excel untuk diunggah.';
+                document.getElementById('hs-task-created-alert-icon').innerHTML = `
+                    <span
+                        class="mb-4 inline-flex justify-center items-center size-11 rounded-full border-4 border-yellow-50 bg-yellow-100 text-yellow-500 dark:bg-yellow-700 dark:border-yellow-600 dark:text-yellow-100">
+                        <svg class="shrink-0 size-5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                        </svg>
+                    </span>
+                `;
+                HSOverlay.open('#hs-task-created-alert');
                 return;
             }
 
@@ -563,11 +689,50 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    alert('✅ File berhasil diunggah dan diproses.');
+                    document.getElementById('hs-task-created-alert-label').innerText = 'Sukses';
+                    document.getElementById('hs-task-created-alert-icon').innerHTML = '';
+                    document.getElementById('hs-task-created-alert-content').innerText = 'File anda berhasil diunggah dan sedang diproses.';
+                    document.getElementById('hs-task-created-alert-icon').innerHTML = `
+                        <span
+                            class="mb-4 inline-flex justify-center items-center size-11 rounded-full border-4 border-green-50 bg-green-100 text-green-500 dark:bg-green-700 dark:border-green-600 dark:text-green-100">
+                            <svg class="shrink-0 size-5" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                fill="currentColor" viewBox="0 0 16 16">
+                                <path
+                                    d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z" />
+                            </svg>
+                        </span>
+                    `;
+                    HSOverlay.open('#hs-task-created-alert');
+                    // reset form
+                    selectedFiles = [];
+                    previewContainer.innerHTML = '';
+                    // close modal
+                    HSOverlay.close('#hs-large-modal');
+                    // reload jobs
+                    fetch('/cek-kpb/getAllJobs')
+                        .then(res => res.json())
+                        .then(jobs => {
+                            console.log(jobs);
+                            renderJobs(jobs);
+                            const jobIds = jobs.map(job => job.cek_kpb_progress?.job_id ?? job.id);
+                            refreshProgressMultiple(jobIds);
+                        })
+                        .catch(err => console.error('Error fetching jobs', err));
+                    confetti();
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('❌ Terjadi kesalahan saat mengunggah file.');
+                    document.getElementById('hs-task-created-alert-label').innerText = 'Error';
+                    document.getElementById('hs-task-created-alert-icon').innerHTML = '';
+                    document.getElementById('hs-task-created-alert-content').innerText = 'Terjadi kesalahan saat mengunggah file.';
+                    document.getElementById('hs-task-created-alert-icon').innerHTML = `
+                        <span
+                            class="mb-4 inline-flex justify-center items-center size-11 rounded-full border-4 border-red-50 bg-red-100 text-red-500 dark:bg-red-700 dark:border-red-600 dark:text-red-100">
+                            <svg class="shrink-0 size-5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                            </svg>
+                        </span>
+                    `;
+                    HSOverlay.open('#hs-task-created-alert');
                 });
         });
 
