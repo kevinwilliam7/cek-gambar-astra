@@ -173,107 +173,124 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
     /**
      * Untuk mengecek engine duplikat yang memiliki tanggal beli berbeda
      */
-    protected function checkDuplicateEngine($data, $rowNum, $formattedTglBeli, $formattedTglService) {
+    protected function checkDuplicateEngine($data, $rowNum, $formattedTglBeli, $formattedTglService)
+    {
         $engineKey = strtoupper(trim($data['No Engine']));
         $serviceId = (int) $data['Service Ke-'];
         $km = (int) $data['Km'];
 
-        // ✅ Tambahan logika: cek duplikat engine & tanggal beli berbeda
-        if (isset($this->duplicateEngines[$engineKey])) {
-            $previousServices = $this->duplicateEngines[$engineKey];
-            $previousIds = array_keys($previousServices);
-            $maxPrevId = max($previousIds);
-
-            $previous = $previousServices[$maxPrevId];
-            $previousServiceId = $previous['service_id'];
-            $previousTglBeli = $previous['tgl_beli'];
-            $previousTglService = $previous['tgl_service'];
-            $previousKm = $previous['km'];
-            $previousRow = $previous['row'];
-
-            // 🚨 Jika tanggal beli berbeda → warning
-            if ($formattedTglBeli !== $previousTglBeli) {
-                if ($this->context instanceof Command) {
-                    $this->log("⚠️ Baris {$rowNum}: No Engine {$engineKey} - {$data['Service Ke-']} - Tgl Beli di Excel ($formattedTglBeli) berbeda dengan Tgl Beli sebelumnya di service ID {$previousServiceId} ({$previousTglBeli})");
-                } else {
-                    $cekKpb = CekKpb::updateOrCreate(
-                        [
-                            'engine' => $data['No Engine'],
-                            'service_id' => $data['Service Ke-'],
-                            'file_name' => $this->fileName,
-                        ],
-                        [
-                            'buy_date' => $formattedTglBeli,
-                            'service_date' => $formattedTglService,
-                            'km' => $data['Km'],
-                            'user_id' => $this->user_id,
-                        ]
-                    );
-
-                    $cekKpb->notes()->create([
-                        'message' => "⚠️ Baris {$rowNum}: No Engine {$engineKey} muncul lagi (baris {$previousRow}) dengan Tgl Beli berbeda. Excel: {$formattedTglBeli}, Sebelumnya: {$previousTglBeli}",
-                    ]);
-                }
-            }
-
-            // 🚨 Jika KM lebih kecil atau sama dari sebelumnya
-            if ($km < $previousKm) {
-                if ($this->context instanceof Command) {
-                    $this->log("⚠️ Baris {$rowNum}: No Engine {$engineKey} - {$data['Service Ke-']} - KM Service di Excel ({$km}) lebih kecil atau sama dengan KM Service sebelumnya di baris {$previousRow} ({$previousKm})");
-                } else {
-                    $cekKpb = CekKpb::updateOrCreate(
-                        [
-                            'engine' => $data['No Engine'],
-                            'service_id' => $data['Service Ke-'],
-                            'file_name' => $this->fileName,
-                        ],
-                        [
-                            'buy_date' => $formattedTglBeli,
-                            'service_date' => $formattedTglService,
-                            'km' => $data['Km'],
-                            'user_id' => $this->user_id,
-                        ]
-                    );
-                    $cekKpb->notes()->create([
-                        'message' => "⚠️ Baris {$rowNum}: No Engine {$engineKey} - {$data['Service Ke-']} - KM Service di Excel ({$km}) lebih kecil atau sama dengan KM Service sebelumnya di service ID {$previousServiceId} ({$previousKm})",
-                    ]);
-                }
-            }
-
-            // 🚨 Jika tanggal service lebih kecil atau sama dari sebelumnya
-            if ($formattedTglService <= $previousTglService) {
-                if ($this->context instanceof Command) {
-                    $this->log("⚠️ Baris {$rowNum}: No Engine {$engineKey} - {$data['Service Ke-']} - Tgl Service di Excel ({$formattedTglService}) lebih kecil atau sama dengan Tgl Service sebelumnya di service ID {$previousServiceId} ({$previousTglService})");
-                } else {
-                    $cekKpb = CekKpb::updateOrCreate(
-                        [
-                            'engine' => $data['No Engine'],
-                            'service_id' => $data['Service Ke-'],
-                            'file_name' => $this->fileName,
-                        ],
-                        [
-                            'buy_date' => $formattedTglBeli,
-                            'service_date' => $formattedTglService,
-                            'km' => $data['Km'],
-                            'user_id' => $this->user_id,
-                        ]
-                    );
-                    $cekKpb->notes()->create([
-                        'message' => "⚠️ Baris {$rowNum}: No Engine {$engineKey} - {$data['Service Ke-']} - Tgl Service di Excel ({$formattedTglService}) lebih kecil atau sama dengan Tgl Service sebelumnya di baris {$previousRow} ({$previousTglService})",
-                    ]);
-                }
-            }
-        }
-
-        // simpan engine dan tanggal beli pertama kali ditemukan
+        // Simpan data saat ini
         $this->duplicateEngines[$engineKey][$serviceId] = [
             'tgl_service' => $formattedTglService,
-            'tgl_beli' => $formattedTglBeli,
-            'service_id' => $serviceId,
-            'km' => $km,
-            'row' => $rowNum,
+            'tgl_beli'    => $formattedTglBeli,
+            'service_id'  => $serviceId,
+            'km'          => $km,
+            'row'         => $rowNum,
         ];
 
+        // Ambil semua KPB untuk engine ini dan urutkan berdasarkan service_id
+        $sorted = collect($this->duplicateEngines[$engineKey])
+            ->sortBy('service_id') // pastikan KPB1 -> KPB2 -> KPB3
+            ->values();
+
+        $prev = null;
+        foreach ($sorted as $curr) {
+            if ($prev) {
+                // ----------- 1️⃣ TGL BELI ----------
+                if ($curr['tgl_beli'] !== $prev['tgl_beli']) {
+                    $message = "⚠️ Baris {$curr['row']}: No Engine {$engineKey} Tgl Beli berbeda dgn sebelumnya. Excel: {$curr['tgl_beli']}, Sebelumnya: {$prev['tgl_beli']}";
+                    if ($this->context instanceof Command) {
+                        $this->log($message);
+                    } else {
+                        $cekKpb = CekKpb::updateOrCreate(
+                            [
+                                'engine' => $engineKey,
+                                'service_id' => $curr['service_id'],
+                                'file_name' => $this->fileName,
+                            ],
+                            [
+                                'buy_date' => $curr['tgl_beli'],
+                                'service_date' => $curr['tgl_service'],
+                                'km' => $curr['km'],
+                                'user_id' => $this->user_id,
+                            ]
+                        );
+                        $cekKpb->notes()->create(['message' => $message]);
+                    }
+                }
+
+                // ----------- 2️⃣ KM ----------
+                if ($curr['km'] <= $prev['km']) {
+                    $message = "⚠️ Baris {$curr['row']}: No Engine {$engineKey} - KM {$curr['km']} lebih kecil atau sama dengan sebelumnya ({$prev['km']}) pada Service ID {$prev['service_id']}";
+                    if ($this->context instanceof Command) {
+                        $this->log($message);
+                    } else {
+                        $cekKpb = CekKpb::updateOrCreate(
+                            [
+                                'engine' => $engineKey,
+                                'service_id' => $curr['service_id'],
+                                'file_name' => $this->fileName,
+                            ],
+                            [
+                                'buy_date' => $curr['tgl_beli'],
+                                'service_date' => $curr['tgl_service'],
+                                'km' => $curr['km'],
+                                'user_id' => $this->user_id,
+                            ]
+                        );
+                        $cekKpb->notes()->create(['message' => $message]);
+                    }
+                }
+
+                // ----------- 3️⃣ TGL SERVICE ----------
+                if ($curr['tgl_service'] <= $prev['tgl_service']) {
+                    $message = "⚠️ Baris {$curr['row']}: No Engine {$engineKey} - Tgl Service {$curr['tgl_service']} lebih kecil atau sama dengan sebelumnya ({$prev['tgl_service']})";
+                    if ($this->context instanceof Command) {
+                        $this->log($message);
+                    } else {
+                        $cekKpb = CekKpb::updateOrCreate(
+                            [
+                                'engine' => $engineKey,
+                                'service_id' => $curr['service_id'],
+                                'file_name' => $this->fileName,
+                            ],
+                            [
+                                'buy_date' => $curr['tgl_beli'],
+                                'service_date' => $curr['tgl_service'],
+                                'km' => $curr['km'],
+                                'user_id' => $this->user_id,
+                            ]
+                        );
+                        $cekKpb->notes()->create(['message' => $message]);
+                    }
+                }
+
+                // ----------- 4️⃣ DUPLIKAT SERVICE ID ----------
+                if ($curr['service_id'] === $prev['service_id']) {
+                    $message = "⚠️ No Engine {$engineKey} memiliki duplikat Service ID {$curr['service_id']} (baris {$curr['row']} dan {$prev['row']})";
+                    if ($this->context instanceof Command) {
+                        $this->log($message);
+                    } else {
+                        $cekKpb = CekKpb::updateOrCreate(
+                            [
+                                'engine' => $engineKey,
+                                'service_id' => $curr['service_id'],
+                                'file_name' => $this->fileName,
+                            ],
+                            [
+                                'buy_date' => $curr['tgl_beli'],
+                                'service_date' => $curr['tgl_service'],
+                                'km' => $curr['km'],
+                                'user_id' => $this->user_id,
+                            ]
+                        );
+                        $cekKpb->notes()->create(['message' => $message]);
+                    }
+                }
+            }
+
+            $prev = $curr; // set current sebagai previous untuk iterasi selanjutnya
+        }
     }
 
     /**
