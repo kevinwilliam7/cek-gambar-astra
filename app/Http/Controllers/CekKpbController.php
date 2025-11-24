@@ -236,7 +236,7 @@ class CekKpbController extends Controller
                 }
             }),
             $request,
-            ['file_name', 'md_code', 'md_name', 'engine', 'km', 'user_id'],
+            ['file_name', 'md_code', 'md_name', 'engine', 'km', 'user_id', 'notes.message'],
             ['file_name', 'md_code', 'md_name', 'engine', 'km', 'user_id']
         );
 

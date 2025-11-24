@@ -15,10 +15,35 @@ class DatatableService
         $sortDir = strtolower($request->get('sort_dir', 'asc'));
 
         // search
+        // if ($q && $searchCols) {
+        //     $query->where(function ($w) use ($q, $searchCols) {
+        //         foreach ($searchCols as $col) {
+        //             $w->orWhere($col, 'ilike', "%{$q}%");
+        //         }
+        //     })->orWhereHas('notes', function ($w) use ($q) {
+        //         $w->where('message', 'ilike', "%{$q}%");
+        //     });
+        // }
         if ($q && $searchCols) {
             $query->where(function ($w) use ($q, $searchCols) {
                 foreach ($searchCols as $col) {
-                    $w->orWhere($col, 'ilike', "%{$q}%");
+                    // Jika searchCols berisi "notes.message" atau "notes"
+                    if (str_contains($col, 'notes')) {
+                        // Ambil field setelah 'notes.' jika ada
+                        $field = 'message'; // default
+
+                        if (str_contains($col, '.')) {
+                            [, $field] = explode('.', $col, 2);
+                        }
+
+                        $w->orWhereHas('notes', function ($q2) use ($q, $field) {
+                            $q2->where($field, 'ilike', "%{$q}%");
+                        });
+
+                    } else {
+                        // normal column search
+                        $w->orWhere($col, 'ilike', "%{$q}%");
+                    }
                 }
             });
         }

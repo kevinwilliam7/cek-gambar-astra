@@ -389,7 +389,7 @@
                         <table id="table1"
                             class="min-w-full divide-y divide-gray-200 border-t border-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
                             <thead id="thead1" class="bg-gray-50 dark:bg-neutral-700/50">
-                                @php($table1_headers = [['', ''], ['Nama File', 'ahass_name'], ['Service ID', 'service_id'], ['Nomor Mesin', 'engine'], ['Notes', 'notes']])
+                                @php($table1_headers = [['', ''], ['Nama File', 'ahass_name'], ['Service ID', 'service_id'], ['Nomor Mesin', 'engine'], ['Catatan', 'notes.message']])
                                 <tr>
                                     @foreach ($table1_headers as $table1_header)
                                         <th scope="col"
@@ -911,7 +911,9 @@
                                             <div class="flex items-center gap-1.5">
                                                 <span class="shrink-0 size-2 inline-block rounded-full"></span>
                                                 <span class="block text-sm text-gray-800 dark:text-neutral-200">
-                                                ${item.notes[0]?.message}
+                                                    <ul class="list-disc ms-4 text-sm text-gray-800 dark:text-neutral-200">
+                                                        ${item.notes?.map(n => `<li>${n.message}</li>`).join('')}
+                                                    </ul>
                                                 </span>
                                             </div>
                                         </div>
