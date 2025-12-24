@@ -73,6 +73,7 @@ class ExcelCekKpbHelper
                 $context->error($msg);
                 return;
             }
+            unlink($tempPath);
             throw new Exception($msg); //biar masuk ke log_activities gagal
             return Log::warning($msg);
         }
