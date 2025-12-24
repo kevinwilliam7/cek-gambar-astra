@@ -19,7 +19,7 @@
                     class="inline-flex shrink-0 items-center gap-x-2 text-sm font-medium rounded-full border border-transparent text-white hover:text-white/80 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-white/10"
                     aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
                     <img class="shrink-0 size-9.5 rounded-full"
-                        src="https://images.unsplash.com/photo-1659482633369-9fe69af50bfb?ixlib=rb-4.0.3&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=320&amp;h=320&amp;q=80"
+                        src="https://ui-avatars.com/api/?name={{auth()->user()->name}}"
                         alt="Avatar">
                 </button>
 

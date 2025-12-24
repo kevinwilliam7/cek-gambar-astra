@@ -163,7 +163,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                         'user_id' => $this->user_id,
                     ]
                 );
-                $cekKpb->notes()->create([
+                $cekKpb->notes()->updateOrCreate([
                     'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - No Engine ".strlen($data['No Engine'])." karakter.",
                 ]);
             }
@@ -215,7 +215,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                                 'user_id' => $this->user_id,
                             ]
                         );
-                        $cekKpb->notes()->create(['message' => $message]);
+                        $cekKpb->notes()->updateOrCreate(['message' => $message]);
                     }
                 }
 
@@ -238,13 +238,13 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                                 'user_id' => $this->user_id,
                             ]
                         );
-                        $cekKpb->notes()->create(['message' => $message]);
+                        $cekKpb->notes()->updateOrCreate(['message' => $message]);
                     }
                 }
 
                 // ----------- 3️⃣ TGL SERVICE ----------
                 if ($curr['tgl_service'] <= $prev['tgl_service']) {
-                    $message = "⚠️ Baris {$curr['row']}: No Engine {$engineKey} - Tgl Service {$curr['tgl_service']} lebih kecil atau sama dengan sebelumnya ({$prev['tgl_service']})";
+                    $message = "⚠️ Baris {$curr['row']}: No Engine {$engineKey} - Tgl Service {$curr['tgl_service']} lebih kecil atau sama dengan sebelumnya ({$prev['tgl_service']}) pada Service ID {$prev['service_id']}";
                     if ($this->context instanceof Command) {
                         $this->log($message);
                     } else {
@@ -261,7 +261,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                                 'user_id' => $this->user_id,
                             ]
                         );
-                        $cekKpb->notes()->create(['message' => $message]);
+                        $cekKpb->notes()->updateOrCreate(['message' => $message]);
                     }
                 }
 
@@ -284,7 +284,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                                 'user_id' => $this->user_id,
                             ]
                         );
-                        $cekKpb->notes()->create(['message' => $message]);
+                        $cekKpb->notes()->updateOrCreate(['message' => $message]);
                     }
                 }
             }
@@ -314,7 +314,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                         'user_id' => $this->user_id,
                     ]
                 );
-                $cekKpb->notes()->create([
+                $cekKpb->notes()->updateOrCreate([
                     'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Tgl Service sama dengan Tgl Beli.",
                 ]);
             }
@@ -346,7 +346,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
             //                 'user_id' => $this->user_id,
             //             ]
             //         );
-            //         $cekKpb->notes()->create([
+            //         $cekKpb->notes()->updateOrCreate([
             //             'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$formattedTglBeli} - {$data['Service Ke-']} - Data KPB sebelumnya tidak ditemukan di database.",
             //         ]);
             //     }
@@ -369,7 +369,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                             'user_id' => $this->user_id,
                         ]
                     );
-                    $cekKpb->notes()->create([
+                    $cekKpb->notes()->updateOrCreate([
                         'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Tgl Beli tidak sesuai (DB: {$rekap_kpbs->buy_date}, Excel: {$formattedTglBeli})",
                     ]);
                 }
@@ -401,7 +401,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                                     'user_id' => $this->user_id,
                                 ]
                             );
-                            $cekKpb->notes()->create([
+                            $cekKpb->notes()->updateOrCreate([
                                 'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - KM Service di Excel ({$data['Km']}) lebih besar dari KM Service setelahnya di database ".$getKmRekap['km']." pada KPB ".$getKmRekap['service_id'],
                             ]);
                         }
@@ -426,7 +426,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                                     'user_id' => $this->user_id,
                                 ]
                             );
-                            $cekKpb->notes()->create([
+                            $cekKpb->notes()->updateOrCreate([
                                 'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - KM Service di Excel ({$data['Km']}) lebih kecil atau sama dengan KM Service sebelumnya di database ".$getKmRekap['km'],
                             ]);
                         }
@@ -459,7 +459,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                                     'user_id' => $this->user_id,
                                 ]
                             );
-                            $cekKpb->notes()->create([
+                            $cekKpb->notes()->updateOrCreate([
                                 'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Tgl Service di Excel (".$this->formatTanggalExcel($data['Tgl Service']).") lebih besar dari Tgl Service setelahnya di database ".$this->formatTanggalExcel($getTglServiceRekap['service_date'])." pada KPB ".$getTglServiceRekap['service_id'],
                             ]);
                         }
@@ -484,7 +484,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                                     'user_id' => $this->user_id,
                                 ]
                             );
-                            $cekKpb->notes()->create([
+                            $cekKpb->notes()->updateOrCreate([
                                 'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Tgl Service di Excel (".$this->formatTanggalExcel($data['Tgl Service']).") lebih kecil atau sama dengan Tgl Service sebelumnya di database ".$this->formatTanggalExcel($getTglServiceRekap['service_date']),
                             ]);
                         }
@@ -519,7 +519,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                         'user_id' => $this->user_id,
                     ]
                 );
-                $cekKpb->notes()->create([
+                $cekKpb->notes()->updateOrCreate([
                     'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Kriteria KPB tidak ditemukan untuk pengecekan Tanggal Service maksimum.",
                 ]);
             }
@@ -541,7 +541,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                             'user_id' => $this->user_id,
                         ]
                     );
-                    $cekKpb->notes()->create([
+                    $cekKpb->notes()->updateOrCreate([
                         'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Tgl Service di Excel ({$formattedTglService}) lebih kecil atau sama dengan Tgl Beli ({$formattedTglBeli})",
                     ]);
                 }
@@ -563,7 +563,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                                 'user_id' => $this->user_id,
                             ]
                         );
-                        $cekKpb->notes()->create([
+                        $cekKpb->notes()->updateOrCreate([
                             'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Selisih Hari ($selisihHari hari) melebihi batas maksimum ({$kriteriaKpb->hari_maksimum} hari)",
                         ]);
                     }
@@ -595,7 +595,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                         'user_id' => $this->user_id,
                     ]
                 );
-                $cekKpb->notes()->create([
+                $cekKpb->notes()->updateOrCreate([
                     'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - Kriteria KPB tidak ditemukan untuk pengecekan KM maksimum.",
                 ]);
             }
@@ -617,7 +617,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                             'user_id' => $this->user_id,
                         ]
                     );
-                    $cekKpb->notes()->create([
+                    $cekKpb->notes()->updateOrCreate([
                         'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - KM Service di Excel ({$data['Km']}) melebihi batas maksimum ({$kriteriaKpb->km_maksimum} KM)",
                     ]);
                 }
@@ -638,7 +638,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets
                             'user_id' => $this->user_id,
                         ]
                     );
-                    $cekKpb->notes()->create([
+                    $cekKpb->notes()->updateOrCreate([
                         'message' => "⚠️ Baris {$rowNum}: No Engine {$data['No Engine']} - {$data['Service Ke-']} - KM Service di Excel ({$data['Km']}) tidak valid.",
                     ]);
                 }

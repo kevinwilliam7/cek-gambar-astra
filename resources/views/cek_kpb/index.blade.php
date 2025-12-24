@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Ahass | Rekap KPB')
+@section('title', 'Ahass | Cek KPB')
 @section('main-content')
     <div
         class="relative px-2 sm:px-5 py-5
@@ -21,257 +21,38 @@
                 <div class="grid grid-cols-1 md:grid-cols-12">
                     <div class="md:col-span-4 flex-1 flex flex-col h-full">
                         <div class="md:sticky md:top-0 p-5 md:pt-6.5">
-                            <!-- Timeline -->
-                            <div>
-                                <h3 class="mb-4 font-medium text-sm text-gray-800 dark:text-neutral-200">
-                                    Module cek KPB
-                                </h3>
-
-                                <!-- Item -->
-                                <div class="group relative flex gap-x-3.5">
-                                    <!-- Icon -->
-                                    <div
-                                        class="relative group-last:after:hidden after:absolute after:top-6 after:bottom-1 after:start-2.5 after:w-px after:-translate-x-[0.5px] after:bg-gray-200 dark:after:bg-neutral-700">
-                                        <span
-                                            class="size-5 flex justify-center items-center bg-green-600 text-white rounded-full dark:bg-green-500">
-                                            <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
-                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M20 6 9 17l-5-5"></path>
-                                            </svg>
-                                            <svg class="hidden shrink-0 size-5" xmlns="http://www.w3.org/2000/svg"
-                                                width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
-                                                <path d="M12 12v9"></path>
-                                                <path d="m8 17 4 4 4-4"></path>
-                                            </svg>
-                                        </span>
-                                    </div>
-                                    <!-- End Icon -->
-
-                                    <!-- Right Content -->
-                                    <div class="-mt-1 grow pb-5 group-last:pb-0">
-                                        <span class="text-sm text-gray-800 dark:text-neutral-200">
-                                            Cek Nosin kurang / lebih dari 12 karakter
-                                        </span>
-                                    </div>
-                                    <!-- End Right Content -->
-                                </div>
-                                <!-- End Item -->
-
-                                <!-- Item -->
-                                <div class="group relative flex gap-x-3.5">
-                                    <!-- Icon -->
-                                    <div
-                                        class="relative group-last:after:hidden after:absolute after:top-6 after:bottom-1 after:start-2.5 after:w-px after:-translate-x-[0.5px] after:bg-gray-200 dark:after:bg-neutral-700">
-                                        <span
-                                            class="size-5 flex justify-center items-center bg-green-600 text-white rounded-full dark:bg-green-500">
-                                            <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
-                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M20 6 9 17l-5-5"></path>
-                                            </svg>
-                                            <svg class="hidden shrink-0 size-5" xmlns="http://www.w3.org/2000/svg"
-                                                width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
-                                                <path d="M12 12v9"></path>
-                                                <path d="m8 17 4 4 4-4"></path>
-                                            </svg>
-                                        </span>
-                                    </div>
-                                    <!-- End Icon -->
-
-                                    <!-- Right Content -->
-                                    <div class="-mt-1 grow pb-5 group-last:pb-0">
-                                        <span class="text-sm text-gray-800 dark:text-neutral-200">
-                                            Cek tanggal beli sama dengan tanggal service
-                                        </span>
-                                    </div>
-                                    <!-- End Right Content -->
-                                </div>
-                                <!-- End Item -->
-
-                                <!-- Item -->
-                                <div class="group relative flex gap-x-3.5">
-                                    <!-- Icon -->
-                                    <div
-                                        class="relative group-last:after:hidden after:absolute after:top-6 after:bottom-1 after:start-2.5 after:w-px after:-translate-x-[0.5px] after:bg-gray-200 dark:after:bg-neutral-700">
-                                        <span
-                                            class="size-5 flex justify-center items-center bg-green-600 text-white rounded-full dark:bg-green-500">
-                                            <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
-                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M20 6 9 17l-5-5"></path>
-                                            </svg>
-                                            <svg class="hidden shrink-0 size-5" xmlns="http://www.w3.org/2000/svg"
-                                                width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
-                                                <path d="M12 12v9"></path>
-                                                <path d="m8 17 4 4 4-4"></path>
-                                            </svg>
-                                        </span>
-                                    </div>
-                                    <!-- End Icon -->
-
-                                    <!-- Right Content -->
-                                    <div class="-mt-1 grow pb-5 group-last:pb-0">
-                                        <span class="text-sm text-gray-800 dark:text-neutral-200">
-                                            Cek KM / Tanggal service yang lebih kecil dari service ID sebelumnya (Compare dengan rekap database).
-                                        </span>
-                                    </div>
-                                    <!-- End Right Content -->
-                                </div>
-                                <!-- End Item -->
-
-                                <!-- Item -->
-                                <div class="group relative flex gap-x-3.5">
-                                    <!-- Icon -->
-                                    <div
-                                        class="relative group-last:after:hidden after:absolute after:top-6 after:bottom-1 after:start-2.5 after:w-px after:-translate-x-[0.5px] after:bg-gray-200 dark:after:bg-neutral-700">
-                                        <span
-                                            class="size-5 flex justify-center items-center border border-dashed border-gray-400 text-gray-800 rounded-full dark:text-neutral-200">
-                                        </span>
-                                    </div>
-                                    <!-- End Icon -->
-
-                                    <!-- Right Content -->
-                                    <div class="-mt-1 grow pb-5 group-last:pb-0">
-                                        <span class="text-sm text-gray-800 dark:text-neutral-200">
-                                            Cek KM / Tanggal service yang lebih kecil dari service ID sebelumnya (Compare dengan sesama excel).
-                                        </span>
-                                    </div>
-                                    <!-- End Right Content -->
-                                </div>
-                                <!-- End Item -->
-
-                                <!-- Item -->
-                                <div class="group relative flex gap-x-3.5">
-                                    <!-- Icon -->
-                                    <div
-                                        class="relative group-last:after:hidden after:absolute after:top-6 after:bottom-1 after:start-2.5 after:w-px after:-translate-x-[0.5px] after:bg-gray-200 dark:after:bg-neutral-700">
-                                        <span
-                                            class="size-5 flex justify-center items-center border border-dashed border-gray-400 text-gray-800 rounded-full dark:text-neutral-200">
-                                        </span>
-                                    </div>
-                                    <!-- End Icon -->
-
-                                    <!-- Right Content -->
-                                    <div class="-mt-1 grow pb-5 group-last:pb-0">
-                                        <span class="text-sm text-gray-800 dark:text-neutral-200">
-                                            Cek Expired / Tanggal service melebihi batas maksimal
-                                        </span>
-                                    </div>
-                                    <!-- End Right Content -->
-                                </div>
-                                <!-- End Item -->
+                            <p class="text-start text-sm font-medium text-gray-800 rounded-lg dark:text-neutral-200 mb-5">Monitor KPB Queue Process</p>
+                            <div id="jobs-container">
+                                <!-- JS akan generate semua job di sini -->
                             </div>
-                            <!-- End Timeline -->
                         </div>
-
                     </div>
                     <!-- End Col -->
 
                     <div class="md:col-span-8 md:border-s border-gray-200 dark:border-neutral-700">
                         <!-- Accordion Group -->
                         <div class="hs-accordion-group space-y-2 p-1.5 md:p-3">
-                            <!-- Accordion -->
-                            <div class="hs-accordion flex flex-col active" id="hs-pro-psuf-sg-hd-one-atm-hd">
-                                <!-- Accordion Button -->
-                                <button
-                                    class="hs-accordion-toggle p-3.5 w-full inline-flex justify-between items-center gap-x-3 text-start text-sm bg-gray-100 font-medium text-gray-800 rounded-lg focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:border-neutral-800 dark:text-neutral-200"
-                                    aria-expanded="true" aria-controls="hs-pro-psuf-sg-one-atm">
-                                    Track file excel KPB queue process
 
-                                    <svg class="hs-accordion-active:hidden block size-4.5"
-                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m6 9 6 6 6-6"></path>
+
+                            <!-- Accordion -->
+                            <div class="hs-accordion flex flex-col" id="hs-pro-psuf-sg-hd-one-mps-hd">
+                                <!-- Accordion Button -->
+                                <button class="hs-accordion-toggle p-3.5 w-full inline-flex justify-between items-center gap-x-3 text-start text-sm bg-gray-100 font-medium text-gray-800 rounded-lg focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:border-neutral-800 dark:text-neutral-200" aria-expanded="true" aria-controls="hs-pro-psuf-sg-one-mps">
+                                    Log Activities
+
+                                    <svg class="hs-accordion-active:hidden block size-4.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m6 9 6 6 6-6"></path>
                                     </svg>
-                                    <svg class="hs-accordion-active:block hidden size-4.5"
-                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m18 15-6-6-6 6"></path>
+                                    <svg class="hs-accordion-active:block hidden size-4.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m18 15-6-6-6 6"></path>
                                     </svg>
                                 </button>
                                 <!-- End Accordion Button -->
 
                                 <!-- Accordion Content -->
-                                <div id="hs-pro-psuf-sg-one-atm"
-                                    class="hs-accordion-content w-full overflow-hidden transition-[height] duration-300"
-                                    role="region" aria-labelledby="hs-pro-psuf-sg-hd-one-atm-hd">
+                                <div id="hs-pro-psuf-sg-one-mps" class="hs-accordion-content w-full overflow-hidden transition-[height] duration-300" role="region" aria-labelledby="hs-pro-psuf-sg-hd-one-mps-hd">
                                     <div class="p-3.5 sm:pb-8">
-                                        <p class="text-sm text-gray-500 dark:text-neutral-400">
-                                            Monitor progress and keep your excel KPB queue proccess
-                                        </p>
-                                        {{-- @foreach ($jobs as $job)
-                                            <!-- List Group -->
-                                            <div class="mt-5 flex flex-col">
-                                                <!-- Item -->
-                                                <div
-                                                    class="py-2.5 first:pt-0 last:pb-0 first:border-t-0 border-t border-dashed border-gray-200 dark:border-neutral-700">
-                                                    <div class="flex items-center gap-3">
-                                                        <div class="text-gray-800 dark:text-neutral-200">
-                                                            <svg class="shrink-0 size-5" xmlns="http://www.w3.org/2000/svg"
-                                                                width="24" height="24" viewBox="0 0 24 24"
-                                                                fill="none" stroke="currentColor" stroke-width="1.5"
-                                                                stroke-linecap="round" stroke-linejoin="round">
-                                                                <rect width="18" height="18" x="3" y="3"
-                                                                    rx="2"></rect>
-                                                                <path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2"></path>
-                                                                <path
-                                                                    d="M3 11h3c.8 0 1.6.3 2.1.9l1.1.9c1.6 1.6 4.1 1.6 5.7 0l1.1-.9c.5-.5 1.3-.9 2.1-.9H21">
-                                                                </path>
-                                                            </svg>
-                                                        </div>
-                                                        <div class="grow">
-                                                            <p class="text-sm text-gray-800 dark:text-neutral-200">
-                                                                {{ $job->file_name }}
-                                                            </p>
-                                                            <div class="mt-2 flex flex-col gap-x-3">
-
-                                                                <!-- TEXT (Kasih ID unik berdasarkan job_id) -->
-                                                                <span id="percent-text-{{ $job->detail?->job_id }}"
-                                                                    class="block mb-1.5 text-xs text-gray-500 dark:text-neutral-400">
-                                                                    {{ number_format( ($job->detail?->progress / ($job->detail?->total ?? 1)) * 100, 1) }}% ·
-                                                                    {{ $job->detail?->progress ?? 0 }} / {{ $job->detail?->total ?? 0 }} Checked
-                                                                </span>
-
-                                                                <!-- PROGRESS BAR -->
-                                                                <div class="flex w-full h-1 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-700">
-                                                                    <div id="percent-bar-{{ $job->detail?->job_id }}"
-                                                                        class="flex flex-col justify-center overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap dark:bg-neutral-200"
-                                                                        style="width: {{ ($job->detail?->progress / ($job->detail->total ?? 1)) * 100 }}%">
-                                                                    </div>
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-
-                                                        <div>
-                                                            <button type="button"
-                                                                class="py-2 px-3 inline-flex items-center gap-x-2 text-xs font-medium rounded-lg border border-transparent bg-gray-800 text-white hover:bg-gray-900 disabled:bg-gray-100 disabled:text-gray-400 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-800 dark:bg-white dark:text-neutral-800 dark:hover:bg-neutral-200 dark:focus:bg-neutral-200 dark:disabled:bg-neutral-700 dark:disabled:text-neutral-400">
-                                                                <span class="loading loading-infinity loading-xs"></span>
-                                                                {{ $job->status }}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!-- End Item -->
-                                            </div>
-                                            <!-- End List Group -->
-                                        @endforeach --}}
-
-                                        <div id="jobs-container">
-                                            <!-- JS akan generate semua job di sini -->
-                                        </div>
+                                        <div id="logs-container"></div>
                                     </div>
                                 </div>
                                 <!-- End Accordion Content -->
@@ -515,10 +296,58 @@
 @section('js')
     <script>
         const jobsContainer = document.getElementById('jobs-container');
+        const logsContainer = document.getElementById('logs-container');
+        const noData = `
+            <div class="p-5 h-full flex flex-col justify-center items-center text-center">
+                <svg class="w-48 mx-auto mb-4" width="178" height="90" viewBox="0 0 178 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="27" y="50.5" width="124" height="39" rx="7.5" fill="currentColor" class="fill-white dark:fill-neutral-800"></rect>
+                <rect x="27" y="50.5" width="124" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-50 dark:stroke-neutral-700/10"></rect>
+                <rect x="34.5" y="58" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
+                <rect x="66.5" y="61" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
+                <rect x="66.5" y="73" width="77" height="6" rx="3" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
+                <rect x="19.5" y="28.5" width="139" height="39" rx="7.5" fill="currentColor" class="fill-white dark:fill-neutral-800"></rect>
+                <rect x="19.5" y="28.5" width="139" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-100 dark:stroke-neutral-700/30"></rect>
+                <rect x="27" y="36" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
+                <rect x="59" y="39" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
+                <rect x="59" y="51" width="92" height="6" rx="3" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
+                <g filter="url(#filter14)">
+                    <rect x="12" y="6" width="154" height="40" rx="8" fill="currentColor" class="fill-white dark:fill-neutral-800" shape-rendering="crispEdges"></rect>
+                    <rect x="12.5" y="6.5" width="153" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-100 dark:stroke-neutral-700/60" shape-rendering="crispEdges"></rect>
+                    <rect x="20" y="14" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700 "></rect>
+                    <rect x="52" y="17" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
+                    <rect x="52" y="29" width="106" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
+                </g>
+                <defs>
+                    <filter id="filter14" x="0" y="0" width="178" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                    <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"></feColorMatrix>
+                    <feOffset dy="6"></feOffset>
+                    <feGaussianBlur stdDeviation="6"></feGaussianBlur>
+                    <feComposite in2="hardAlpha" operator="out"></feComposite>
+                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"></feColorMatrix>
+                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1187_14810"></feBlend>
+                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1187_14810" result="shape"></feBlend>
+                    </filter>
+                </defs>
+                </svg>
+
+                <div class="max-w-sm mx-auto">
+                <p class="mt-2 font-medium text-gray-800 dark:text-neutral-200">
+                    No data
+                </p>
+                <p class="mb-5 text-sm text-gray-500 dark:text-neutral-500">
+                    No data here yet. We will notify you when there's an update.
+                </p>
+                </div>
+            </div>
+        `;
         // Render semua job ke DOM
         function renderJobs(jobs) {
-            jobsContainer.innerHTML = '';
-
+            jobsContainer.innerHTML = ``;
+            if(jobs.length === 0) {
+                jobsContainer.innerHTML = noData;
+                return;
+            }
             jobs.forEach(job => {
                 const progress = job.cek_kpb_progress ?? {};
                 const jobId = progress.job_id ?? job.id;
@@ -527,29 +356,82 @@
                 const percent = ((current / total) * 100).toFixed(1);
 
                 const html = `
-                <div class="mt-5 flex flex-col">
-                    <div class="py-2.5 border-t border-dashed border-gray-200 dark:border-neutral-700">
-                        <div class="flex items-center gap-3">
-                            <div class="grow">
-                                <p class="text-sm text-gray-800 dark:text-neutral-200">${job.file_name ?? '(belum ada file)'}</p>
-                                <div class="mt-2 flex flex-col gap-x-3">
-                                    <span id="percent-text-${jobId}" class="block mb-1.5 text-xs text-gray-500 dark:text-neutral-400">
-                                        ${percent}% · ${current} / ${total} Checked
-                                    </span>
-                                    <div class="flex w-full h-1 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-700">
-                                        <div id="percent-bar-${jobId}"
-                                            class="flex flex-col justify-center overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap dark:bg-neutral-200"
-                                            style="width: ${percent}%">
+                    <div class="mt-5 flex flex-col">
+                        <div class="py-2.5 border-t border-dashed border-gray-200 dark:border-neutral-700">
+                            <div class="flex items-center gap-3">
+                                <div class="grow">
+                                    <p class="text-sm text-gray-800 dark:text-neutral-200">${job.file_name ?? '(belum ada file)'}</p>
+                                    <div class="mt-2 flex flex-col gap-x-3">
+                                        <span id="percent-text-${jobId}" class="block mb-1.5 text-xs text-gray-500 dark:text-neutral-400">
+                                            ${percent}% · ${current} / ${total} Checked
+                                        </span>
+                                        <div class="flex w-full h-1 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-700">
+                                            <div id="percent-bar-${jobId}"
+                                                class="flex flex-col justify-center overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap dark:bg-neutral-200"
+                                                style="width: ${percent}%">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 `;
-
                 jobsContainer.insertAdjacentHTML('beforeend', html);
+            });
+        }
+        // Render semua log ke DOM
+        function renderLogs(logs) {
+            logsContainer.innerHTML = ``;
+            if(logs.length === 0) {
+                logsContainer.innerHTML = noData;
+                return;
+            }
+            logs.forEach(log => {
+                const html = `
+                    <div class="p-5 mt-2 space-y-4 flex flex-col bg-white border border-gray-200 rounded-xl dark:bg-neutral-800 dark:border-neutral-700">
+                        <!-- Heading -->
+                        <div class="flex flex-wrap justify-between items-center gap-2">
+                            <span class="font-medium text-gray-800 dark:text-neutral-200">
+                            ${log.file_name}
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 py-px px-2 text-xs font-medium ${log.status === 'failed' ? 'bg-red-100 text-red-800 rounded-full dark:bg-red-500/10 dark:text-red-500' : 'bg-green-100 text-green-800 rounded-full dark:bg-green-500/10 dark:text-green-500'}">
+                            ${log.status === 'failed' ? 'Gagal' : 'Berhasil'}
+                            </span>
+                        </div>
+                        <!-- End Heading -->
+
+                        <!-- List Group -->
+                        <ul class="space-y-2">
+                            <li class="flex justify-between items-center">
+                            <span class="text-xs uppercase text-gray-500 dark:text-neutral-500">
+                                IP address:
+                            </span>
+                            <span class="text-sm text-gray-800 dark:text-neutral-200">
+                                ${log.ip_address}
+                            </span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                            <span class="text-xs uppercase text-gray-500 dark:text-neutral-500">
+                                Deskripsi:
+                            </span>
+                            <span class="text-sm text-gray-800 dark:text-neutral-200">
+                                ${log.description}
+                            </span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                            <span class="text-xs uppercase text-gray-500 dark:text-neutral-500">
+                                Recent activity:
+                            </span>
+                            <span class="text-sm text-gray-800 dark:text-neutral-200">
+                                ${log.created_at_human}
+                            </span>
+                            </li>
+                        </ul>
+                        <!-- End List Group -->
+                    </div>
+                `;
+                logsContainer.insertAdjacentHTML('beforeend', html);
             });
         }
 
@@ -581,6 +463,12 @@
                                         refreshProgressMultiple(jobIds);
                                     })
                                     .catch(err => console.error('Error fetching jobs', err));
+                                fetch('/cek-kpb/getAllLogJobs')
+                                    .then(res => res.json())
+                                    .then(logs => {
+                                        renderLogs(logs);
+                                    })
+                                    .catch(err => console.error('Error fetching logs', err));
                                 return { jobId, done: data.progress >= data.total };
                             }
                         } catch {
@@ -609,7 +497,13 @@
                 refreshProgressMultiple(jobIds);
             })
             .catch(err => console.error('Error fetching jobs', err));
-
+        // Ambil semua log dari server
+        fetch('/cek-kpb/getAllLogJobs')
+            .then(res => res.json())
+            .then(logs => {
+                renderLogs(logs);
+            })
+            .catch(err => console.error('Error fetching logs', err));
         const checkKpbSubmit = document.getElementById('checkKpbSubmit');
         let selectedFiles = [];
 
@@ -718,6 +612,12 @@
                             refreshProgressMultiple(jobIds);
                         })
                         .catch(err => console.error('Error fetching jobs', err));
+                    fetch('/cek-kpb/getAllLogJobs')
+                        .then(res => res.json())
+                        .then(logs => {
+                            renderLogs(logs);
+                        })
+                        .catch(err => console.error('Error fetching logs', err));
                     confetti();
                 })
                 .catch(error => {

@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Row;
 use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithLimit;
 
 class WebcImport implements OnEachRow, WithHeadingRow, WithChunkReading
 {
@@ -25,39 +26,44 @@ class WebcImport implements OnEachRow, WithHeadingRow, WithChunkReading
     public function onRow(Row $row)
     {
         $sheetName = $row->getDelegate()->getWorksheet()->getTitle();
+
         $data = $row->toArray();
 
-        if (!isset($data['no_mesin']) || $data['no_mesin'] == null || $data['no_mesin'] == 'no_mesin') {
+        // Cek row benar-benar kosong
+        $filtered = array_filter($data, fn($v) => $v !== null && $v !== '');
+
+        if (empty($filtered)) {
             return;
-        } else {
-            AstraWebc::updateOrCreate(
-                [
-                    'nama_region' => $data['nama_region'],
-                    'nomor_pkb' => $data['pkb_number'],
-                    'nama_ahass' => $data['nama_ahass'],
-                    'nomor_transaksi' => $data['nomor_transaksi'],
-                    'kode_ahass' => $data['kode_ahass'],
-                    'nama_customer' => $data['nama_customer'] ?? null,
-                    'no_handphone' => $data['no_handphone'] ?? null,
-                    "type_motor" => $data['type_motor'] ?? null,
-                    "nomor_mesin" => $data['no_mesin'] ?? null,
-                    "no_polisi" => $data['no_polisi'] ?? null,
-                    "kpb_type" => $data['kpb_type'] ?? null,
-                    "km" => $data['km'] ?? null,
-                    "tanggal_beli" => $data['tanggal_beli'] ?? null,
-                    "tanggal_claim" => $data['tanggal_claim'] ?? null,
-                    "validitas" => $data['validitas'],
-                    "no_rangka" => $data['no_rangka'] ?? null,
-                    "filename" => $data['photo_url'],
-                ],
-                [
-                    "current_excel" => strtolower($sheetName) === 'sheet2' ? true : false,
-                ]
-            );
         }
 
+        AstraWebc::updateOrCreate(
+            [
+                'nama_region' => $data['nama_region'],
+                'nomor_pkb' => $data['pkb_number'],
+                'nama_ahass' => $data['nama_ahass'],
+                'nomor_transaksi' => $data['nomor_transaksi'],
+                'kode_ahass' => $data['kode_ahass'],
+                'nama_customer' => $data['nama_customer'] ?? null,
+                'no_handphone' => $data['no_handphone'] ?? null,
+                "type_motor" => $data['type_motor'] ?? null,
+                "nomor_mesin" => $data['no_mesin'] ?? null,
+                "no_polisi" => $data['no_polisi'] ?? null,
+                "kpb_type" => $data['kpb_type'] ?? null,
+                "km" => $data['km'] ?? null,
+                "tanggal_beli" => $data['tanggal_beli'] ?? null,
+                "tanggal_claim" => $data['tanggal_claim'] ?? null,
+                "validitas" => $data['validitas'],
+                "no_rangka" => $data['no_rangka'] ?? null,
+                "filename" => $data['photo_url'],
+            ],
+            [
+                "current_excel" => strtolower($sheetName) === 'sheet2' ? true : false,
+            ]
+        );
+
+
         if ($this->command) {
-            $this->command->info($sheetName." ".$this->year . "_" . $this->month . " Berhasil import webc row: " . ($data['no_mesin'] ?? ''));
+            $this->command->info($sheetName . " " . $this->year . "_" . $this->month . " Berhasil import webc row: " . ($data['no_mesin'] ?? ''));
         }
     }
 

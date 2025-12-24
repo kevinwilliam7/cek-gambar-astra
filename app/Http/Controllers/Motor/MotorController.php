@@ -3,11 +3,16 @@
 namespace App\Http\Controllers\Motor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Motor\StoreRequest;
+use App\Http\Requests\Motor\UpdateRequest;
+use App\Models\KpbKriteria;
 use App\Models\Motor;
 use App\Models\RekapKpb;
 use App\Services\DatatableService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MotorController extends Controller
 {
@@ -34,9 +39,36 @@ class MotorController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreRequest $request)
     {
-        //
+        try {
+            DB::beginTransaction();
+            $motor = Motor::with(['kpb_kriteria'])->create([
+                'kode_nosin' => $request->kode_nosin,
+                'type_motor' => $request->type_motor,
+                'deskripsi' => $request->description,
+            ]);
+            for($i=0; $i<4; $i++) {
+                if ($request->hari_maksimum[$i]==null && $request->km_maksimum[$i]==null && $request->material[$i]==null && $request->jasa[$i]==null) {
+                } else {
+                    $kpb_kriteria = KpbKriteria::firstOrCreate(
+                        [
+                            'kode_nosin' => $request->kode_nosin,
+                            'kpb_type' => 'KPB ' . ($i+1),
+                            'hari_maksimum' => $request->hari_maksimum[$i],
+                            'km_maksimum' => $request->km_maksimum[$i],
+                            'material' => $request->material[$i],
+                            'jasa' => $request->jasa[$i],
+                        ]
+                    );
+                }
+            }
+            DB::commit();
+            return response()->json(['status' => true, 'message' => 'Successfully added data']);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['status' => false, 'message' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -58,9 +90,44 @@ class MotorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateRequest $request)
     {
-        //
+        try {
+            DB::beginTransaction();
+            $motor = Motor::with(['kpb_kriteria'])->findOrFail($request->id)->update([
+                'kode_nosin' => $request->kode_nosin,
+                'type_motor' => $request->type_motor,
+                'deskripsi' => $request->description,
+            ]);
+            for($i=0; $i<4; $i++) {
+                if ($request->hari_maksimum[$i]==null && $request->km_maksimum[$i]==null && $request->material[$i]==null && $request->jasa[$i]==null) {
+                    $kpb_kriteria = KpbKriteria::where('kode_nosin', $request->kode_nosin)
+                        ->where('kpb_type', 'KPB ' . ($i+1))
+                        ->first();
+                    $kpb_kriteria !== null ? $kpb_kriteria->delete() : null;
+                } else {
+                    $kpb_kriteria = KpbKriteria::updateOrCreate(
+                        [
+                            'kode_nosin' => $request->kode_nosin,
+                            'kpb_type' => 'KPB ' . ($i+1),
+                        ],
+                        [
+                            'hari_maksimum' => $request->hari_maksimum[$i],
+                            'km_maksimum' => $request->km_maksimum[$i],
+                            'material' => $request->material[$i],
+                            'jasa' => $request->jasa[$i],
+                        ]
+                    );
+                }
+            }
+            DB::commit();
+            Log::error('MotorController Update SUCCESS');
+            return response()->json(['status' => true, 'message' => 'Successfully updated data']);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('MotorController Update ERROR: '.$e->getMessage());
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 400);
+        }
     }
 
     /**
@@ -73,7 +140,9 @@ class MotorController extends Controller
 
     public function datatable(Request $request)
     {
-        $result = DatatableService::apply(Motor::with(['kpb_kriteria', 'images'])->where(function($q) use ($request){
+        $result = DatatableService::apply(Motor::with(['kpb_kriteria' => function($q) {
+            $q->orderBy('kpb_type', 'asc'); // urut ascending berdasarkan kpb_type
+        }, 'images'])->where(function($q) use ($request){
             if ($request->filled('type_motor')) {
                 $q->whereIn('type_motor', $request->input('type_motor'));
             }

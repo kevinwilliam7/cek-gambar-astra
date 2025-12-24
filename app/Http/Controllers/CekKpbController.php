@@ -7,10 +7,13 @@ use App\Models\CekKpb;
 use App\Models\CekKpbProgress;
 use App\Models\FailedJob;
 use App\Models\Job;
+use App\Models\LogActivity;
 use App\Models\Motor;
 use App\Services\DatatableService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Jenssegers\Agent\Facades\Agent;
 
 class CekKpbController extends Controller
 {
@@ -141,6 +144,25 @@ class CekKpbController extends Controller
         ]);
     }
 
+    public function getAllLogJobList() {
+        $logs = LogActivity::where('logable_type', 'ilike', '%Job%')
+            ->limit(10)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Format created_at menjadi "5 Agustus 2025 05:00 WIB"
+        Carbon::setLocale('id'); // untuk nama bulan dalam bahasa Indonesia
+
+        $logs->transform(function($log) {
+            // ubah timezone ke Asia/Jakarta
+            $created = Carbon::parse($log->created_at)->timezone('Asia/Jakarta');
+            $log->created_at_human = $created->translatedFormat('j F Y H:i') . ' WIB';
+            return $log;
+        });
+
+        return response()->json($logs);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -153,7 +175,7 @@ class CekKpbController extends Controller
                 $realPath = file_exists($path)
                     ? $path
                     : storage_path('app/private/tes_cek_kpb/' . basename($path));
-                CekKpbJob::dispatch($realPath, $excel_file->getClientOriginalName(), Auth::user()->id);
+                CekKpbJob::dispatch($realPath, $excel_file->getClientOriginalName(), Auth::user()->id, $request->header('User-Agent'), $request->header('X-Forwarded-For'));
             }
             return response()->json([
                 'queued' => true,

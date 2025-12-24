@@ -1,0 +1,399 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\Ahass;
+use App\Models\KpbKriteria;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
+class ExportReportKpbSo extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'export:report-kpb-so-command {month} {year}';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Rekap data dari file .xls untuk fisik & digital punya ce Meiliani / SO';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        $month_file = $this->argument('month');
+        $year_file  = $this->argument('year');
+
+        // 2 storage path: fisik & digital
+        $folderPathFisik   = storage_path("assets/list_kpb/kpb_so_{$month_file}_{$year_file}/fisik");
+        $folderPathDigital = storage_path("assets/list_kpb/kpb_so_{$month_file}_{$year_file}/digital");
+
+        // Baca file masing-masing folder
+        $rowsFisik   = $this->readFolderFisik($folderPathFisik, "Fisik");
+        $rowsDigital = $this->readFolderDigital($folderPathDigital, "Digital");
+
+        // --- Export Excel baru ---
+        $export = new Spreadsheet();
+
+        // Sheet Fisik
+        $sheetFisik = $export->getActiveSheet();
+        $sheetFisik->setTitle('FISIK');
+        $headerFisik = ['Nama SO', 'No Surat', 'Nosin','Servis ID','Status','Kode Nosin','Material','Jasa','Pokok'];
+        $sheetFisik->fromArray($headerFisik, null, 'A1');
+        $sheetFisik->fromArray($rowsFisik, null, 'A2');
+
+        // Sheet Digital
+        $sheetDigital = $export->createSheet();
+        $sheetDigital->setTitle('DIGITAL');
+        $headerDigital = ['Nama SO', 'No Surat', 'Nosin','Servis ID','Status','Kode Nosin','Material','Jasa','Pokok'];
+        $sheetDigital->fromArray($headerDigital, null, 'A1');
+        $sheetDigital->fromArray($rowsDigital, null, 'A2');
+
+        // Hitung baris terakhir (jumlah data + header)
+        $lastRowFisik   = count($rowsFisik) + 1;   // +1 header
+        $lastRowDigital = count($rowsDigital) + 1; // +1 header
+
+        // Hitung total kolom Material, Jasa, Pokok
+        $totalRowFisik = $lastRowFisik + 1;
+        $sheetFisik->setCellValue("G{$totalRowFisik}", "=SUM(G2:G{$lastRowFisik})");
+        $sheetFisik->setCellValue("H{$totalRowFisik}", "=SUM(H2:H{$lastRowFisik})");
+        $sheetFisik->setCellValue("I{$totalRowFisik}", "=SUM(I2:I{$lastRowFisik})");
+        $totalRowDigital = $lastRowDigital + 1;
+        $sheetDigital->setCellValue("G{$totalRowDigital}", "=SUM(G2:G{$lastRowDigital})");
+        $sheetDigital->setCellValue("H{$totalRowDigital}", "=SUM(H2:H{$lastRowDigital})");
+        $sheetDigital->setCellValue("I{$totalRowDigital}", "=SUM(I2:I{$lastRowDigital})");
+
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical'   => Alignment::VERTICAL_CENTER,
+            ],
+        ];
+
+        // Apply ke range sheet Fisik (A1 sampai I{lastRow})
+        $sheetFisik->getStyle("A1:I{$totalRowFisik}")->applyFromArray($styleArray);
+        // Auto-size kolom Sheet Fisik
+        foreach (range('A', 'D') as $col) {
+            $sheetFisik->getColumnDimension($col)->setAutoSize(true);
+        }
+        foreach (range('F', 'I') as $col) {
+            $sheetFisik->getColumnDimension($col)->setAutoSize(true);
+        }
+        $sheetFisik->getStyle("G2:I{$totalRowFisik}")
+            ->getNumberFormat()
+            ->setFormatCode('"Rp" #,##0_-');
+
+        // Apply ke range sheet Digital (A1 sampai I{lastRow})
+        $sheetDigital->getStyle("A1:I{$totalRowDigital}")->applyFromArray($styleArray);
+        // Auto-size kolom Sheet Digital
+        foreach (range('A', 'D') as $col) {
+            $sheetDigital->getColumnDimension($col)->setAutoSize(true);
+        }
+        foreach (range('F', 'I') as $col) {
+            $sheetDigital->getColumnDimension($col)->setAutoSize(true);
+        }
+        $sheetDigital->getStyle("G2:I{$totalRowDigital}")
+            ->getNumberFormat()
+            ->setFormatCode('"Rp" #,##0_-');
+        // ===============================================
+
+
+        // Simpan file
+        $exportPath = storage_path("exports/report_kpb_so_{$month_file}_{$year_file}.xlsx");
+        File::ensureDirectoryExists(dirname($exportPath));
+
+        $writer = new XlsxWriter($export);
+        $writer->save($exportPath);
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * Baca semua file Excel Fisik dalam folder tertentu & return data baris
+     */
+    private function readFolderFisik(string $folderPath, string $label = ''): array
+    {
+        $rowsData = [];
+
+        if (!File::exists($folderPath)) {
+            $this->warn("Folder {$label} tidak ditemukan: {$folderPath}");
+            return [];
+        }
+
+        $files = File::files($folderPath);
+        $fileKe = 0;
+
+        foreach ($files as $file) {
+            try {
+                $fileKe++;
+                $reader = IOFactory::createReaderForFile($file->getRealPath());
+                $spreadsheet = $reader->load($file->getRealPath());
+
+                $namaFile = basename($file->getRealPath());
+                $namaSheets = $spreadsheet->getSheetNames();
+
+                foreach($namaSheets as $sheet){
+                    $sheet2 = $spreadsheet->getSheetByName($sheet)->toArray();
+                    $header = $sheet2[0];
+
+                    // 1) MAP HEADER SEKALI SAJA
+                    $colMap = [];
+                    foreach ($header as $idx => $colName) {
+                        $colName = strtolower(trim($colName));
+                        if (in_array($colName, [
+                            'no engine','service ke-','tgl beli','bulan beli',
+                            'tahun beli','tgl service','km', 'noted'
+                        ])) {
+                            $colMap[$colName] = $idx;
+                        }
+
+                    }
+
+                    // CEK apakah semua kolom wajib ada
+                    if (!isset($colMap['service ke-']) ||
+                        !isset($colMap['no engine']) ||
+                        !isset($colMap['tgl beli']) ||
+                        !isset($colMap['tgl service']) ||
+                        !isset($colMap['km']) ||
+                        !isset($colMap['noted'])) {
+
+                        $this->warn("Kolom wajib tidak lengkap pada file: {$namaFile}");
+                        continue; // skip sheet
+                    }
+
+                    // 2) PROSES ROW SEKALI SAJA (TIDAK DI DALAM LOOP HEADER)
+                    foreach ($sheet2 as $i => $row) {
+                        if ($i === 0) continue;
+
+                        if (
+                            empty($row[$colMap['service ke-']]) ||
+                            empty($row[$colMap['no engine']])   ||
+                            empty($row[$colMap['tgl beli']])    ||
+                            empty($row[$colMap['tgl service']]) ||
+                            empty($row[$colMap['km']])
+                        ) {
+                            continue;
+                        }
+                        $nosin = $row[$colMap['no engine']] ?? null;
+                        $kode_nosin = substr($nosin, 0, 5);
+
+                        $ket = isset($colMap['noted']) && isset($row[$colMap['noted']])
+                            ? trim($row[$colMap['noted']])
+                            : null;
+                        if(!empty($ket)) {
+                            if(str_contains(strtolower($ket), 'revisi')) {
+                                $ket = 'Revisi';
+                            } elseif(str_contains(strtolower($ket), 'dispen')) {
+                                $ket = 'Dispensasi';
+                            } else {
+                                $ket = $ket;
+                            }
+                        } else {
+                            $ket = 'Ok';
+                        }
+
+                        $svc = $row[$colMap['service ke-']];
+                        $servisId = match($svc) {
+                            "1" => 'A',
+                            "2" => 'B',
+                            "3" => 'C',
+                            "4" => 'D',
+                            default => '',
+                        };
+                        $kpb_kriteria = KpbKriteria::where('kode_nosin', substr($nosin, 0, 5))
+                            ->where('kpb_service_id', $servisId)
+                            ->first();
+                        $material = $kpb_kriteria ? $kpb_kriteria->material : null;
+                        $jasa     = $kpb_kriteria ? $kpb_kriteria->jasa : null;
+                        $pokok   = $kpb_kriteria ? ($material + $jasa) : null;
+                        $rowsData[] = [
+                            'nama_so'     => preg_replace('/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/', '', $namaFile),
+                            'no_surat'    => $sheet ?? null,
+                            'nosin'       => $nosin,
+                            'service_ke'  => $servisId,
+                            'status'      => $ket,
+                            'kode_nosin'  => $kode_nosin.'-'.$servisId,
+                            'material'    => $material,
+                            'jasa'        => $jasa,
+                            'pokok'       => $pokok,
+                        ];
+                    }
+                }
+
+                $this->info("Berhasil baca file {$label} ke-{$fileKe}: " . $file->getFilename());
+
+            } catch (\Throwable $e) {
+                $this->error("Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
+            }
+        }
+
+        return $rowsData;
+    }
+
+    /**
+     * Baca semua file Excel Digital dalam folder tertentu & return data baris
+     */
+    private function readFolderDigital(string $folderPath, string $label = ''): array
+    {
+        $rowsData = [];
+
+        if (!File::exists($folderPath)) {
+            $this->warn("Folder {$label} tidak ditemukan: {$folderPath}");
+            return [];
+        }
+
+        $files = File::files($folderPath);
+        $fileKe = 0;
+
+        foreach ($files as $file) {
+            try {
+                $fileKe++;
+                $reader = IOFactory::createReaderForFile($file->getRealPath());
+                $spreadsheet = $reader->load($file->getRealPath());
+
+                $namaFile = basename($file->getRealPath());
+                $namaSheets = $spreadsheet->getSheetNames();
+
+                foreach($namaSheets as $sheet){
+                    $sheet2 = $spreadsheet->getSheetByName($sheet)->toArray();
+                    $header = $sheet2[0];
+
+                    // 1) MAP HEADER SEKALI SAJA
+                    $colMap = [];
+                    foreach ($header as $idx => $colName) {
+                        $colName = strtolower(trim($colName));
+                        if (in_array($colName, [
+                            'no. surat klaim', 'no_mesin','kpb_type','tanggal_beli','tanggal_claim','km', 'noted'
+                        ])) {
+                            $colMap[$colName] = $idx;
+                        }
+                    }
+
+                    // CEK apakah semua kolom wajib ada
+                    if (!isset($colMap['kpb_type']) ||
+                        !isset($colMap['no_mesin']) ||
+                        !isset($colMap['tanggal_beli']) ||
+                        !isset($colMap['tanggal_claim']) ||
+                        !isset($colMap['km']) ||
+                        !isset($colMap['noted']) ||
+                        !isset($colMap['no. surat klaim'])) {
+                        $this->warn("Kolom wajib tidak lengkap pada file: {$namaFile}");
+                        continue; // skip sheet
+                    }
+
+                    // 2) PROSES ROW SEKALI SAJA (TIDAK DI DALAM LOOP HEADER)
+                    foreach ($sheet2 as $i => $row) {
+                        if ($i === 0) continue;
+
+                        if (
+                            empty($row[$colMap['kpb_type']]) ||
+                            empty($row[$colMap['no_mesin']])   ||
+                            empty($row[$colMap['tanggal_beli']])    ||
+                            empty($row[$colMap['tanggal_claim']]) ||
+                            empty($row[$colMap['km']]) ||
+                            empty($row[$colMap['no. surat klaim']])
+                        ) {
+                            continue;
+                        }
+                        $nosin = $row[$colMap['no_mesin']] ?? null;
+                        $kode_nosin = substr($nosin, 0, 5);
+
+                        $ket = isset($colMap['noted']) && isset($row[$colMap['noted']])
+                            ? trim($row[$colMap['noted']])
+                            : null;
+                        if(!empty($ket)) {
+                            if(str_contains(strtolower($ket), 'revisi')) {
+                                $ket = 'Revisi';
+                            } elseif(str_contains(strtolower($ket), 'dispen')) {
+                                $ket = 'Dispensasi';
+                            } else {
+                                $ket = $ket;
+                            }
+                        } else {
+                            $ket = 'Ok';
+                        }
+
+                        $svc = $row[$colMap['kpb_type']];
+                        $servisId = match($svc) {
+                            "KPB1" => 'A',
+                            "KPB2" => 'B',
+                            "KPB3" => 'C',
+                            "KPB4" => 'D',
+                            default => '',
+                        };
+                        $kpb_kriteria = KpbKriteria::where('kode_nosin', substr($nosin, 0, 5))
+                            ->where('kpb_service_id', $servisId)
+                            ->first();
+                        $material = $kpb_kriteria ? $kpb_kriteria->material : null;
+                        $jasa     = $kpb_kriteria ? $kpb_kriteria->jasa : null;
+                        $pokok   = $kpb_kriteria ? ($material + $jasa) : null;
+                        $rowsData[] = [
+                            'nama_so'     => isset($colMap['no. surat klaim'])
+                                ? (Ahass::where('kode_ahass', substr($row[$colMap['no. surat klaim']], 0, 5))->first()->nama_ahass ?? preg_replace('/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/', '', $namaFile))
+                                : preg_replace('/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/', '', $namaFile),
+                            'no_surat'    => $row[$colMap['no. surat klaim']] ?? null,
+                            'nosin'       => $nosin,
+                            'service_ke'  => $servisId,
+                            'status'      => $ket,
+                            'kode_nosin'  => $kode_nosin.'-'.$servisId,
+                            'material'    => $material,
+                            'jasa'        => $jasa,
+                            'pokok'       => $pokok,
+                        ];
+                    }
+                }
+
+                $this->info("Berhasil baca file {$label} ke-{$fileKe}: " . $file->getFilename());
+
+            } catch (\Throwable $e) {
+                $this->error("Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
+            }
+        }
+
+        return $rowsData;
+    }
+
+
+    /**
+     * Bersihkan nilai dari teks nama file
+     */
+    private function cleanValue($val): ?string
+    {
+        if (empty($val)) {
+            return null;
+        }
+
+        // Buang extension (.xlsx, .xls, dsb)
+        $val = pathinfo($val, PATHINFO_FILENAME);
+
+        // Hilangkan bulan + tahun di belakang
+        $pattern = '/\s+(Jan(?:uari)?|Feb(?:ruari)?|Mar(?:et)?|Apr(?:il)?|Mei|Jun(?:i)?|Jul(?:i)?|Ags(?:t|tus)?|Sep(?:t|tember)?|Okt(?:ober)?|Nov(?:ember)?|Des(?:ember)?)\s+\d{4}$/i';
+        $val = preg_replace($pattern, '', $val);
+
+        // Hilangkan kata "Digital" di depan (case-insensitive)
+        $val = str_ireplace("Digital", "", $val);
+
+        // Rapikan spasi
+        return trim($val);
+    }
+
+}

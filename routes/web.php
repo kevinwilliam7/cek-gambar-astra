@@ -29,6 +29,8 @@ Route::middleware(['auth'])->group(function () {
     });
     Route::prefix('motor')->name('motor.')->group(function () {
         Route::get('/', [MotorMotorController::class, 'index'])->name('index');
+        Route::post('/store', [MotorMotorController::class, 'store'])->name('store');
+        Route::post('/update', [MotorMotorController::class, 'update'])->name('update');
     });
     Route::prefix('rekap-kpb')->name('rekap-kpb.')->group(function () {
         Route::get('/', [RekapKpbController::class, 'index'])->name('index');
@@ -38,6 +40,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/store', [CekKpbController::class, 'store'])->name('store');
         Route::get('/getAllJobs', [CekKpbController::class, 'getProgressJobList'])->name('getAllJobs');
         Route::get('/getProgressJob/{id}', [CekKpbController::class, 'getProgressJob'])->name('getProgressJob');
+        Route::get('/getAllLogJobs', [CekKpbController::class, 'getAllLogJobList'])->name('getAllLogJobs');
+        Route::get('/showip', function () {
+            return request()->header('X-Forwarded-For');
+        });
     });
     Route::prefix('file')->name('file.')->group(function () {
         Route::get('/', [FileFileController::class, 'index'])->name('index');

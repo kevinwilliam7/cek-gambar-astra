@@ -16,7 +16,7 @@ class DuplikasiGambar extends Command
     {
         $month = $this->argument('month');
         $year = $this->argument('year');
-        $baseDir = storage_path("assets/sedang_cek_kpb/{$month}_{$year}");
+        $baseDir = storage_path("app/private/");
 
         if (!File::exists($baseDir)) {
             $this->error("❌ Folder tidak ditemukan: {$baseDir}");
