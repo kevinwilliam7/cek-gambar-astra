@@ -29,26 +29,45 @@ class GetPHashWebc extends Command
     public function handle()
     {
         $hasher = new ImageHash(new PerceptualHash());
-        $data = AstraWebc::where(function($q){
+        $data = AstraWebc::where(function ($q) {
             $q->whereNull('phash')->where('filename', '!=', 'photo_url')->where('no_rangka', '!=', 'Belum Divalidasi');;
-        })->orWhere(function($q){
+        })->orWhere(function ($q) {
             $q->whereNull('phash')->where('no_rangka', '!=', 'Belum Divalidasi');
         })
-        ->whereNull('phash')
-        ->get();
-        foreach($data as $key => $item) {
+            ->whereNull('phash')
+            ->get();
+        foreach ($data as $key => $item) {
             try {
                 $url = $item->filename;
-                $temp = tempnam(sys_get_temp_dir(), 'img');
-                file_put_contents($temp, file_get_contents($url));
+                $dir = storage_path('app/tmp');
+                if (!is_dir($dir)) {
+                    mkdir($dir, 0775, true);
+                }
+
+                $temp = $dir . '/' . uniqid('img_', true);
+
+                $dataImg = file_get_contents($url);
+                if ($dataImg === false) {
+                    throw new \Exception('Gagal download image');
+                }
+
+                file_put_contents($temp, $dataImg);
+
                 $hash = $hasher->hash($temp);
                 $item->update([
                     'phash' => $hash->toHex()
                 ]);
-                $this->info(($key+1).'. PHASH '.$item->nomor_mesin.' '.$item->type_motor.' '.$item->no_polisi);
-            } catch(\Exception $e) {
-                $this->error('Gagal mendapatkan PHASH '.$item->nomor_mesin.' '.$item->type_motor.' '.$item->no_polisi);
+                $this->info(($key + 1) . '. PHASH ' . $item->nomor_mesin . ' ' . $item->type_motor . ' ' . $item->no_polisi);
+            } catch (\Exception $e) {
+                $this->error('Gagal mendapatkan PHASH ' . $item->nomor_mesin . ' ' . $item->type_motor . ' ' . $item->no_polisi . ' ' . $e->getMessage());
+                if ($temp && file_exists($temp)) {
+                    unlink($temp);
+                }
                 continue;
+            } finally {
+                if ($temp && file_exists($temp)) {
+                    unlink($temp);
+                }
             }
         }
     }
