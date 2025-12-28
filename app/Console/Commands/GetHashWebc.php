@@ -5,37 +5,35 @@ namespace App\Console\Commands;
 use App\Models\AstraWebc;
 use Illuminate\Console\Command;
 use Jenssegers\ImageHash\ImageHash;
+use Jenssegers\ImageHash\Implementations\DifferenceHash;
 use Jenssegers\ImageHash\Implementations\PerceptualHash;
 
-class GetPHashWebc extends Command
+class GetHashWebc extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'app:get-p-hash-webc';
+    protected $signature = 'app:get-hash-webc';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Untuk Mendapatkan Perceptual Hash dari Link Foto Webc Astra';
+    protected $description = 'Untuk Mendapatkan Perceptual Hash dan Difference Hash dari Link Foto Webc Astra';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $hasher = new ImageHash(new PerceptualHash());
-        $data = AstraWebc::where(function ($q) {
-            $q->whereNull('phash')->where('filename', '!=', 'photo_url')->where('no_rangka', '!=', 'Belum Divalidasi');;
-        })->orWhere(function ($q) {
-            $q->whereNull('phash')->where('no_rangka', '!=', 'Belum Divalidasi');
-        })
-            ->whereNull('phash')
-            ->get();
+        $perceptual_hash = new ImageHash(new PerceptualHash());
+        $difference_hash = new ImageHash(new DifferenceHash());
+        $data = AstraWebc::where(function($q){
+            $q->whereNull('dhash')->orWhereNull('phash');
+        })->get();
         foreach ($data as $key => $item) {
             try {
                 $url = $item->filename;
@@ -53,13 +51,15 @@ class GetPHashWebc extends Command
 
                 file_put_contents($temp, $dataImg);
 
-                $hash = $hasher->hash($temp);
+                $phash = $perceptual_hash->hash($temp);
+                $dhash = $difference_hash->hash($temp);
                 $item->update([
-                    'phash' => $hash->toHex()
+                    'phash' => $phash->toHex(),
+                    'dhash' => $dhash->toHex()
                 ]);
-                $this->info(($key + 1) . '. PHASH ' . $item->nomor_mesin . ' ' . $item->type_motor . ' ' . $item->no_polisi);
+                $this->info(($key + 1) . '. HASH ' . $item->nomor_mesin . ' ' . $item->type_motor . ' ' . $item->no_polisi);
             } catch (\Exception $e) {
-                $this->error('Gagal mendapatkan PHASH ' . $item->nomor_mesin . ' ' . $item->type_motor . ' ' . $item->no_polisi . ' ' . $e->getMessage());
+                $this->error('Gagal mendapatkan HASH ' . $item->nomor_mesin . ' ' . $item->type_motor . ' ' . $item->no_polisi . ' ' . $e->getMessage());
                 if ($temp && file_exists($temp)) {
                     unlink($temp);
                 }
