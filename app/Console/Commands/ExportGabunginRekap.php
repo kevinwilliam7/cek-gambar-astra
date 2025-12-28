@@ -8,9 +8,9 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-class ExportStnkBpkb extends Command
+class ExportGabunginRekap extends Command
 {
-    protected $signature = 'export:stnk-bpkb';
+    protected $signature = 'export:gabungin-rekap';
     protected $description = 'Merge semua file Excel apa adanya tanpa mengubah kolom';
 
     public function handle()
