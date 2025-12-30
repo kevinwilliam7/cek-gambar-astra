@@ -354,6 +354,10 @@
         let jenisDealerValues = [];
         let wilayahValues = [];
 
+        window.addEventListener('load', () => {
+            $(document).ready(() => console.log('aman 100%'));
+        });
+
         function loadTable1(currentPageTable1) {
             let jenisDealerValues = Array.from(
                 document.querySelectorAll('input[name="jenis_dealer"]:checked')
@@ -603,5 +607,4 @@
 
         loadTable1();
     </script>
-
 @endsection
