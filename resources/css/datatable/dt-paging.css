@@ -1,0 +1,84 @@
+/* ================================
+   DATATABLES PAGINATION – PRELINE
+   ================================ */
+
+/* wrapper */
+.dt-paging {
+    @apply text-xs flex items-center justify-end gap-2 mt-0 p-2;
+}
+
+/* button base */
+.dt-paging button {
+    @apply min-w-[36px] h-9 px-3
+         inline-flex items-center justify-center
+         rounded-lg
+         border border-gray-200
+         bg-white text-gray-700
+         font-medium
+         transition-all duration-150 ease-in-out
+         hover:bg-gray-100 hover:text-gray-900
+         focus:outline-none
+         focus:ring-2 focus:ring-blue-500 focus:ring-offset-1;
+}
+
+/* active page */
+.dt-paging button.current {
+    @apply bg-blue-600 border-blue-600
+         text-white font-semibold
+         shadow-sm
+         hover:bg-blue-600 hover:text-white;
+}
+
+/* disabled */
+.dt-paging button:disabled {
+    @apply opacity-40 cursor-not-allowed
+         hover:bg-white hover:text-gray-400;
+}
+
+/* prev / next */
+.dt-paging button.previous,
+.dt-paging button.next {
+    @apply px-4 font-semibold;
+}
+
+.dt-paging button:not(.previous):not(.next) {
+    @apply mx-0.5;
+}
+
+/* ================================
+   MOBILE (SMALL SCREEN)
+   ================================ */
+@media (max-width: 640px) {
+    /* hide page numbers except current */
+    .dt-paging button:not(.current):not(.previous):not(.next) {
+        @apply hidden;
+    }
+
+    .dt-paging {
+        @apply gap-2 px-3;
+    }
+}
+
+/* ================================
+   DARK MODE
+   ================================ */
+.dark .dt-paging {
+    @apply shadow-none;
+}
+
+.dark .dt-paging button {
+    @apply bg-neutral-900
+         border-neutral-700
+         text-neutral-300
+         hover:bg-neutral-800 hover:text-white
+         focus:ring-blue-400 focus:ring-offset-0;
+}
+
+.dark .dt-paging button.current {
+    @apply bg-blue-500 border-blue-500
+         text-white;
+}
+
+.dark .dt-paging button:disabled {
+    @apply hover:bg-neutral-900 hover:text-neutral-500;
+}

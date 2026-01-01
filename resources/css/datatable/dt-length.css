@@ -1,0 +1,34 @@
+/* ================================
+   DATATABLES PAGE SIZE – PRELINE STYLE
+   ================================ */
+
+/* wrapper row (biasanya ada .dt-layout-row:has(.dt-length)) */
+.dt-layout-row:has(.dt-length) {
+    @apply flex justify-start items-center w-full mb-2;
+}
+
+/* select box */
+.dt-length select {
+    @apply text-xs mx-4 my-2 px-3 py-2
+         border border-gray-300 rounded-lg
+         text-gray-700
+         bg-white
+         focus:outline-none focus:ring-2 focus:ring-blue-500
+         focus:border-blue-500
+         transition-all duration-150;
+}
+
+/* dark mode */
+.dark .dt-length select {
+    @apply mx-4 my-2 bg-neutral-900 border-neutral-700 text-neutral-300
+         focus:ring-blue-400 focus:border-blue-500;
+}
+
+/* select label */
+.dt-length label {
+    @apply text-xs text-gray-600;
+}
+
+.dark .dt-length label {
+    @apply text-neutral-400;
+}

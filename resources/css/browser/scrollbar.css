@@ -1,0 +1,14 @@
+/* Untuk semua scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #9ca3af; /* gray-400 */
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f3f4f6; /* gray-100 */
+}

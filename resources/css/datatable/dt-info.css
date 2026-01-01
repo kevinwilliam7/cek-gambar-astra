@@ -1,0 +1,49 @@
+/* ================================
+   DATATABLES INFO – PRELINE STYLE
+   ================================ */
+
+.dt-info {
+    @apply mt-2 text-xs text-gray-500 text-center
+         flex items-center justify-center gap-1;
+}
+
+/* highlight numbers */
+.dt-info strong {
+    @apply font-medium text-gray-700;
+}
+
+/* dark mode */
+.dark .dt-info {
+    @apply text-neutral-400;
+}
+
+.dark .dt-info strong {
+    @apply text-neutral-200;
+}
+
+/* ================================
+   CLEANER WORDING (CSS-ONLY TRICK)
+   ================================ */
+
+/* hide the word "to" and "entries" visually */
+.dt-info::after {
+    content: "";
+}
+
+.dt-info {
+    word-spacing: 0.1em;
+}
+
+/* optional: make dash nicer */
+.dt-info {
+    letter-spacing: 0.01em;
+}
+
+/* ================================
+   MOBILE – EVEN SMALLER
+   ================================ */
+@media (max-width: 640px) {
+    .dt-info {
+        @apply text-[11px];
+    }
+}
