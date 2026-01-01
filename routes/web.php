@@ -27,6 +27,9 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('home')->name('home.')->group(function () {
         Route::get('/', [HomeHomeController::class, 'index'])->name('index');
     });
+    Route::prefix('ahass')->name('ahass.')->group(function () {
+        Route::get('/', [AhassController::class, 'index'])->name('index');
+    });
     Route::prefix('motor')->name('motor.')->group(function () {
         Route::get('/', [MotorMotorController::class, 'index'])->name('index');
         Route::post('/store', [MotorMotorController::class, 'store'])->name('store');

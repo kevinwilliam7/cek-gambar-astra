@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ahass;
-use App\Services\DatatableService;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class AhassController extends Controller
 {
@@ -13,7 +13,17 @@ class AhassController extends Controller
      */
     public function index()
     {
-        //
+        $wilayah = Ahass::select('wilayah')
+            ->distinct()
+            ->pluck('wilayah');
+        $jenis_dealer = Ahass::select('jenis_dealer')
+            ->distinct()
+            ->pluck('jenis_dealer');
+        $data = [
+            'wilayah' => $wilayah,
+            'jenis_dealer' => $jenis_dealer,
+        ];
+        return view('ahass.index', compact('data'));
     }
 
     /**
@@ -66,28 +76,15 @@ class AhassController extends Controller
 
     public function datatable(Request $request)
     {
-        $result = DatatableService::apply(Ahass::where(function($q) use ($request) {
-                if ($request->filled('wilayah')) {
-                    $q->whereIn('wilayah', $request->input('wilayah', []));
-                }
-                if ($request->filled('jenis_dealer')) {
-                    $q->whereIn('jenis_dealer', $request->input('jenis_dealer', []));
-                }
-            }), $request,
-            ['nama_ahass','kode_ahass', 'nama_ahass_ttpk','wilayah','jenis_dealer'],
-            ['id','nama_ahass','kode_ahass', 'nama_ahass_ttpk', 'wilayah', 'jenis_dealer', 'created_at']
-        );
-
-        return response()->json([
-            'data'           => $result['rows'],
-            'page'           => $result['page'],
-            'per_page'       => $result['perPage'],
-            'total'          => $result['total'],
-            'total_filtered' => $result['filtered'],
-            'total_pages'    => ceil($result['filtered'] / $result['perPage']),
-            'sort_by'        => $result['sortBy'],
-            'sort_dir'       => $result['sortDir'],
-            'q'              => $result['q'],
-        ]);
+        $data = Ahass::where(function ($q) use ($request) {
+            if ($request->filled('wilayah')) {
+                $q->whereIn('wilayah', $request->input('wilayah', []));
+            }
+            if ($request->filled('jenis_dealer')) {
+                $q->whereIn('jenis_dealer', $request->input('jenis_dealer', []));
+            }
+        });
+        return DataTables::of($data)
+            ->make(true);
     }
 }
