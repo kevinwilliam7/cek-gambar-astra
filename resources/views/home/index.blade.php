@@ -43,8 +43,7 @@
                                 Add Data
                             </button>
                             <button id="hs-new-toast" type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-
-</button>
+                            </button>
                         </div>
                     </div>
                     <!-- End Page Header -->
@@ -427,35 +426,34 @@
             });
         });
 
-          function tostifyCustomClose(el) {
-    const parent = el.closest('.toastify');
-    const close = parent.querySelector('.toast-close');
+        function tostifyCustomClose(el) {
+            const parent = el.closest('.toastify');
+            const close = parent.querySelector('.toast-close');
+            close.click();
+        }
 
-    close.click();
-  }
+        window.addEventListener('load', () => {
+            (function () {
+            const callToast = document.querySelector("#hs-new-toast");
+            const toastMarkup1 = document.getElementById('toastalert-template').innerHTML;
 
-  window.addEventListener('load', () => {
-    (function () {
-      const callToast = document.querySelector("#hs-new-toast");
-      const toastMarkup1 = document.getElementById('toastalert-template').innerHTML;
-
-      callToast.addEventListener("click", () => {
-        Toastify({
-          text: toastMarkup1,
-          className: "hs-toastify-on:opacity-100 opacity-0 fixed -top-10 end-10 z-90 transition-all duration-300 w-72 bg-white text-sm text-gray-700 border border-gray-200 rounded-xl shadow-lg [&>.toast-close]:hidden dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400",
-          duration: 3000,
-          close: true,
-          escapeMarkup: false,
-            style: {
-                background: "transparent",
-                color: "#111827", // text-gray-900
-                border: "1px solid transparent", // border-transparent
-                borderRadius: "0.75rem", // rounded-xl
-                boxShadow: "none" // shadow-lg
-            }
-        }).showToast();
-      });
-    })();
-  });
+            callToast.addEventListener("click", () => {
+                Toastify({
+                text: toastMarkup1,
+                className: "hs-toastify-on:opacity-100 opacity-0 fixed -top-10 end-10 z-90 transition-all duration-300 w-72 bg-white text-sm text-gray-700 border border-gray-200 rounded-xl shadow-lg [&>.toast-close]:hidden dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400",
+                duration: 3000,
+                close: true,
+                escapeMarkup: false,
+                    style: {
+                        background: "transparent",
+                        color: "#111827", // text-gray-900
+                        border: "1px solid transparent", // border-transparent
+                        borderRadius: "0.75rem", // rounded-xl
+                        boxShadow: "none" // shadow-lg
+                    }
+                }).showToast();
+            });
+            })();
+        });
     </script>
 @endsection

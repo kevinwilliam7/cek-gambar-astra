@@ -1,0 +1,20 @@
+td.dt-control {
+    cursor: pointer;
+    position: relative;
+}
+
+td.dt-control::before {
+    content: '';
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    background-color: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 5l7 7-7 7' fill='black'/%3E%3C/svg%3E") no-repeat center;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 5l7 7-7 7' fill='black'/%3E%3C/svg%3E") no-repeat center;
+    transition: transform 0.2s ease;
+    color: rgb(107 114 128);
+}
+
+tr.dt-hasChild td.dt-control::before {
+    transform: rotate(90deg);
+}

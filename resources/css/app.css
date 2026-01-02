@@ -9,6 +9,7 @@
 @import "../css/datatable/dt-search.css";
 @import "../css/datatable/dt-length.css";
 @import "../css/browser/scrollbar.css";
+@import "../css/datatable/dt-control.css";
 
 @import "tailwindcss";
 @source "../views";

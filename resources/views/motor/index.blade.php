@@ -15,206 +15,163 @@
             </div>
             <!-- End Header -->
 
-            <!-- Filter Group -->
-            <div class="grid md:grid-cols-2 gap-y-2 md:gap-y-0 md:gap-x-5">
-                <div>
-                    <!-- Search Input -->
-                    <div class="relative">
-                        <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none z-20 ps-3.5">
-                            <svg class="shrink-0 size-4 text-gray-500 dark:text-neutral-400"
-                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <circle cx="11" cy="11" r="8" />
-                                <path d="m21 21-4.3-4.3" />
-                            </svg>
+            <!-- Bar Chart in Card -->
+            <div>
+                <!-- Header -->
+                <div class="border-b bg-white border border-gray-200 dark:bg-neutral-800 dark:border-neutral-700">
+                    <!-- Page Header -->
+                    <div
+                        class="py-3 px-5 flex flex-wrap justify-between items-center gap-y-2 gap-x-5 bg-white dark:bg-neutral-800">
+                        <!-- Input Search -->
+                        <div id="topbar-table1" class="flex flex-1 flex-wrap items-center justify-start gap-x-3 gap-y-2">
                         </div>
-                        <input id="search-table1" type="text"
-                            class="py-1 sm:py-1.5 ps-10 pe-8 block w-full bg-gray-100 border-transparent rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:border-transparent dark:text-neutral-400 dark:placeholder:text-neutral-400 dark:focus:bg-neutral-800 dark:focus:ring-neutral-600"
-                            placeholder="Search projects">
-                        <div class="hidden absolute inset-y-0 end-0 flex items-center z-20 pe-1">
-                            <button type="button"
-                                class="inline-flex shrink-0 justify-center items-center size-6 rounded-full text-gray-500 hover:text-blue-600 focus:outline-hidden focus:text-blue-600 dark:text-neutral-500 dark:hover:text-blue-500 dark:focus:text-blue-500"
-                                aria-label="Close">
-                                <span class="sr-only">Close</span>
-                                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <path d="m15 9-6 6" />
-                                    <path d="m9 9 6 6" />
+                        <!-- End Input Search -->
+
+                        <div class="flex justify-end items-center gap-x-2">
+                            <button type="button" id="add-data" aria-haspopup="dialog" aria-expanded="false"
+                                aria-controls="hs-large-modal" data-hs-overlay="#hs-large-modal"
+                                class="py-2 px-2.5 inline-flex items-center gap-x-2 text-xs font-medium rounded-lg border border-transparent bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:ring-2 focus:ring-indigo-600 dark:focus:ring-indigo-500">
+                                <svg class="hidden sm:block shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
+                                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14"></path>
+                                    <path d="M12 5v14"></path>
                                 </svg>
+                                Add Data
                             </button>
                         </div>
                     </div>
-                    <!-- End Search Input -->
+                    <!-- End Page Header -->
                 </div>
-                <!-- End Col -->
+                <!-- End Header -->
 
-                <div class="flex md:justify-end items-center gap-x-2">
+                <!-- Body -->
+                <div class="py-4 px-5 space-y-4">
+                    <!-- Grid -->
+                    <div
+                        class="mt-2 flex flex-nowrap gap-2 md:gap-3 overflow-x-auto [&amp;::-webkit-scrollbar]:h-1 [&amp;::-webkit-scrollbar-thumb]:rounded-full [&amp;::-webkit-scrollbar-track]:bg-gray-100 [&amp;::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&amp;::-webkit-scrollbar-track]:bg-neutral-700 dark:[&amp;::-webkit-scrollbar-thumb]:bg-neutral-500">
+                        <div class="flex">
+                            <!-- Filter Bar -->
+                            <div class="flex flex-wrap  items-center gap-2">
+                                <!-- Dropdown Jenis Dealer -->
+                                <div class="hs-dropdown [--auto-close:inside] inline-block">
+                                    <!-- Type Motor Button -->
+                                    <button id="hs-pro-shscld" type="button"
+                                        class="hs-dropdown-toggle py-1 px-3 flex items-center gap-x-1 border border-gray-200 text-sm text-start text-gray-800 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
+                                        aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
+                                        Type Motor
+                                        <span id="indicator-jenis_dealer" class="hidden relative flex h-2 w-2 ms-2">
+                                            <span
+                                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                                        </span>
+                                        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
+                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m6 9 6 6 6-6" />
+                                        </svg>
+                                    </button>
+                                    <!-- End Jenis Dealer Button -->
 
-                    <div class="flex justify-end items-center gap-x-2">
-                        {{-- <span class="text-sm">Perpage</span> --}}
-                        <select id="page-size-table1"
-                            data-hs-select='{
-                            "placeholder": "Select option...",
-                            "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
-                            "toggleClasses": "hs-select-disabled:pointer-events-none hs-select-disabled:opacity-50 relative py-2 ps-3 pe-9 flex gap-x-2 text-nowrap w-full cursor-pointer bg-white border border-stone-200 rounded-lg text-start text-sm focus:outline-hidden focus:ring-2 focus:ring-green-600 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:focus:outline-hidden dark:focus:ring-1 dark:focus:ring-neutral-600",
-                            "dropdownClasses": "mt-2 z-50 w-16 max-h-72 p-1 space-y-0.5 overflow-hidden overflow-y-auto bg-white rounded-xl shadow-xl [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-stone-100 [&::-webkit-scrollbar-thumb]:bg-stone-300 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 dark:bg-neutral-900",
-                            "optionClasses": "hs-selected:bg-stone-100 dark:hs-selected:bg-neutral-800 py-1.5 px-2 w-full text-[13px] text-stone-800 cursor-pointer hover:bg-stone-100 rounded-lg focus:outline-hidden focus:bg-stone-100 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700",
-                            "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"hidden hs-selected:block\"><svg class=\"shrink-0 size-3.5 text-stone-800 dark:text-neutral-200\" xmlns=\"http:.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"20 6 9 17 4 12\"/></svg></span></div>"
-                            }'
-                            class="hidden">
-                            <option value="10" selected>10</option>
-                            <option value="15">15</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                        </select>
-                        <button id="add-data" type="button" aria-haspopup="dialog" aria-expanded="false"
-                            aria-controls="hs-large-modal" data-hs-overlay="#hs-large-modal"
-                            class="py-2 px-2.5 inline-flex items-center gap-x-2 text-xs font-medium rounded-lg border border-transparent bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:ring-2 focus:ring-indigo-600 dark:focus:ring-indigo-500">
-                            <svg class="hidden sm:block shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
-                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M5 12h14"></path>
-                                <path d="M12 5v14"></path>
-                            </svg>
-                            Add Data
-                        </button>
+                                    <!-- Dropdown Menu -->
+                                    <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 w-full hidden z-20 w-full max-w-xs bg-white rounded-xl shadow-xl before:absolute before:-top-4 before:start-0 before:w-full before:h-5 dark:bg-neutral-900"
+                                        role="menu" aria-orientation="vertical" aria-labelledby="hs-pro-shscld">
+                                        <div class="p-4 sm:p-6">
+                                            <!-- Grid -->
+                                            <div class="space-y-0.5">
+                                                @foreach ($data['motor'] as $type_motor)
+                                                    <!-- Radio -->
+                                                    <label for="hs-pro-shflocss-{{ $type_motor['type_motor'] }}"
+                                                        class="p-2 group w-full inline-flex items-center cursor-pointer text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800">
+                                                        <input type="checkbox"
+                                                            class="shrink-0 size-4.5 bg-black border-black rounded-sm focus:ring-0 focus:ring-offset-0 checked:text-black disabled:opacity-50 disabled:pointer-events-none"
+                                                            id="hs-pro-shflocss-{{ $type_motor['type_motor'] }}" name="type_motor"
+                                                            value="{{ $type_motor['type_motor'] }}">
+                                                        <span
+                                                            class="ms-2 text-gray-800 dark:text-neutral-400">{{ $type_motor['type_motor'] }}</span>
+                                                        <span
+                                                            class="ms-auto text-xs text-gray-500 dark:text-neutral-500">(∞)</span>
+                                                    </label>
+                                                    <!-- End Radio -->
+                                                @endforeach
+                                            </div>
+                                            <!-- End Grid -->
+                                        </div>
+                                    </div>
+                                    <!-- End Dropdown Menu -->
+                                </div>
+                                <!-- End Dropdown Jenis Dealer -->
+                            </div>
+                            <!-- End Filter Bar -->
+                        </div>
+                        <div class="ml-auto flex items-center">
+                            <button id="clear-filters"
+                                class="py-1 px-3 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                    <!-- End Grid -->
+                </div>
+                <!-- End Body -->
+
+                <!-- Table Content -->
+                <div
+                    class="overflow-x-auto [&amp;::-webkit-scrollbar]:h-2 [&amp;::-webkit-scrollbar-thumb]:rounded-full [&amp;::-webkit-scrollbar-track]:bg-gray-100 [&amp;::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&amp;::-webkit-scrollbar-track]:bg-neutral-700 dark:[&amp;::-webkit-scrollbar-thumb]:bg-neutral-500">
+                    <div>
+                        <div class="min-w-full inline-block align-middle">
+                            <!-- Table -->
+                            <table id="table1"
+                                class="min-w-full divide-y divide-gray-200 border-t border-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
+                                <thead id="thead1" class="bg-gray-50 dark:bg-neutral-700/50">
+                                    @php($table1_headers = [['',''],['Kode Nosin', 'kode_nosin'], ['KM', 'km_maksimum'], ['Hari', 'hari_maksimum'], ['Material', 'material'], ['Jasa', 'jasa'], ['Action', 'action']])
+                                    <tr>
+                                        @foreach ($table1_headers as $table1_header)
+                                            <th scope="col"
+                                                class="{{ $table1_header[0] === '' ? '' : 'min-w-52' }} {{ $table1_header[0] === 'Action' ? 'text-right justify-end' : 'text-left' }}">
+                                                <!-- Sort Dropdown -->
+                                                <div class="hs-dropdown relative inline-flex w-full cursor-pointer">
+                                                    {!! $table1_header[0] === ''
+                                                        ? ''
+                                                        : '<button id="hs-pro-ptpn" type="button" class="px-5 py-2.5 text-start w-full flex items-center gap-x-1 text-sm text-nowrap whitespace-nowrap font-normal text-gray-500 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-500 dark:focus:bg-neutral-700 ' .
+                                                            ($table1_header[0] === 'Action' ? 'justify-end text-right' : 'text-left w-full text-start') .
+                                                            '"aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">' .
+                                                            $table1_header[0] .
+                                                            '<svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path>
+                                                            </svg>
+                                                        </button>' !!}
+                                                </div>
+                                                <!-- End Sort Dropdown -->
+                                            </th>
+                                        @endforeach
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody1" class="divide-y divide-gray-200 dark:divide-neutral-700">
+                                </tbody>
+                            </table>
+                            <!-- End Table -->
+                        </div>
                     </div>
                 </div>
-                <!-- End Col -->
-            </div>
-            <!-- End Filter Group -->
+                <!-- End Table Content -->
 
-            <!-- Table Section -->
-            <div
-                class="overflow-x-auto [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
-                <div class="min-w-full inline-block align-middle">
-                    <!-- Table -->
-                    <table id="table1" class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
-                        <thead id="thead1">
-                            @php($table1_headers = [['Kode Nosin', 'kode_nosin'], ['Deskripsi', 'deskripsi'], ['KM', 'km_maksimum'], ['Hari', 'hari_maksimum'], ['Material', 'material'], ['Jasa', 'jasa']])
-                            <tr
-                                class="border-t border-gray-200 divide-x divide-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
-                                @foreach ($table1_headers as $table1_header)
-                                    <th scope="col"
-                                        class="{{ $table1_header[0] === '' ? '' : 'min-w-52' }} {{ $table1_header[0] === 'Action' ? 'text-right justify-end' : 'text-left' }}">
-                                        <!-- Sort Dropdown -->
-                                        <div class="hs-dropdown relative inline-flex w-full cursor-pointer">
-                                            <button id="hs-pro-ptpn" type="button"
-                                                class="px-5 py-2.5 text-start w-full flex items-center gap-x-1 text-sm text-nowrap whitespace-nowrap font-normal text-gray-500 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-500 dark:focus:bg-neutral-700 {{ $table1_header[0] === 'Action' ? 'justify-end text-right' : 'text-left w-full text-start' }}"
-                                                aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
-                                                {{ $table1_header[0] }}
-                                                <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
-                                                    width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round">
-                                                    <path d="m7 15 5 5 5-5"></path>
-                                                    <path d="m7 9 5-5 5 5"></path>
-                                                </svg>
-                                            </button>
-
-                                            <!-- Dropdown -->
-                                            <div class="hs-dropdown-menu hs-dropdown-open:opacity-100 w-40 transition-[opacity,margin] duration opacity-0 hidden z-10 bg-white rounded-xl shadow-xl dark:bg-neutral-900"
-                                                role="menu" aria-orientation="vertical" aria-labelledby="hs-pro-ptpn"
-                                                tabindex="-1">
-                                                <div class="p-1">
-                                                    <button type="button"
-                                                        onclick="setSortTable1('{{ $table1_header[1] }}', 'asc')"
-                                                        class="w-full flex items-center gap-x-3 py-1.5 px-2 rounded-lg text-[13px] font-normal text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-300 focus:outline-hidden focus:bg-gray-100 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
-                                                        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
-                                                            width="24" height="24" viewBox="0 0 24 24"
-                                                            fill="none" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round">
-                                                            <path d="m5 12 7-7 7 7"></path>
-                                                            <path d="M12 19V5"></path>
-                                                        </svg>
-                                                        Sort ascending
-                                                    </button>
-                                                    <button type="button"
-                                                        onclick="setSortTable1('{{ $table1_header[1] }}', 'desc')"
-                                                        class="w-full flex items-center gap-x-3 py-1.5 px-2 rounded-lg text-[13px] font-normal text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-300 focus:outline-hidden focus:bg-gray-100 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
-                                                        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
-                                                            width="24" height="24" viewBox="0 0 24 24"
-                                                            fill="none" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round">
-                                                            <path d="M12 5v14"></path>
-                                                            <path d="m19 12-7 7-7-7"></path>
-                                                        </svg>
-                                                        Sort descending
-                                                    </button>
-                                                    <div class="my-1 border-t border-gray-200 dark:border-neutral-800">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- End Dropdown -->
-                                        </div>
-                                        <!-- End Sort Dropdown -->
-                                    </th>
-                                @endforeach
-                                <th scope="col" class="text-gray-500 font-normal text-[13px] p-4">Action</th>
-                            </tr>
-                        </thead>
-
-                        <tbody id="tbody1" class="divide-y divide-gray-200 dark:divide-neutral-700">
-                        </tbody>
-                    </table>
-                    <!-- End Table -->
-                </div>
-            </div>
-            <!-- End Table Section -->
-
-            <!-- Footer -->
-            <div class="py-3 px-5 border-t border-gray-200 dark:border-neutral-800">
                 <!-- Footer -->
-                <div class="grid grid-cols-2 items-center gap-y-2 sm:gap-y-0 sm:gap-x-5">
-                    <p class="text-sm text-gray-800 dark:text-neutral-200">
-                        <span id="pagination1-total-data" class="font-medium">0</span>
-                        <span class="text-gray-500 dark:text-neutral-500">results</span>
-                    </p>
-
-                    <!-- Pagination -->
-                    <nav class="flex justify-end items-center gap-x-1" aria-label="Pagination">
-                        <button id="prevBtnTable1" type="button"
-                            class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-2 text-sm rounded-lg text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 dark:text-white dark:hover:bg-white/10 dark:focus:bg-neutral-700"
-                            aria-label="Previous">
-                            <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
-                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m15 18-6-6 6-6"></path>
-                            </svg>
-                            <span class="sr-only">Previous</span>
-                        </button>
-                        <div class="flex items-center gap-x-1">
-                            <span id="pagination1-current-page"
-                                class="min-h-9.5 min-w-9.5 flex justify-center items-center bg-gray-100 text-gray-800 py-2 px-3 text-sm rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:text-white"
-                                aria-current="page">0</span>
-                            <span
-                                class="min-h-9.5 flex justify-center items-center text-gray-500 py-2 px-1.5 text-sm dark:text-neutral-500">of</span>
-                            <span id="pagination1-total-page"
-                                class="min-h-9.5 flex justify-center items-center text-gray-500 py-2 px-1.5 text-sm dark:text-neutral-500">0</span>
-                        </div>
-                        <button id="nextBtnTable1" type="button"
-                            class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-2 text-sm rounded-lg text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 dark:text-white dark:hover:bg-white/10 dark:focus:bg-neutral-700"
-                            aria-label="Next">
-                            <span class="sr-only">Next</span>
-                            <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
-                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m9 18 6-6-6-6"></path>
-                            </svg>
-                        </button>
-                    </nav>
-                    <!-- End Pagination -->
+                <div
+                    class="py-3 px-5 border-t border-gray-200 dark:border-neutral-800 flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <div id="info-table1" class="text-sm text-gray-800 dark:text-neutral-200"></div>
+                    <div id="pagination-table1" class="flex justify-center sm:justify-end items-center gap-x-1"></div>
                 </div>
                 <!-- End Footer -->
             </div>
-            <!-- End Footer -->
+            <!-- End Bar Chart in Card -->
         </div>
     </div>
     @include('motor.partial.modal_cu')
     @include('motor.partial.modal')
+    @include('template.empty_table_template.index')
+    @include('template.loading_table_template.index')
+    @include('template.processing_table_template.index')
+    @include('components.row_checkbox_table_component.index')
 @endsection
 @section('js')
     <script>
@@ -227,7 +184,7 @@
             document.getElementById('type_motor').value = '';
             document.getElementById('description').value = '';
             document.getElementById('description').dispatchEvent(new Event('input'));
-            for (let i = 1; i <=4; i++) {
+            for (let i = 1; i <= 4; i++) {
                 document.getElementById('hari_maksimum_' + i).value = '';
                 document.getElementById('km_maksimum_' + i).value = '';
                 document.getElementById('material_' + i).value = '';
@@ -295,7 +252,8 @@
         //Tombol Submit Form
         document.getElementById('submit').addEventListener('click', function(data) {
             const formData = new FormData();
-            let url = document.getElementById('id').value ? '{{ route("motor.update") }}' : '{{ route("motor.store") }}';
+            let url = document.getElementById('id').value ? '{{ route('motor.update') }}' :
+                '{{ route('motor.store') }}';
             formData.append('id', document.getElementById('id').value);
             formData.append('kode_nosin', document.getElementById('kode_nosin').value);
             formData.append('type_motor', document.getElementById('type_motor').value);
@@ -322,7 +280,8 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('hs-task-created-alert-label').innerText = data?.status == true ? 'Success' : 'Failed';
+                    document.getElementById('hs-task-created-alert-label').innerText = data?.status == true ?
+                        'Success' : 'Failed';
                     document.getElementById('hs-task-created-alert-icon').innerHTML = '';
                     document.getElementById('hs-task-created-alert-content').innerText = data?.message;
                     document.getElementById('hs-task-created-alert-icon').innerHTML = `
@@ -398,217 +357,271 @@
                 zoomable: true,
             });
         });
-        let currentPageTable1 = 1;
-        let perPageTable1 = document.getElementById("page-size-table1").value;
-        let searchTable1 = "";
-        let sortByTable1 = 'buy_date';
-        let sortDirTable1 = 'desc';
 
-        function loadTable1(currentPageTable1) {
-            let jenisDealerValues = Array.from(
-                document.querySelectorAll('input[name="jenis_dealer"]:checked')
-            ).map(c => c.value);
-            let wilayahValues = Array.from(
-                document.querySelectorAll('input[name="wilayah"]:checked')
-            ).map(c => c.value);
-
-            // bikin parameter query
-            let params = new URLSearchParams({
-                page: currentPageTable1,
-                per_page: perPageTable1,
-                q: searchTable1,
-                sort_by: sortByTable1,
-                sort_dir: sortDirTable1,
-            });
-
-            // tambahin filter jenis_dealer[]
-            jenisDealerValues.forEach(v => params.append("jenis_dealer[]", v));
-            // tambahin filter wilayah[]
-            wilayahValues.forEach(v => params.append("wilayah[]", v));
-            let url = "{{ app()->environment('local') ? route('datatable.motor') : secure_url('datatable/motor') }}";
-            fetch(url + "?" + params.toString()) // route ke controller serverside
-                .then(res => res.json())
-                .then(res => {
-                    let tbody = document.getElementById("tbody1");
-                    tbody.innerHTML = ""; // kosongkan dulu
-                    if (res.data.length === 0) {
-                        // 👇 Empty state row
-                        let emptyRow = `
-                            <tr class="hover:bg-gray-100 dark:hover:bg-neutral-700">
-                                <td colspan="8" class="hidden md:table-cell py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                                    <div class="animate-slide-down p-5 min-h-100 flex flex-col justify-center items-center text-center">
-                                        <svg class="w-48 mx-auto mb-4 text-white" width="178" height="90" viewBox="0 0 178 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <rect x="27" y="50.5" width="124" height="39" rx="7.5" fill="currentColor" class="fill-white dark:fill-neutral-800"></rect>
-                                            <rect x="27" y="50.5" width="124" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-50 dark:stroke-neutral-700/10"></rect>
-                                            <rect x="34.5" y="58" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
-                                            <rect x="66.5" y="61" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
-                                            <rect x="66.5" y="73" width="77" height="6" rx="3" fill="currentColor" class="fill-gray-50 dark:fill-neutral-700/30"></rect>
-                                            <rect x="19.5" y="28.5" width="139" height="39" rx="7.5" fill="currentColor" class="fill-white dark:fill-neutral-800"></rect>
-                                            <rect x="19.5" y="28.5" width="139" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-100 dark:stroke-neutral-700/30"></rect>
-                                            <rect x="27" y="36" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
-                                            <rect x="59" y="39" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
-                                            <rect x="59" y="51" width="92" height="6" rx="3" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
-                                            <g filter="url(#filter1)">
-                                                <rect x="12" y="6" width="154" height="40" rx="8" fill="currentColor" class="fill-white dark:fill-neutral-800" shape-rendering="crispEdges"></rect>
-                                                <rect x="12.5" y="6.5" width="153" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-100 dark:stroke-neutral-700/60" shape-rendering="crispEdges"></rect>
-                                                <rect x="20" y="14" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700 "></rect>
-                                                <rect x="52" y="17" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
-                                                <rect x="52" y="29" width="106" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
-                                            </g>
-                                            <defs>
-                                                <filter id="filter1" x="0" y="0" width="178" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                                                <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
-                                                <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"></feColorMatrix>
-                                                <feOffset dy="6"></feOffset>
-                                                <feGaussianBlur stdDeviation="6"></feGaussianBlur>
-                                                <feComposite in2="hardAlpha" operator="out"></feComposite>
-                                                <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"></feColorMatrix>
-                                                <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1187_14810"></feBlend>
-                                                <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1187_14810" result="shape"></feBlend>
-                                                </filter>
-                                            </defs>
-                                        </svg>
-
-                                        <div class="max-w-sm mx-auto">
-                                            <p class="mt-2 font-medium text-gray-800 dark:text-neutral-200">
-                                                No Data
-                                            </p>
-                                            <p class="mb-5 text-sm text-gray-500 dark:text-neutral-500">
-                                                No data here yet. We will notify you when there's an update.
-                                            </p>
+        window.addEventListener('load', () => {
+            $(document).ready(() => {
+                let table1 = $('#table1').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    colReorder: true,
+                    // fixedHeader: true,
+                    pagingType: 'simple_numbers',
+                    ajax: {
+                        url: '{{ route('datatable.motor') }}',
+                        data: function(d) {
+                            // Tambahkan data filter ke dalam request AJAX
+                            d.type_motor = Array.from(document.querySelectorAll(
+                                'input[name="type_motor"]:checked')).map(cb => cb.value);
+                        }
+                    },
+                    columns: [
+                        {
+                            className: 'dt-control',
+                            orderable: false,
+                            data: null,
+                            defaultContent: ''
+                        },
+                        {
+                            data: 'kode_nosin',
+                            name: 'kode_nosin',
+                            render: function(data, type, row) {
+                                return `<div class="flex items-center gap-x-3">
+                                        <div class="grow">
+                                            <a class="font-medium text-gray-800 underline-offset-2 hover:underline hover:decoration-2 hover:text-indigo-700 focus:outline-hidden focus:underline focus:decoration-2 focus:text-indigo-700 dark:text-neutral-200 dark:hover:text-indigo-400 dark:focus:text-indigo-400" href="#">
+                                            ${data}
+                                            </a>
+                                            <ul class="flex flex-wrap items-center whitespace-nowrap gap-1.5">
+                                            <li class="inline-flex items-center relative text-xs text-gray-500 pe-2 last:pe-0 last:after:hidden after:absolute after:top-1/2 after:end-0 after:inline-block after:size-[3px] after:bg-gray-400 after:rounded-full after:-translate-y-1/2 dark:text-neutral-500 dark:after:bg-neutral-600">
+                                                <p class="text-xs text-gray-500 dark:text-neutral-400">
+                                                ${row.type_motor}
+                                                </p>
+                                            </li>
+                                            </ul>
                                         </div>
-                                    </div>
-                                </td>
-                                <td colspan="5" class="table-cell md:hidden py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                                    Data tidak ditemukan
-                                </td>
-                            </tr>`;
-                        document.getElementById("pagination1-current-page").innerText = 0;
-                        document.getElementById("pagination1-total-page").innerText = 0;
-                        document.getElementById("pagination1-total-data").innerText = 0;
-                        tbody.insertAdjacentHTML("beforeend", emptyRow);
-                    } else {
-                        res.data.forEach((item, index) => {
-                            const collapseId = `collapse-${index}`;
-                            const collapseHeadingId = `collapse-heading-${index}`;
-                            let row = `
-                            <tr class="divide-x divide-gray-200 dark:divide-neutral-700">
-                                <td class="size-px whitespace-nowrap">
-                                <div class="px-5 py-2">
-                                    <a href="${item.images && item.images.length > 0 ? item.images[0]['filename'] : 'https://via.placeholder.com/300x200?text=Gambar+Belum+Tersedia'}" data-gallery="motor-${index}" class="glightbox">
-                                        <p class="text-sm font-semibold text-gray-800 dark:text-neutral-200">${item.type_motor}</p>
-                                        <p class="text-sm text-gray-500 dark:text-neutral-500">${item.kode_nosin}</p>
-                                    </a>
-                                    ${item.images.slice(1).map(img => `
-                                            <a href="${img.filename}" data-gallery="motor-${index}" class="glightbox hidden"></a>
-                                        `).join('')}
-                                </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                <div class="px-5 py-2">
-                                    <div class="flex items-center -space-x-2">
-                                        <p class="text-sm text-gray-500 dark:text-neutral-500">${item.deskripsi}</p>
-                                    </div>
-                                </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="flex flex-wrap gap-1.5 px-4 py-1">
-                                        ${item.kpb_kriteria.filter(k => k.kpb_type).map(k => `
-                                                <span class="p-2 bg-gray-100 text-gray-800 text-xs rounded-md dark:bg-neutral-700 dark:text-neutral-200">
-                                                ${k.kpb_type}: ${k.km_maksimum} KM
-                                                </span>
-                                            `).join('')}
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="flex flex-wrap gap-1.5 px-4 py-1">
-                                        ${item.kpb_kriteria.filter(k => k.kpb_type).map(k => `
-                                                <span class="p-2 bg-gray-100 text-gray-800 text-xs rounded-md dark:bg-neutral-700 dark:text-neutral-200">
-                                                ${k.kpb_type}: ${k.hari_maksimum} Hari
-                                                </span>
-                                            `).join('')}
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="flex flex-wrap gap-1.5 px-4 py-1">
-                                        ${item.kpb_kriteria.filter(k => k.kpb_type).map(k => `
-                                                <span class="p-2 bg-gray-100 text-gray-800 text-xs rounded-md dark:bg-neutral-700 dark:text-neutral-200">
-                                                    ${k.kpb_type}: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(k.material)}
-                                                </span>
-                                            `).join('')}
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="flex flex-wrap gap-1.5 px-4 py-1">
-                                        ${item.kpb_kriteria.filter(k => k.kpb_type).map(k => `
-                                                <span class="p-2 bg-gray-100 text-gray-800 text-xs rounded-md dark:bg-neutral-700 dark:text-neutral-200">
-                                                    ${k.kpb_type}: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(k.jasa)}
-                                                </span>
-                                            `).join('')}
-                                    </div>
-                                </td>
-                                <td class="size-px whitespace-nowrap">
-                                    <div class="flex flex-wrap gap-1.5 py-1 px-4 justify-end">
-                                        <button data-json='${JSON.stringify(item)}' class="edit-data inline-flex items-center gap-x-0.5 text-[13px] text-indigo-700 underline underline-offset-2 hover:decoration-2 focus:outline-hidden focus:decoration-2 disabled:opacity-50 disabled:pointer-events-none dark:text-indigo-400" data-hs-overlay="#hs-large-modal">
+                                    </div>`;
+                            }
+                        },
+                        {
+                            data: 'type_motor',
+                            name: 'type_motor',
+                            render: function (data, type, row) {
+                                if (!row.kpb_kriteria?.length) return '-';
+                                return row.kpb_kriteria
+                                    .filter(k => k.kpb_type)
+                                    .map(k => `
+                                        <span class="inline-block p-2 mr-1 mb-1 bg-gray-100 text-gray-800 text-xs rounded-md">
+                                            ${k.kpb_type}: ${k.km_maksimum} KM
+                                        </span>
+                                    `)
+                                    .join('');
+                            },
+                        },
+                        {
+                            data: 'deskripsi',
+                            name: 'deskripsi',
+                            render: function (data, type, row) {
+                                if (!row.kpb_kriteria?.length) return '-';
+                                return row.kpb_kriteria
+                                    .filter(k => k.kpb_type)
+                                    .map(k => `
+                                        <span class="inline-block p-2 mr-1 mb-1 bg-gray-100 text-gray-800 text-xs rounded-md">
+                                            ${k.kpb_type}: ${k.hari_maksimum} Hari
+                                        </span>
+                                    `)
+                                    .join('');
+                            },
+                        },
+                        {
+                            data: 'kode_nosin',
+                            name: 'kode_nosin',
+                            render: function (data, type, row) {
+                                if (!row.kpb_kriteria?.length) return '-';
+                                return row.kpb_kriteria
+                                    .filter(k => k.kpb_type)
+                                    .map(k => `
+                                        <span class="inline-block p-2 mr-1 mb-1 bg-gray-100 text-gray-800 text-xs rounded-md">
+                                            ${k.kpb_type}: ${k.material}
+                                        </span>
+                                    `)
+                                    .join('');
+                            },
+                        },
+                        {
+                            data: 'kode_nosin',
+                            name: 'kode_nosin',
+                            render: function (data, type, row) {
+                                if (!row.kpb_kriteria?.length) return '-';
+                                return row.kpb_kriteria
+                                    .filter(k => k.kpb_type)
+                                    .map(k => `
+                                        <span class="inline-block p-2 mr-1 mb-1 bg-gray-100 text-gray-800 text-xs rounded-md">
+                                            ${k.kpb_type}: ${k.jasa}
+                                        </span>
+                                    `)
+                                    .join('');
+                            },
+                        },
+                        {
+                            data: 'kode_nosin',
+                            name: 'kode_nosin',
+                            render: function(data, type, row) {
+                                return `
+                                    <div class="flex justify-end items-center gap-x-2">
+                                        <button type="button" aria-haspopup="dialog" aria-expanded="false"
+                                            aria-controls="hs-large-modal"
+                                            class="edit-data py-1.5 px-3 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                                            data-json='${JSON.stringify(row)}'>
                                             Edit
                                         </button>
+                                        <button type="button" class="delete-data py-1.5 px-3 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700">Delete</button>
                                     </div>
-                                </td>
-                            </tr>
-                            `;
-                            tbody.insertAdjacentHTML("beforeend", row);
-                        });
-                        console.log(res);
-                        document.getElementById("pagination1-current-page").innerText = res.page;
-                        document.getElementById("pagination1-total-page").innerText = res.total_pages;
-                        document.getElementById("pagination1-total-data").innerText = res.total_filtered;
-                        if (res.page === 1) {
-                            document.getElementById("prevBtnTable1").setAttribute("disabled", "true");
-                        } else {
-                            document.getElementById("prevBtnTable1").removeAttribute("disabled");
-                        }
-
-                        if (res.page === res.total_pages) {
-                            document.getElementById("nextBtnTable1").setAttribute("disabled", "true");
-                        } else {
-                            document.getElementById("nextBtnTable1").removeAttribute("disabled");
-                        }
-                    }
-                    lightbox.reload();
+                                `;
+                            }
+                        },
+                    ],
+                    createdRow: function(row, data) {
+                        $(row).addClass(
+                            'hover:bg-gray-50 dark:hover:bg-neutral-800 text-sm text-gray-800 dark:text-white'
+                        );
+                        $('td', row).addClass('py-3 px-5');
+                    },
+                    language: {
+                        emptyTable: document.getElementById('empty-table-template').innerHTML,
+                        zeroRecords: document.getElementById('empty-table-template').innerHTML,
+                        processing: document.getElementById('processing-table-template').innerHTML,
+                        loadingRecords: document.getElementById('loading-table-template').innerHTML,
+                        search: "", // hilangkan label “Search:”
+                        searchPlaceholder: "Search table...", // <-- placeholder
+                    },
                 });
-        }
+                function format(d) {
+                    const slides = (d.images && d.images.length)
+                        ? d.images.map(img => `
+                            <div class="hs-carousel-slide px-1 h-full">
+                                <div class="flex justify-center items-center h-full bg-gray-100 dark:bg-neutral-900">
+                                    <a href="${img.filename}" class="glightbox" data-gallery="motor-${d.id}" data-title="${d.type_motor} - ${img.deskripsi ?? ''}">
+                                    <img
+                                        src="${img.filename}"
+                                        class="max-h-full object-contain rounded-lg"
+                                        alt="${d.type_motor}"
+                                    />
+                                    </a>
+                                </div>
+                            </div>
+                        `).join('')
+                        : `
+                            <div class="hs-carousel-slide px-1 h-full">
+                                <div class="flex justify-center items-center h-full bg-gray-100 dark:bg-neutral-900">
+                                    <span class="text-sm text-gray-500">Tidak ada gambar</span>
+                                </div>
+                            </div>
+                        `;
 
-        function setSortTable1(column, order) {
-            sortByTable1 = column;
-            sortDirTable1 = order;
-            let tbody = document.getElementById("tbody1");
-            tbody.innerHTML = showLoadingTable(8, "Loading...");
-            loadTable1(1); // refresh dari page 1
-        }
-        document.getElementById("prevBtnTable1").addEventListener("click", () => {
-            if (currentPageTable1 > 1) {
-                let tbody = document.getElementById("tbody1");
-                tbody.innerHTML = showLoadingTable(8, "Loading...");
-                loadTable1(currentPageTable1 -= 1);
-            }
+                    return `
+                        <div class="p-4 bg-gray-50 dark:bg-neutral-800 rounded-xl space-y-4">
+
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-neutral-100">
+                                    ${d.type_motor} (${d.kode_nosin}) [${d.deskripsi}]
+                                </h4>
+                            </div>
+
+                            <div data-hs-carousel='{
+                                "loadingClasses": "opacity-0",
+                                "slidesQty": { "xs": 1, "lg": 3 },
+                                "isDraggable": true
+                            }' class="relative">
+
+                                <div class="hs-carousel overflow-hidden rounded-lg bg-white dark:bg-neutral-900">
+                                    <div class="relative h-72 -mx-1">
+                                        <div class="hs-carousel-body absolute inset-0 flex h-full opacity-0 transition-transform duration-700">
+                                            ${slides}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button"
+                                    class="hs-carousel-prev absolute inset-y-0 start-0 z-10 flex items-center justify-center w-10
+                                        text-gray-800 dark:text-white">
+                                    ‹
+                                </button>
+
+                                <button type="button"
+                                    class="hs-carousel-next absolute inset-y-0 end-0 z-10 flex items-center justify-center w-10
+                                        text-gray-800 dark:text-white">
+                                    ›
+                                </button>
+
+                                <div class="hs-carousel-pagination flex justify-center gap-2 mt-2"></div>
+                            </div>
+
+                        </div>
+                    `;
+                }
+
+                table1.on('click', 'tbody td.dt-control', function (e) {
+                    const tr = $(this).closest('tr');
+                    const row = table1.row(tr);
+
+                    if (row.child.isShown()) {
+                        row.child.hide();
+                        tr.removeClass('dt-hasChild');
+                    } else {
+                        row.child(format(row.data())).show();
+                        tr.addClass('dt-hasChild');
+
+                        // INIT ULANG PRELINE
+                        setTimeout(() => {
+                            window.HSStaticMethods.autoInit();
+                            if (window.lightbox) {
+                                window.lightbox.reload();
+                            }
+                        }, 0);
+                    }
+                });
+                const search = $('.dt-search');
+                const length = $('.dt-length');
+                const info = $('.dt-info');
+                const pagination = $('.dt-paging');
+                $('#topbar-table1').append(length).append(search);
+                $('#pagination-table1').append(pagination);
+                $('#info-table1').append(info);
+
+                // Untuk Filter Checkbox
+                ['wilayah', 'jenis_dealer'].forEach(name => {
+                    document.querySelectorAll(`input[name="${name}"]`).forEach(cb => {
+                        cb.addEventListener('change', () => {
+                            let checked = document.querySelectorAll(
+                                    `input[name="${name}"]:checked`)
+                                .length > 0;
+                            let indicator = document.getElementById(
+                                `indicator-${name}`);
+                            if (indicator) {
+                                indicator.classList.toggle('hidden', !checked);
+                            }
+                            table1.draw();
+                        });
+                    });
+                });
+
+                //Untuk Clear Filter Button
+                document.getElementById('clear-filters').addEventListener('click', function() {
+                    // Uncheck semua checkbox
+                    document.querySelectorAll(
+                        'input[type="checkbox"][name="wilayah"], input[type="checkbox"][name="jenis_dealer"]'
+                    ).forEach(
+                        cb => {
+                            cb.checked = false;
+                        });
+
+                    // Sembunyikan semua indicator
+                    ['wilayah', 'jenis_dealer'].forEach(field => {
+                        document.getElementById(`indicator-${field}`).classList.add(
+                            'hidden');
+                    });
+                    table1.draw();
+                });
+            });
         });
-        document.getElementById("nextBtnTable1").addEventListener("click", () => {
-            let tbody = document.getElementById("tbody1");
-            tbody.innerHTML = showLoadingTable(8, "Loading...");
-            loadTable1(currentPageTable1 += 1);
-        });
-        document.getElementById("search-table1").addEventListener("change", (e) => {
-            let tbody = document.getElementById("tbody1");
-            tbody.innerHTML = showLoadingTable(8, "Loading...");
-            searchTable1 = e.target.value;
-            loadTable1(1);
-        });
-        document.getElementById("page-size-table1").addEventListener("change", function() {
-            let tbody = document.getElementById("tbody1");
-            tbody.innerHTML = showLoadingTable(8, "Loading...");
-            perPageTable1 = this.value;
-            loadTable1(1);
-        });
-        loadTable1();
     </script>
 @endsection

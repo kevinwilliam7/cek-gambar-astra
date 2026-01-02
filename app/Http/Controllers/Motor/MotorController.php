@@ -7,12 +7,10 @@ use App\Http\Requests\Motor\StoreRequest;
 use App\Http\Requests\Motor\UpdateRequest;
 use App\Models\KpbKriteria;
 use App\Models\Motor;
-use App\Models\RekapKpb;
-use App\Services\DatatableService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\Facades\DataTables;
 
 class MotorController extends Controller
 {
@@ -140,27 +138,40 @@ class MotorController extends Controller
 
     public function datatable(Request $request)
     {
-        $result = DatatableService::apply(Motor::with(['kpb_kriteria' => function($q) {
+        $data = Motor::with(['kpb_kriteria' => function($q) {
             $q->orderBy('kpb_type', 'asc'); // urut ascending berdasarkan kpb_type
-        }, 'images'])->where(function($q) use ($request){
+        }, 'images'])->where(function ($q) use ($request) {
             if ($request->filled('type_motor')) {
-                $q->whereIn('type_motor', $request->input('type_motor'));
+                $q->whereIn('type_motor', $request->input('type_motor', []));
             }
-        }), $request,
-            ['id', 'kode_nosin','type_motor'],
-            ['id', 'kode_nosin','type_motor','created_at']
-        );
-
-        return response()->json([
-            'data'           => $result['rows'],
-            'page'           => $result['page'],
-            'per_page'       => $result['perPage'],
-            'total'          => $result['total'],
-            'total_filtered' => $result['filtered'],
-            'total_pages'    => ceil($result['filtered'] / $result['perPage']),
-            'sort_by'        => $result['sortBy'],
-            'sort_dir'       => $result['sortDir'],
-            'q'              => $result['q'],
-        ]);
+        });
+        return DataTables::of($data)
+            ->make(true);
     }
+
+    // public function datatable(Request $request)
+    // {
+    //     $result = DatatableService::apply(Motor::with(['kpb_kriteria' => function($q) {
+    //         $q->orderBy('kpb_type', 'asc'); // urut ascending berdasarkan kpb_type
+    //     }, 'images'])->where(function($q) use ($request){
+    //         if ($request->filled('type_motor')) {
+    //             $q->whereIn('type_motor', $request->input('type_motor'));
+    //         }
+    //     }), $request,
+    //         ['id', 'kode_nosin','type_motor'],
+    //         ['id', 'kode_nosin','type_motor','created_at']
+    //     );
+
+    //     return response()->json([
+    //         'data'           => $result['rows'],
+    //         'page'           => $result['page'],
+    //         'per_page'       => $result['perPage'],
+    //         'total'          => $result['total'],
+    //         'total_filtered' => $result['filtered'],
+    //         'total_pages'    => ceil($result['filtered'] / $result['perPage']),
+    //         'sort_by'        => $result['sortBy'],
+    //         'sort_dir'       => $result['sortDir'],
+    //         'q'              => $result['q'],
+    //     ]);
+    // }
 }
