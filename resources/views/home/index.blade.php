@@ -233,20 +233,12 @@
                                                 <div class="hs-dropdown relative inline-flex w-full cursor-pointer">
                                                     {!! $table1_header[0] === ''
                                                         ? view('components.header_checkbox_table_component.index')->render()
-                                                        : '<button id="hs-pro-ptpn" type="button"
-                                                                                                                                                                    class="px-5 py-2.5 text-start w-full flex items-center gap-x-1 text-sm text-nowrap whitespace-nowrap font-normal text-gray-500 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-500 dark:focus:bg-neutral-700 ' .
+                                                        : '<button id="hs-pro-ptpn" type="button" class="px-5 py-2.5 text-start w-full flex items-center gap-x-1 text-sm text-nowrap whitespace-nowrap font-normal text-gray-500 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-500 dark:focus:bg-neutral-700 ' .
                                                             ($table1_header[0] === 'Action' ? 'justify-end text-right' : 'text-left w-full text-start') .
-                                                            '"
-                                                                                                                                                                    aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">' .
+                                                            '"aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">' .
                                                             $table1_header[0] .
-                                                            '<svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
-                                                                                                                                                                        width="24" height="24" viewBox="0 0 24 24"
-                                                                                                                                                                        fill="none" stroke="currentColor" stroke-width="2"
-                                                                                                                                                                        stroke-linecap="round" stroke-linejoin="round">
-                                                                                                                                                                        <path d="m7 15 5 5 5-5"></path>
-                                                                                                                                                                        <path d="m7 9 5-5 5 5"></path>
-                                                                                                                                                                    </svg>
-                                                                                                                                                                </button>' !!}
+                                                            '<svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+                                                    </button>' !!}
                                                 </div>
                                                 <!-- End Sort Dropdown -->
                                             </th>
