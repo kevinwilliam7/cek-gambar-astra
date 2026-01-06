@@ -484,7 +484,7 @@
                 } catch (err) {
                     console.error('Error polling jobs');
                 }
-            }, 1000);
+            }, 5000);
         }
         // Ambil semua job dari server
         fetch('/cek-kpb/getAllJobs')
