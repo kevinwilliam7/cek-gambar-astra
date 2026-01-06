@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Jenssegers\Agent\Facades\Agent;
+use Yajra\DataTables\Facades\DataTables;
 
 class CekKpbController extends Controller
 {
@@ -22,7 +23,13 @@ class CekKpbController extends Controller
      */
     public function index()
     {
-        return view('cek_kpb.index');
+        $motor = Motor::get()->unique('type_motor');
+        $service_id = [1,2,3,4];
+        $data = [
+            'motor' => $motor,
+            'service_id' => $service_id,
+        ];
+        return view('cek_kpb.index', compact('data'));
     }
 
 
@@ -220,58 +227,79 @@ class CekKpbController extends Controller
 
     public function datatable(Request $request)
     {
-        $result = DatatableService::apply(
-            CekKpb::with(['notes', 'user'])->where(function($q) use ($request) {
-                if ($request->filled('status_description')) {
-                    $q->whereIn('status_description', $request->input('status_description', []));
-                }
-                if ($request->filled('type_motor')) {
-                    $values = $request->input('type_motor', []);
-                    $motor = Motor::whereIn('type_motor', $values)->pluck('kode_nosin');
+        $data = CekKpb::with(['notes', 'user'])->where(function($q) use ($request) {
+            if ($request->filled('type_motor')) {
+                $values = $request->input('type_motor', []);
+                $motor = Motor::whereIn('type_motor', $values)->pluck('kode_nosin');
 
-                    $q->where(function ($query) use ($motor) {
-                        foreach ($motor as $val) {
-                            $query->orWhere('engine', 'ILIKE', "%{$val}%");
-                        }
-                    });
-                }
-                if ($request->filled('service_id')) {
-                    $q->whereIn('service_id', $request->input('service_id', []));
-                }
-                if ($request->filled('tahun')) {
-                    $values = $request->input('tahun', []);
-
-                    $q->where(function ($query) use ($values) {
-                        foreach ($values as $val) {
-                            $query->orWhere('month', 'ILIKE', "%_{$val}");
-                        }
-                    });
-                }
-                if ($request->filled('bulan')) {
-                    $values = $request->input('bulan', []);
-
-                    $q->where(function ($query) use ($values) {
-                        foreach ($values as $val) {
-                            $query->orWhere('month', 'ILIKE', "{$val}_%");
-                        }
-                    });
-                }
-            }),
-            $request,
-            ['file_name', 'md_code', 'md_name', 'engine', 'km', 'user_id', 'notes.message'],
-            ['file_name', 'md_code', 'md_name', 'engine', 'km', 'user_id']
-        );
-
-        return response()->json([
-            'data'           => $result['rows'],
-            'page'           => $result['page'],
-            'per_page'       => $result['perPage'],
-            'total'          => $result['total'],
-            'total_filtered' => $result['filtered'],
-            'total_pages'    => ceil($result['filtered'] / $result['perPage']),
-            'sort_by'        => $result['sortBy'],
-            'sort_dir'       => $result['sortDir'],
-            'q'              => $result['q'],
-        ]);
+                $q->where(function ($query) use ($motor) {
+                    foreach ($motor as $val) {
+                        $query->orWhere('engine', 'ILIKE', "%{$val}%");
+                    }
+                });
+            }
+            if ($request->filled('service_id')) {
+                $q->whereIn('service_id', $request->input('service_id', []));
+            }
+        });
+        return DataTables::of($data)
+            ->make(true);
     }
+
+    // public function datatable(Request $request)
+    // {
+    //     $result = DatatableService::apply(
+    //         CekKpb::with(['notes', 'user'])->where(function($q) use ($request) {
+    //             if ($request->filled('status_description')) {
+    //                 $q->whereIn('status_description', $request->input('status_description', []));
+    //             }
+    //             if ($request->filled('type_motor')) {
+    //                 $values = $request->input('type_motor', []);
+    //                 $motor = Motor::whereIn('type_motor', $values)->pluck('kode_nosin');
+
+    //                 $q->where(function ($query) use ($motor) {
+    //                     foreach ($motor as $val) {
+    //                         $query->orWhere('engine', 'ILIKE', "%{$val}%");
+    //                     }
+    //                 });
+    //             }
+    //             if ($request->filled('service_id')) {
+    //                 $q->whereIn('service_id', $request->input('service_id', []));
+    //             }
+    //             if ($request->filled('tahun')) {
+    //                 $values = $request->input('tahun', []);
+
+    //                 $q->where(function ($query) use ($values) {
+    //                     foreach ($values as $val) {
+    //                         $query->orWhere('month', 'ILIKE', "%_{$val}");
+    //                     }
+    //                 });
+    //             }
+    //             if ($request->filled('bulan')) {
+    //                 $values = $request->input('bulan', []);
+
+    //                 $q->where(function ($query) use ($values) {
+    //                     foreach ($values as $val) {
+    //                         $query->orWhere('month', 'ILIKE', "{$val}_%");
+    //                     }
+    //                 });
+    //             }
+    //         }),
+    //         $request,
+    //         ['file_name', 'md_code', 'md_name', 'engine', 'km', 'user_id', 'notes.message'],
+    //         ['file_name', 'md_code', 'md_name', 'engine', 'km', 'user_id']
+    //     );
+
+    //     return response()->json([
+    //         'data'           => $result['rows'],
+    //         'page'           => $result['page'],
+    //         'per_page'       => $result['perPage'],
+    //         'total'          => $result['total'],
+    //         'total_filtered' => $result['filtered'],
+    //         'total_pages'    => ceil($result['filtered'] / $result['perPage']),
+    //         'sort_by'        => $result['sortBy'],
+    //         'sort_dir'       => $result['sortDir'],
+    //         'q'              => $result['q'],
+    //     ]);
+    // }
 }
