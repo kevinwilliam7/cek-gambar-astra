@@ -59,39 +59,37 @@ class CekKpbImport implements ToCollection, WithMultipleSheets, WithHeadingRow
      */
     public function collection(Collection $rows)
     {
-        $rowNum = 0;
-        $headers = [];
-        $noEngineArray = $rows->pluck('no_engine')->toArray();
-        $this->rekapKpbCache = RekapKpb::select('engine', 'km', 'service_date', 'service_id')
+        $noEngineArray = $rows->pluck('no_engine')->filter()->toArray();
+
+        $this->rekapKpbCache = RekapKpb::select('engine', 'km', 'service_date', 'service_id', 'buy_date')
             ->whereIn('engine', $noEngineArray)
-            ->orderBy('service_id', 'DESC');
-        foreach ($rows as $key => $row) {
-            $rowNum++;
-            // Pastikan jumlah kolom sama dengan header
-            $data = $row->toArray();
-            if(is_numeric($data['service_ke'])) {
-                $tgl_beli = isset($data['bulan_beli']) ? $data['tgl_beli'].'/'.$data['bulan_beli'].'/'.$data['tahun_beli'] : $data['tgl_beli'];
-                $formattedTglBeli = $this->formatTanggalExcel($tgl_beli);
-                $formattedTglService = $this->formatTanggalExcel($data['tgl_service']);
+            ->orderBy('service_id', 'DESC')
+            ->get()
+            ->groupBy('engine');
+        $rowNum = 0;
 
-                //Panggil fungsi cek KPB compare rekap
-                $this->checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService);
-                // Panggil fungsi cek duplikat engine dengan tgl beli berbeda
-                $this->checkDuplicateEngine($data, $rowNum, $formattedTglBeli, $formattedTglService);
-                // Panggil fungsi cek panjang nosin
-                $this->checkEngineLength($data, $rowNum, $formattedTglBeli, $formattedTglService);
-                // Panggil fungsi cek tgl beli sama dengan tgl service
-                $this->checkBuyDateEqualsServiceDate($data, $rowNum, $formattedTglBeli, $formattedTglService);
-                // Panggil fungsi cek tgl service yang melebihi batas maksimal
-                $this->checkServiceDateExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
-                // Panggil fungsi cek km yang melebihi batas maksimal
-                $this->checkKmExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
-            } else {
-                // Log::info($data['service_ke'].' Bukan numeric');
+        // Chunking untuk menghindari out of shared memory
+        $rows->chunk(500)->each(function($chunk) use (&$rowNum) {
+            foreach ($chunk as $row) {
+                $rowNum++;
+                $data = $row->toArray();
+                if(is_numeric($data['service_ke'])) {
+                    $tgl_beli = isset($data['bulan_beli']) ? $data['tgl_beli'].'/'.$data['bulan_beli'].'/'.$data['tahun_beli'] : $data['tgl_beli'];
+                    $formattedTglBeli = $this->formatTanggalExcel($tgl_beli);
+                    $formattedTglService = $this->formatTanggalExcel($data['tgl_service']);
+
+                    // Panggil semua check function
+                    $this->checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                    $this->checkDuplicateEngine($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                    $this->checkEngineLength($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                    $this->checkBuyDateEqualsServiceDate($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                    $this->checkServiceDateExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                    $this->checkKmExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                }
             }
-        }
+        });
 
-        $this->log("✅ Total baris dibaca: {($rowNum-1)}");
+        $this->log("✅ Total baris dibaca: " . $rowNum);
     }
 
     /**
@@ -353,10 +351,8 @@ class CekKpbImport implements ToCollection, WithMultipleSheets, WithHeadingRow
             }
         }
 
-        //ambil semua km, service_id, tgl service
-        $getRekaps = $this->rekapKpbCache->get($data['no_engine'])->toArray();
         //cek km excel jika lebih kecil dari list km yang ada diarray
-        foreach($getRekaps as $key => $rekapOnly) {
+        foreach ($this->rekapKpbCache->get($data['no_engine'], collect())->toArray() as $rekapOnly) {
             //Buat cek KM untuk service sekarang apakah KM lebih besar dari service setelahnya
             if($rekapOnly['service_id'] > $data['service_ke']) {
                 if($data['km'] > $rekapOnly['km']) {
