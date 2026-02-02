@@ -12,12 +12,8 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Concerns\OnEachRow;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Row;
 
-class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading
+class CekKpbImport implements ToCollection, WithMultipleSheets
 {
     protected $context;
     protected $fileName;
@@ -35,46 +31,62 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading
     }
 
     /**
-     * Proses data di sheet ke-2
+     * Tentukan sheet yang ingin dibaca.
+     * Index dimulai dari 0 → 0 = sheet pertama, 1 = sheet kedua
      */
-    public function onRow(Row $row)
+    public function sheets(): array
     {
-        $rowNum = $row->getIndex(); // nomor baris Excel
-        $data = $row->toArray();
-
-        if($this->job_id !== null) {
-            CekKpbProgress::updateOrCreate(
-                ['job_id' => $this->job_id],
-                [
-                    'file_name' => $this->fileName,
-                    'progress' => $rowNum,
-                    'status' => 'processing'
-                ]
-            );
-        }
-
-        // Pastikan Service Ke- numeric
-        if(!isset($data['service_ke']) || !is_numeric($data['service_ke'])) {
-            return;
-        }
-
-        // Format tanggal
-        $tglBeli = $data['bulan_beli'] ?? null ? ($data['tgl_beli'].'/'.$data['bulan_beli'].'/'.$data['tahun_beli']) : $data['tgl_beli'];
-        $formattedTglBeli = $this->formatTanggalExcel($tglBeli);
-        $formattedTglService = $this->formatTanggalExcel($data['tgl_service']);
-
-        // Panggil fungsi pengecekan
-        $this->checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService);
-        $this->checkDuplicateEngine($data, $rowNum, $formattedTglBeli, $formattedTglService);
-        $this->checkEngineLength($data, $rowNum, $formattedTglBeli, $formattedTglService);
-        $this->checkBuyDateEqualsServiceDate($data, $rowNum, $formattedTglBeli, $formattedTglService);
-        $this->checkServiceDateExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
-        $this->checkKmExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
+        return [
+            0 => $this, // langsung baca sheet kedua
+        ];
     }
 
-    public function chunkSize(): int
+    /**
+     * Proses data di sheet ke-2
+     */
+    public function collection(Collection $rows)
     {
-        return 100; // misal proses 100 baris per batch
+        $rowNum = 0;
+        $headers = [];
+        foreach ($rows as $key => $row) {
+            $rowNum++;
+            if($this->job_id !== null) {
+                CekKpbProgress::updateOrCreate(
+                    ['job_id' => $this->job_id],
+                    ['file_name' => $this->fileName, 'progress' => $key, 'total' => count($rows)-1, 'status' => 'processing']
+                );
+            }
+            // Baris pertama = header
+            if ($rowNum === 1) {
+                $headers = $row->toArray();
+                continue;
+            }
+            $values = $row->toArray();
+            // Pastikan jumlah kolom sama dengan header
+            $data = array_combine($headers, $values);
+            if(is_numeric($data['Service Ke-'])) {
+                $tgl_beli = isset($data['Bulan Beli']) ? $data['Tgl Beli'].'/'.$data['Bulan Beli'].'/'.$data['Tahun Beli'] : $data['Tgl Beli'];
+                $formattedTglBeli = $this->formatTanggalExcel($tgl_beli);
+                $formattedTglService = $this->formatTanggalExcel($data['Tgl Service']);
+
+                //Panggil fungsi cek KPB compare rekap
+                $this->checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                // Panggil fungsi cek duplikat engine dengan tgl beli berbeda
+                $this->checkDuplicateEngine($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                // Panggil fungsi cek panjang nosin
+                $this->checkEngineLength($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                // Panggil fungsi cek tgl beli sama dengan tgl service
+                $this->checkBuyDateEqualsServiceDate($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                // Panggil fungsi cek tgl service yang melebihi batas maksimal
+                $this->checkServiceDateExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                // Panggil fungsi cek km yang melebihi batas maksimal
+                $this->checkKmExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
+            } else {
+                // Log::info($data['Service Ke-'].' Bukan numeric');
+            }
+        }
+
+        $this->log("✅ Total baris dibaca: {($rowNum-1)}");
     }
 
     /**
