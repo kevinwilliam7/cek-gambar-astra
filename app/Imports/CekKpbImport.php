@@ -41,7 +41,7 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
     public function sheets(): array
     {
         return [
-            1 => $this, // langsung baca sheet kedua
+            0 => $this, // langsung baca sheet kedua
         ];
     }
 
