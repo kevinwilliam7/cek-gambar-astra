@@ -24,6 +24,8 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
     protected $messages = [];
     protected $kpbKriteriaCache;
     protected $rekapKpbCache;
+    private $rekapCache = [];           // [engine => [service_id => ['km' => , 'service_date' => ]]]
+    private $lastRekapCache = [];       // [engine => object Rekap terakhir (untuk buy_date)]
 
     public function __construct($context = null, $fileName = null, $job_id = null, $user_id = null)
     {
@@ -323,13 +325,43 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
     }
 
     /**
+     * Load rekap hanya sekali per engine (panggil lazy)
+     */
+    private function loadRekapForEngine(?string $engine): void
+    {
+        if ($engine === null || isset($this->rekapCache[$engine])) {
+            return;
+        }
+
+        $rekaps = RekapKpb::where('engine', $engine)
+            ->select('service_id', 'km', 'service_date', 'buy_date')
+            ->orderBy('service_id', 'DESC')
+            ->get();
+
+        // Cache data per service_id
+        $this->rekapCache[$engine] = $rekaps->keyBy('service_id')->map(fn($r) => [
+            'km'           => (int) $r->km,
+            'service_date' => $r->service_date,
+        ])->toArray();
+
+        // Simpan rekap terakhir untuk cek buy_date
+        $this->lastRekapCache[$engine] = $rekaps->first();
+    }
+
+    /**
      * Untuk mengecek KPB 2, 3, 4 untuk dicompare dengan database rekap
      */
     protected function checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService) {
-        $rekap_kpbs = RekapKpb::where('engine', $data['no_engine'] ?? null)->orderBy('service_id', 'DESC')->first();
-        if(isset($rekap_kpbs) && $rekap_kpbs->buy_date !== $formattedTglBeli) {
+        $engine = $data['no_engine'] ?? null;
+        if (!$engine) {
+            return;
+        }
+        $this->loadRekapForEngine($engine);
+        $rekapCache    = $this->rekapCache[$engine]     ?? [];
+        $lastRekap     = $this->lastRekapCache[$engine] ?? null;
+        if ($lastRekap && $lastRekap->buy_date !== $formattedTglBeli) {
             if ($this->context instanceof Command) {
-                $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli tidak sesuai (DB: {$rekap_kpbs->buy_date}, Excel: {$formattedTglBeli})");
+                $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli tidak sesuai (DB: {$lastRekap->buy_date}, Excel: {$formattedTglBeli})");
             } else {
                 $cekKpb = CekKpb::updateOrCreate(
                     [
@@ -345,15 +377,15 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
                     ]
                 );
                 $cekKpb->notes()->updateOrCreate([
-                    'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli tidak sesuai (DB: {$rekap_kpbs->buy_date}, Excel: {$formattedTglBeli})",
+                    'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli tidak sesuai (DB: {$lastRekap->buy_date}, Excel: {$formattedTglBeli})",
                 ]);
             }
         }
 
-        // //ambil semua km, service_id, tgl service
-        // $getRekaps = $this->rekapKpbCache;
+        //ambil semua km, service_id, tgl service
+        $getRekaps = $this->rekapKpbCache;
 
-        // //cek km excel jika lebih kecil dari list km yang ada diarray
+        //cek km excel jika lebih kecil dari list km yang ada diarray
         // foreach($getRekaps as $key => $rekapOnly) {
         //     //Buat cek KM untuk service sekarang apakah KM lebih besar dari service setelahnya
         //     if($rekapOnly['service_id'] > $data['service_ke']) {
