@@ -86,7 +86,7 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
 
     public function chunkSize(): int
     {
-        return 100; // misal proses 100 baris per batch
+        return 25; // misal proses 25 baris per batch
     }
 
     /**
