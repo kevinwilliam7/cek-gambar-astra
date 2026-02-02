@@ -73,7 +73,7 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
         $formattedTglService = $this->formatTanggalExcel($data['tgl_service']);
 
         // Panggil fungsi pengecekan
-        $this->checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService);
+        // $this->checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService);
         $this->checkDuplicateEngine($data, $rowNum, $formattedTglBeli, $formattedTglService);
         $this->checkEngineLength($data, $rowNum, $formattedTglBeli, $formattedTglService);
         $this->checkBuyDateEqualsServiceDate($data, $rowNum, $formattedTglBeli, $formattedTglService);
