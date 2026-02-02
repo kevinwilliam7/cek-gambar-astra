@@ -23,7 +23,6 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
     protected $duplicateEngines = [];
     protected $messages = [];
     protected $kpbKriteriaCache;
-    protected $rekapKpbCache;
 
     public function __construct($context = null, $fileName = null, $job_id = null, $user_id = null)
     {
@@ -42,10 +41,6 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
                 ]
             );
         }
-        $this->rekapKpbCache = RekapKpb::where('engine', $data['no_engine'] ?? null)
-            ->select('km', 'service_id', 'service_date')
-            ->get()
-            ->toArray();
     }
 
     /**
@@ -351,7 +346,10 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
         }
 
         //ambil semua km, service_id, tgl service
-        $getRekaps = $this->rekapKpbCache;
+        $getRekaps = RekapKpb::where('engine', $data['no_engine'] ?? null)
+            ->select('km', 'service_id', 'service_date')
+            ->get()
+            ->toArray();
         //cek km excel jika lebih kecil dari list km yang ada diarray
         foreach($getRekaps as $key => $rekapOnly) {
             //Buat cek KM untuk service sekarang apakah KM lebih besar dari service setelahnya
