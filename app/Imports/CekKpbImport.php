@@ -17,7 +17,7 @@ use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Row;
 
-class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading
+class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithMultipleSheets
 {
     protected $context;
     protected $fileName;
@@ -32,6 +32,17 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading
         $this->fileName = $fileName;
         $this->job_id = $job_id;
         $this->user_id = $user_id;
+    }
+
+    /**
+     * Tentukan sheet yang ingin dibaca.
+     * Index dimulai dari 0 → 0 = sheet pertama, 1 = sheet kedua
+     */
+    public function sheets(): array
+    {
+        return [
+            1 => $this, // langsung baca sheet kedua
+        ];
     }
 
     /**
