@@ -6,16 +6,12 @@ use App\Models\CekKpb;
 use App\Models\CekKpbProgress;
 use App\Models\KpbKriteria;
 use App\Models\RekapKpb;
-use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Maatwebsite\Excel\Row;
 
 class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithMultipleSheets
@@ -26,6 +22,7 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
     protected $user_id;
     protected $duplicateEngines = [];
     protected $messages = [];
+    protected $kpbKriteriaCache;
 
     public function __construct($context = null, $fileName = null, $job_id = null, $user_id = null)
     {
@@ -33,6 +30,17 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
         $this->fileName = $fileName;
         $this->job_id = $job_id;
         $this->user_id = $user_id;
+        $this->kpbKriteriaCache = KpbKriteria::all()->keyBy(fn ($item) => $item->kode_nosin . '|' . $item->kpb_type);
+        if ($this->job_id !== null) {
+            CekKpbProgress::updateOrCreate(
+                ['job_id' => $this->job_id],
+                [
+                    'file_name' => $this->fileName,
+                    'progress' => 0,
+                    'status' => 'processing',
+                ]
+            );
+        }
     }
 
     /**
@@ -53,17 +61,6 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
     {
         $rowNum = $row->getIndex(); // nomor baris Excel
         $data = $row->toArray();
-
-        if($this->job_id !== null) {
-            CekKpbProgress::updateOrCreate(
-                ['job_id' => $this->job_id],
-                [
-                    'file_name' => $this->fileName,
-                    'progress' => $rowNum,
-                    'status' => 'processing'
-                ]
-            );
-        }
 
         // Pastikan Service Ke- numeric
         if(!isset($data['service_ke']) || !is_numeric($data['service_ke'])) {
@@ -326,31 +323,6 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
     protected function checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService) {
         // if($data['service_ke'] > 1) {
             $rekap_kpbs = RekapKpb::where('engine', $data['no_engine'] ?? null)->orderBy('service_id', 'DESC')->first();
-
-            // if($rekap_kpbs === null) {
-            //     if ($this->context instanceof Command) {
-            //         $this->log("⚠️ Bariss {$rowNum}: No Engine {$data['no_engine']} - {$formattedTglBeli} - {$data['service_ke']} - Data KPB sebelumnya tidak ditemukan di database.");
-            //         return;
-            //     } else {
-            //         $cekKpb = CekKpb::updateOrCreate(
-            //             [
-            //                 'engine' => $data['no_engine'],
-            //                 'service_id' => $data['service_ke'],
-            //                 'file_name' => $this->fileName,
-            //             ],
-            //             [
-            //                 'buy_date' => $formattedTglBeli,
-            //                 'service_date' => $formattedTglService,
-            //                 'km' => $data['km'],
-            //                 'user_id' => $this->user_id,
-            //             ]
-            //         );
-            //         $cekKpb->notes()->updateOrCreate([
-            //             'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$formattedTglBeli} - {$data['service_ke']} - Data KPB sebelumnya tidak ditemukan di database.",
-            //         ]);
-            //     }
-            // }
-
             if(isset($rekap_kpbs) && $rekap_kpbs->buy_date !== $formattedTglBeli) {
                 if ($this->context instanceof Command) {
                     $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli tidak sesuai (DB: {$rekap_kpbs->buy_date}, Excel: {$formattedTglBeli})");
@@ -498,7 +470,8 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
      */
     private function checkServiceDateExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService){
         $enginePrefix = substr($data['no_engine'], 0, 5);
-        $kriteriaKpb = KpbKriteria::where('kode_nosin', $enginePrefix)->where('kpb_type', 'ilike', '%'.$data['service_ke'].'%')->first();
+        // $kriteriaKpb = KpbKriteria::where('kode_nosin', $enginePrefix)->where('kpb_type', 'ilike', '%'.$data['service_ke'].'%')->first();
+        $kriteriaKpb = $this->kpbKriteriaCache->get($enginePrefix . '|' . 'KPB '.$data['service_ke']);
         $selisihObj = (new \DateTime($formattedTglBeli))->diff(new \DateTime($formattedTglService));
         $selisihHari = $selisihObj->days * ($selisihObj->invert ? -1 : 1);
         if($kriteriaKpb === null) {
@@ -576,7 +549,8 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
      */
     private function checkKmExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService){
         $enginePrefix = substr($data['no_engine'], 0, 5);
-        $kriteriaKpb = KpbKriteria::where('kode_nosin', $enginePrefix)->where('kpb_type', 'ilike', '%'.$data['service_ke'].'%')->first();
+        // $kriteriaKpb = KpbKriteria::where('kode_nosin', $enginePrefix)->where('kpb_type', 'ilike', '%'.$data['service_ke'].'%')->first();
+        $kriteriaKpb = $this->kpbKriteriaCache->get($enginePrefix . '|' . 'KPB '.$data['service_ke']);
         if($kriteriaKpb === null) {
             if($this->context instanceof Command) {
                 $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Kriteria KPB tidak ditemukan untuk pengecekan KM maksimum.");
