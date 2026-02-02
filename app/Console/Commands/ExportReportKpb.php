@@ -34,6 +34,7 @@ class ExportReportKpb extends Command
      */
     public function handle()
     {
+        $totalStart = microtime(true);
         $month_file = $this->argument('month');
         $year_file  = $this->argument('year');
 
@@ -44,11 +45,22 @@ class ExportReportKpb extends Command
         $folderPathFisik   = storage_path("assets/list_kpb/kpb_{$month_file}_{$year_file}/fisik");
         $folderPathDigital = storage_path("assets/list_kpb/kpb_{$month_file}_{$year_file}/digital");
 
+        // Cache KPB Kriteria dulu biar gak bolak-balik query
+        $kpbCache = KpbKriteria::all()->keyBy(fn($item) => $item->kode_nosin . '|' . $item->kpb_type);
+        // Cache Ahass juga biar gak bolak-balik query
+        $ahassCache = Ahass::all()->keyBy(fn($item) => $item->kode_ahass);
+        $ahassListCache = Ahass::select('kode_ahass', 'nama_ahass')
+            ->where(function ($q) {
+                $q->where('jenis_dealer', 'H23')->orWhere('jenis_dealer', 'H123');
+            })
+            ->orderBy('nama_ahass', 'asc')
+            ->get();
+
         // Baca file masing-masing folder
-        $rowsFisikApproved   = $this->readFolder($folderPathFisik, "Fisik", "Approved");
-        $rowsDigitalApproved = $this->readFolder($folderPathDigital, "Digital", "Approved");
-        $rowsFisikRejected   = $this->readFolder($folderPathFisik, "Fisik", "Rejected");
-        $rowsDigitalRejected = $this->readFolder($folderPathDigital, "Digital", "Rejected");
+        $rowsFisikApproved   = $this->readFolder($folderPathFisik, "Fisik", "Approved", $kpbCache, $ahassCache);
+        $rowsDigitalApproved = $this->readFolder($folderPathDigital, "Digital", "Approved", $kpbCache, $ahassCache);
+        $rowsFisikRejected   = $this->readFolder($folderPathFisik, "Fisik", "Rejected", $kpbCache, $ahassCache);
+        $rowsDigitalRejected = $this->readFolder($folderPathDigital, "Digital", "Rejected", $kpbCache, $ahassCache);
 
         // --- Export Excel baru ---
         $export = new Spreadsheet();
@@ -150,7 +162,8 @@ class ExportReportKpb extends Command
             $rowsFisikApproved,
             $rowsDigitalApproved,
             $rowsFisikRejected,
-            $rowsDigitalRejected
+            $rowsDigitalRejected,
+            $ahassListCache
         );
         $lastRowDataKlaim       = count($dataKlaim) + 3;           // +2 header + 1 grand total
         $dataKlaimForExcel = array_map('array_values', $dataKlaim);
@@ -250,13 +263,15 @@ class ExportReportKpb extends Command
         $writer = new XlsxWriter($export);
         $writer->save($exportPath);
 
+        $this->info('Total Time taken: '.(microtime(true) - $totalStart)." sec");
+        $this->info("Export selesai! File disimpan di: {$exportPath}");
         return Command::SUCCESS;
     }
 
     /**
      * Baca semua file Excel dalam folder tertentu & return data baris
      */
-    private function readFolder(string $folderPath, string $label = '', string $status = ''): array
+    private function readFolder(string $folderPath, string $label = '', string $status = '', $kpbCache, $ahassCache): array
     {
         $rowsData = [];
         if (!File::exists($folderPath)) {
@@ -269,6 +284,7 @@ class ExportReportKpb extends Command
 
         $penomoranExcel = 0;
         foreach ($files as $file) {
+            $start = microtime(true);
             try {
                 $fileKe++;
                 $reader = IOFactory::createReaderForFile($file->getRealPath());
@@ -301,13 +317,15 @@ class ExportReportKpb extends Command
                         if (!empty(trim($row[$colMap['no engine']] ?? null)) && empty(trim($ket)) && strtolower($status) === 'approved') {
                             $kode_mesin = substr($row[$colMap['no engine']] ?? null, 0, 5);
                             $kode_service = $row[$colMap['service ke-']] == '1' ? 'A' : ($row[$colMap['service ke-']] == '2' ? 'B' : ($row[$colMap['service ke-']] == '3' ? 'C' : ($row[$colMap['service ke-']] == '4' ? 'D' : 'Unknown')));
-                            $kriteria_kpb = KpbKriteria::where('kpb_type', 'KPB ' . ($row[$colMap['service ke-']] ?? null))->where('kode_nosin', $kode_mesin)->first();
+                            // $kriteria_kpb = KpbKriteria::where('kpb_type', 'KPB ' . ($row[$colMap['service ke-']] ?? null))->where('kode_nosin', $kode_mesin)->first();
+                            $key = substr($kode_mesin, 0, 5) . '|' . ('KPB ' . ($row[$colMap['service ke-']] ?? null));
+                            $kriteria_kpb = $kpbCache->get($key);
                             $material = $kriteria_kpb?->material ?? 0;
                             $jasa     = $kriteria_kpb?->jasa ?? 0;
                             $pokok = $material + $jasa;
                             $rowsData[] = [
                                 'No.' => $penomoranExcel += 1,
-                                'nama_ahass'   => Ahass::where('kode_ahass', substr($nomorSuratClean, 0, 5))->first()->nama_ahass ?? 'Unknown',
+                                'nama_ahass'   => $ahassCache->get(substr($nomorSuratClean, 0, 5))->nama_ahass ?? 'Unknown',
                                 'nomor_surat'  => $nomorSuratClean,
                                 'kode_ahass'   => substr($nomorSuratClean, 0, 5),
                                 'engine'       => $row[$colMap['no engine']] ?? null,
@@ -326,13 +344,15 @@ class ExportReportKpb extends Command
                         else if (!empty(trim($row[$colMap['no engine']] ?? null)) && !empty(trim($ket)) && strtolower($status) === 'rejected') {
                             $kode_mesin = substr($row[$colMap['no engine']] ?? null, 0, 5);
                             $kode_service = $row[$colMap['service ke-']] == '1' ? 'A' : ($row[$colMap['service ke-']] == '2' ? 'B' : ($row[$colMap['service ke-']] == '3' ? 'C' : ($row[$colMap['service ke-']] == '4' ? 'D' : 'Unknown')));
-                            $kriteria_kpb = KpbKriteria::where('kpb_type', 'KPB ' . ($row[$colMap['service ke-']] ?? null))->where('kode_nosin', $kode_mesin)->first();
+                            // $kriteria_kpb = KpbKriteria::where('kpb_type', 'KPB ' . ($row[$colMap['service ke-']] ?? null))->where('kode_nosin', $kode_mesin)->first();
+                            $key = substr($kode_mesin, 0, 5) . '|' . ('KPB ' . ($row[$colMap['service ke-']] ?? null));
+                            $kriteria_kpb = $kpbCache->get($key);
                             $material = $kriteria_kpb?->material ?? 0;
                             $jasa     = $kriteria_kpb?->jasa ?? 0;
                             $pokok = $material + $jasa;
                             $rowsData[] = [
                                 'No.' => $penomoranExcel += 1,
-                                'nama_ahass'   => Ahass::where('kode_ahass', substr($nomorSuratClean, 0, 5))->first()->nama_ahass ?? 'Unknown',
+                                'nama_ahass'   => $ahassCache->get(substr($nomorSuratClean, 0, 5))->nama_ahass ?? 'Unknown',
                                 'nomor_surat'  => $nomorSuratClean,
                                 'kode_ahass'   => substr($nomorSuratClean, 0, 5),
                                 'engine'       => $row[$colMap['no engine']] ?? null,
@@ -355,8 +375,8 @@ class ExportReportKpb extends Command
             } catch (\Throwable $e) {
                 $this->error("Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
             }
+            $this->info("Time taken: ".(microtime(true) - $start)." sec");
         }
-
         return $rowsData;
     }
 
@@ -364,16 +384,18 @@ class ExportReportKpb extends Command
         array $fisikApproved,
         array $digitalApproved,
         array $fisikRejected,
-        array $digitalRejected
+        array $digitalRejected,
+        $ahassListCache
     ): array {
 
         // Master AHASS (urut nama)
-        $ahassList = Ahass::select('kode_ahass', 'nama_ahass')
-            ->where(function ($q) {
-                $q->where('jenis_dealer', 'H23')->orWhere('jenis_dealer', 'H123');
-            })
-            ->orderBy('nama_ahass', 'asc')
-            ->get();
+        // $ahassList = Ahass::select('kode_ahass', 'nama_ahass')
+        //     ->where(function ($q) {
+        //         $q->where('jenis_dealer', 'H23')->orWhere('jenis_dealer', 'H123');
+        //     })
+        //     ->orderBy('nama_ahass', 'asc')
+        //     ->get();
+        $ahassList = $ahassListCache;
 
         // Jadikan collection biar gampang filter
         $fisikApp   = collect($fisikApproved);

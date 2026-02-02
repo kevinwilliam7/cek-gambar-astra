@@ -483,58 +483,6 @@
                 logsContainer.insertAdjacentHTML('beforeend', html);
             });
         }
-
-        // Polling semua job progress
-        async function refreshProgressMultiple(jobIds) {
-            const interval = setInterval(async () => {
-                try {
-                    const results = await Promise.all(jobIds.map(async jobId => {
-                        try {
-                            const res = await fetch(`/cek-kpb/getProgressJob/${jobId}`);
-                            if (!res.ok) return { jobId, done: true }; // fallback 100%
-
-                            const data = await res.json();
-                            const percent = data.progress >= data.total ? 100 : data.percent.toFixed(1);
-
-                            const textEl = document.getElementById(`percent-text-${jobId}`);
-                            const barEl = document.getElementById(`percent-bar-${jobId}`);
-
-                            if (textEl) textEl.innerText = `${percent}% · ${data.progress} / ${data.total} Checked`;
-                            if (barEl) barEl.style.width = percent + '%';
-
-                            if(data.progress >= data.total) {
-                                // Job selesai, fetch ulang semua job untuk update status
-                                fetch('/cek-kpb/getAllJobs')
-                                    .then(res => res.json())
-                                    .then(jobs => {
-                                        renderJobs(jobs);
-                                        const jobIds = jobs.map(job => job.cek_kpb_progress?.job_id ?? job.id);
-                                        refreshProgressMultiple(jobIds);
-                                    })
-                                    .catch(err => console.error('Error fetching jobs', err));
-                                fetch('/cek-kpb/getAllLogJobs')
-                                    .then(res => res.json())
-                                    .then(logs => {
-                                        renderLogs(logs);
-                                    })
-                                    .catch(err => console.error('Error fetching logs', err));
-                                return { jobId, done: data.progress >= data.total };
-                            }
-                        } catch {
-                            // error fetch → anggap done
-                            return { jobId, done: true };
-                        }
-                    }));
-
-                    // Hentikan interval jika semua job selesai
-                    const allDone = results.every(r => r.done);
-                    if (allDone) clearInterval(interval);
-
-                } catch (err) {
-                    console.error('Error polling jobs');
-                }
-            }, 5000);
-        }
         // Ambil semua job dari server
         fetch('/cek-kpb/getAllJobs')
             .then(res => res.json())
@@ -543,7 +491,6 @@
 
                 // Ambil semua job_id dari cek_kpb_progress untuk polling
                 const jobIds = jobs.map(job => job.cek_kpb_progress?.job_id ?? job.id);
-                refreshProgressMultiple(jobIds);
             })
             .catch(err => console.error('Error fetching jobs', err));
         // Ambil semua log dari server
@@ -658,7 +605,6 @@
                             console.log(jobs);
                             renderJobs(jobs);
                             const jobIds = jobs.map(job => job.cek_kpb_progress?.job_id ?? job.id);
-                            refreshProgressMultiple(jobIds);
                         })
                         .catch(err => console.error('Error fetching jobs', err));
                     fetch('/cek-kpb/getAllLogJobs')

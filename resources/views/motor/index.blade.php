@@ -201,6 +201,17 @@
                 HSOverlay.open('#hs-large-modal');
                 const btn = e.target.closest(".edit-data");
                 const data = JSON.parse(btn.dataset.json);
+                document.getElementById('id').value = '';
+                document.getElementById('kode_nosin').value = '';
+                document.getElementById('type_motor').value = '';
+                document.getElementById('description').value = '';
+                document.getElementById('description').dispatchEvent(new Event('input'));
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById('hari_maksimum_' + i).value = '';
+                    document.getElementById('km_maksimum_' + i).value = '';
+                    document.getElementById('material_' + i).value = '';
+                    document.getElementById('jasa_' + i).value = '';
+                }
                 document.getElementById('id').value = data?.id ?? '';
                 document.getElementById('kode_nosin').value = data?.kode_nosin ?? '';
                 document.getElementById('type_motor').value = data?.type_motor ?? '';

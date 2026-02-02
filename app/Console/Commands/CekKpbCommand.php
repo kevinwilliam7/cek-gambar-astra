@@ -17,7 +17,7 @@ class CekKpbCommand extends Command
         try {
             $month = $this->argument('month');
             $year = $this->argument('year');
-            $folderPath = storage_path("assets/sedang_cek_kpb/{$month}_{$year}");
+            $folderPath = storage_path("app/private/tes_cek_kpb");
 
             // ✅ Cek folder
             if (!File::exists($folderPath)) {

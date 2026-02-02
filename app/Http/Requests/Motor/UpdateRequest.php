@@ -14,7 +14,7 @@ class UpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -32,6 +32,8 @@ class UpdateRequest extends FormRequest
             'km_maksimum' => 'required',
             'material' => 'required',
             'jasa' => 'required',
+            'link_foto' => 'nullable',
+            'deskripsi_speedometer' => 'nullable',
         ];
     }
 

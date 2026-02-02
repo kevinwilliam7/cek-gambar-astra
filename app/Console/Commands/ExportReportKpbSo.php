@@ -41,9 +41,12 @@ class ExportReportKpbSo extends Command
         $folderPathFisik   = storage_path("assets/list_kpb/kpb_so_{$month_file}_{$year_file}/fisik");
         $folderPathDigital = storage_path("assets/list_kpb/kpb_so_{$month_file}_{$year_file}/digital");
 
+        // Cache KPB Kriteria dulu biar gak bolak-balik query
+        $kpbCache = KpbKriteria::all()->keyBy(fn($item) => $item->kode_nosin . '|' . $item->kpb_service_id);
+
         // Baca file masing-masing folder
-        $rowsFisik   = $this->readFolderFisik($folderPathFisik, "Fisik");
-        $rowsDigital = $this->readFolderDigital($folderPathDigital, "Digital");
+        $rowsFisik   = $this->readFolderFisik($folderPathFisik, "Fisik", $kpbCache);
+        $rowsDigital = $this->readFolderDigital($folderPathDigital, "Digital", $kpbCache);
 
         // --- Export Excel baru ---
         $export = new Spreadsheet();
@@ -130,7 +133,7 @@ class ExportReportKpbSo extends Command
     /**
      * Baca semua file Excel Fisik dalam folder tertentu & return data baris
      */
-    private function readFolderFisik(string $folderPath, string $label = ''): array
+    private function readFolderFisik(string $folderPath, string $label = '', $kpbCache): array
     {
         $rowsData = [];
 
@@ -143,9 +146,12 @@ class ExportReportKpbSo extends Command
         $fileKe = 0;
 
         foreach ($files as $file) {
+            $start = microtime(true);
             try {
                 $fileKe++;
                 $reader = IOFactory::createReaderForFile($file->getRealPath());
+                $reader->setReadDataOnly(true);              // skip formula & style
+                $reader->setReadEmptyCells(false);           // skip cell kosong di ujung
                 $spreadsheet = $reader->load($file->getRealPath());
 
                 $namaFile = basename($file->getRealPath());
@@ -219,9 +225,8 @@ class ExportReportKpbSo extends Command
                             "4" => 'D',
                             default => '',
                         };
-                        $kpb_kriteria = KpbKriteria::where('kode_nosin', substr($nosin, 0, 5))
-                            ->where('kpb_service_id', $servisId)
-                            ->first();
+                        $key = substr($nosin, 0, 5) . '|' . $servisId;
+                        $kpb_kriteria = $kpbCache->get($key);
                         $material = $kpb_kriteria ? $kpb_kriteria->material : null;
                         $jasa     = $kpb_kriteria ? $kpb_kriteria->jasa : null;
                         $pokok   = $kpb_kriteria ? ($material + $jasa) : null;
@@ -244,6 +249,7 @@ class ExportReportKpbSo extends Command
             } catch (\Throwable $e) {
                 $this->error("Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
             }
+            $this->info("Time taken: ".(microtime(true) - $start)." sec");
         }
 
         return $rowsData;
@@ -252,7 +258,7 @@ class ExportReportKpbSo extends Command
     /**
      * Baca semua file Excel Digital dalam folder tertentu & return data baris
      */
-    private function readFolderDigital(string $folderPath, string $label = ''): array
+    private function readFolderDigital(string $folderPath, string $label = '', $kpbCache): array
     {
         $rowsData = [];
 
@@ -265,6 +271,7 @@ class ExportReportKpbSo extends Command
         $fileKe = 0;
 
         foreach ($files as $file) {
+            $start = microtime(true);
             try {
                 $fileKe++;
                 $reader = IOFactory::createReaderForFile($file->getRealPath());
@@ -340,9 +347,8 @@ class ExportReportKpbSo extends Command
                             "KPB4" => 'D',
                             default => '',
                         };
-                        $kpb_kriteria = KpbKriteria::where('kode_nosin', substr($nosin, 0, 5))
-                            ->where('kpb_service_id', $servisId)
-                            ->first();
+                        $key = substr($nosin, 0, 5) . '|' . $servisId;
+                        $kpb_kriteria = $kpbCache->get($key);
                         $material = $kpb_kriteria ? $kpb_kriteria->material : null;
                         $jasa     = $kpb_kriteria ? $kpb_kriteria->jasa : null;
                         $pokok   = $kpb_kriteria ? ($material + $jasa) : null;
@@ -367,6 +373,7 @@ class ExportReportKpbSo extends Command
             } catch (\Throwable $e) {
                 $this->error("Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
             }
+            $this->info("Time taken: ".(microtime(true) - $start)." sec");
         }
 
         return $rowsData;

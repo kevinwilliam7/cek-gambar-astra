@@ -92,7 +92,7 @@ class MotorController extends Controller
     {
         try {
             DB::beginTransaction();
-            $motor = Motor::with(['kpb_kriteria'])->findOrFail($request->id)->update([
+            Motor::with(['kpb_kriteria'])->findOrFail($request->id)->update([
                 'kode_nosin' => $request->kode_nosin,
                 'type_motor' => $request->type_motor,
                 'deskripsi' => $request->description,
@@ -117,6 +117,20 @@ class MotorController extends Controller
                         ]
                     );
                 }
+            }
+            if(isset($request?->link_foto) && count($request?->link_foto) > 0) {
+                foreach($request->link_foto as $key => $value) {
+                    Motor::with(['images'])->findOrFail($request->id)->images()->updateOrCreate(
+                        [
+                            'filename' => $value,
+                        ],
+                        [
+                            'deskripsi' => $request->deskripsi_speedometer[$key] ?? null,
+                        ]
+                    );
+                }
+            } else {
+                Motor::with(['images'])->findOrFail($request->id)->images()->delete();
             }
             DB::commit();
             Log::error('MotorController Update SUCCESS');
