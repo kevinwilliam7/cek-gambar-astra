@@ -309,10 +309,11 @@
                     // close modal
                     HSOverlay.close('#hs-large-modal');
                     // reload jobs
-                    loadTable1(1)
+                    table1.draw();
                     data?.status == false ? '' : confetti();
                 })
                 .catch(error => {
+                    console.log(error)
                     document.getElementById('hs-task-created-alert-label').innerText = 'Error';
                     document.getElementById('hs-task-created-alert-icon').innerHTML = '';
                     document.getElementById('hs-task-created-alert-content').innerText =
