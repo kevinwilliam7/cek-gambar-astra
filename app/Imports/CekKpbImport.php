@@ -15,7 +15,10 @@ use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Maatwebsite\Excel\Row;
+
+HeadingRowFormatter::default('none');
 
 class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithMultipleSheets
 {
