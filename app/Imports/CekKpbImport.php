@@ -350,113 +350,113 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
             }
         }
 
-        //ambil semua km, service_id, tgl service
-        $getRekaps = $this->rekapKpbCache;
+        // //ambil semua km, service_id, tgl service
+        // $getRekaps = $this->rekapKpbCache;
 
-        //cek km excel jika lebih kecil dari list km yang ada diarray
-        foreach($getRekaps as $key => $rekapOnly) {
-            //Buat cek KM untuk service sekarang apakah KM lebih besar dari service setelahnya
-            if($rekapOnly['service_id'] > $data['service_ke']) {
-                if($data['km'] > $rekapOnly['km']) {
-                    if($this->context instanceof Command) {
-                        $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM Service di Excel ({$data['km']}) lebih besar dari KM Service setelahnya di database ".$rekapOnly['km']." pada KPB ".$rekapOnly['service_id']);
-                    } else {
-                        $cekKpb = CekKpb::updateOrCreate(
-                            [
-                                'engine' => $data['no_engine'],
-                                'service_id' => $data['service_ke'],
-                                'file_name' => $this->fileName,
-                            ],
-                            [
-                                'buy_date' => $formattedTglBeli,
-                                'service_date' => $formattedTglService,
-                                'km' => $data['km'],
-                                'user_id' => $this->user_id,
-                            ]
-                        );
-                        $cekKpb->notes()->updateOrCreate([
-                            'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM Service di Excel ({$data['km']}) lebih besar dari KM Service setelahnya di database ".$rekapOnly['km']." pada KPB ".$rekapOnly['service_id'],
-                        ]);
-                    }
-                }
-            }
-            //Buat cek KM untuk service sekarang apakah KM lebih kecil dari service sebelumnya
-            else {
-                if($data['km'] <= $rekapOnly['km'] && $data['service_ke'] > 1) {
-                    if ($this->context instanceof Command) {
-                        $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM Service di Excel ({$data['km']}) lebih kecil atau sama dengan KM Service sebelumnya di database ".$rekapOnly['km']);
-                    } else {
-                        $cekKpb = CekKpb::updateOrCreate(
-                            [
-                                'engine' => $data['no_engine'],
-                                'service_id' => $data['service_ke'],
-                                'file_name' => $this->fileName,
-                            ],
-                            [
-                                'buy_date' => $formattedTglBeli,
-                                'service_date' => $formattedTglService,
-                                'km' => $data['km'],
-                                'user_id' => $this->user_id,
-                            ]
-                        );
-                        $cekKpb->notes()->updateOrCreate([
-                            'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM Service di Excel ({$data['km']}) lebih kecil atau sama dengan KM Service sebelumnya di database ".$rekapOnly['km'],
-                        ]);
-                    }
-                }
-            }
+        // //cek km excel jika lebih kecil dari list km yang ada diarray
+        // foreach($getRekaps as $key => $rekapOnly) {
+        //     //Buat cek KM untuk service sekarang apakah KM lebih besar dari service setelahnya
+        //     if($rekapOnly['service_id'] > $data['service_ke']) {
+        //         if($data['km'] > $rekapOnly['km']) {
+        //             if($this->context instanceof Command) {
+        //                 $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM Service di Excel ({$data['km']}) lebih besar dari KM Service setelahnya di database ".$rekapOnly['km']." pada KPB ".$rekapOnly['service_id']);
+        //             } else {
+        //                 $cekKpb = CekKpb::updateOrCreate(
+        //                     [
+        //                         'engine' => $data['no_engine'],
+        //                         'service_id' => $data['service_ke'],
+        //                         'file_name' => $this->fileName,
+        //                     ],
+        //                     [
+        //                         'buy_date' => $formattedTglBeli,
+        //                         'service_date' => $formattedTglService,
+        //                         'km' => $data['km'],
+        //                         'user_id' => $this->user_id,
+        //                     ]
+        //                 );
+        //                 $cekKpb->notes()->updateOrCreate([
+        //                     'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM Service di Excel ({$data['km']}) lebih besar dari KM Service setelahnya di database ".$rekapOnly['km']." pada KPB ".$rekapOnly['service_id'],
+        //                 ]);
+        //             }
+        //         }
+        //     }
+        //     //Buat cek KM untuk service sekarang apakah KM lebih kecil dari service sebelumnya
+        //     else {
+        //         if($data['km'] <= $rekapOnly['km'] && $data['service_ke'] > 1) {
+        //             if ($this->context instanceof Command) {
+        //                 $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM Service di Excel ({$data['km']}) lebih kecil atau sama dengan KM Service sebelumnya di database ".$rekapOnly['km']);
+        //             } else {
+        //                 $cekKpb = CekKpb::updateOrCreate(
+        //                     [
+        //                         'engine' => $data['no_engine'],
+        //                         'service_id' => $data['service_ke'],
+        //                         'file_name' => $this->fileName,
+        //                     ],
+        //                     [
+        //                         'buy_date' => $formattedTglBeli,
+        //                         'service_date' => $formattedTglService,
+        //                         'km' => $data['km'],
+        //                         'user_id' => $this->user_id,
+        //                     ]
+        //                 );
+        //                 $cekKpb->notes()->updateOrCreate([
+        //                     'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM Service di Excel ({$data['km']}) lebih kecil atau sama dengan KM Service sebelumnya di database ".$rekapOnly['km'],
+        //                 ]);
+        //             }
+        //         }
+        //     }
 
-            //Buat cek Tanggal service untuk service sekarang apakah Tanggal service lebih besar dari service setelahnya
-            if($rekapOnly['service_id'] > $data['service_ke']) {
-                if($formattedTglService > $rekapOnly['service_date']) {
-                    if($this->context instanceof Command) {
-                        $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Service di Excel ($formattedTglService) lebih besar dari Tgl Service setelahnya di database ".$this->formatTanggalExcel($rekapOnly['service_date'])." pada KPB ".$rekapOnly['service_id']);
-                    } else {
-                        $cekKpb = CekKpb::updateOrCreate(
-                            [
-                                'engine' => $data['no_engine'],
-                                'service_id' => $data['service_ke'],
-                                'file_name' => $this->fileName,
-                            ],
-                            [
-                                'buy_date' => $formattedTglBeli,
-                                'service_date' => $formattedTglService,
-                                'km' => $data['km'],
-                                'user_id' => $this->user_id,
-                            ]
-                        );
-                        $cekKpb->notes()->updateOrCreate([
-                            'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Service di Excel (".$this->formatTanggalExcel($data['tgl_service']).") lebih besar dari Tgl Service setelahnya di database ".$this->formatTanggalExcel($rekapOnly['service_date'])." pada KPB ".$rekapOnly['service_id'],
-                        ]);
-                    }
-                }
-            }
-            //Buat cek Tanggal service untuk service sekarang apakah Tanggal service lebih kecil dari service sebelumnya
-            else {
-                if($formattedTglService <= $rekapOnly['service_date'] && $data['service_ke'] > 1) {
-                    if ($this->context instanceof Command) {
-                        $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Service di Excel ($formattedTglService) lebih kecil atau sama dengan Tgl Service sebelumnya di database ".$this->formatTanggalExcel($rekapOnly['service_date']));
-                    } else {
-                        $cekKpb = CekKpb::updateOrCreate(
-                            [
-                                'engine' => $data['no_engine'],
-                                'service_id' => $data['service_ke'],
-                                'file_name' => $this->fileName,
-                            ],
-                            [
-                                'buy_date' => $formattedTglBeli,
-                                'service_date' => $formattedTglService,
-                                'km' => $data['km'],
-                                'user_id' => $this->user_id,
-                            ]
-                        );
-                        $cekKpb->notes()->updateOrCreate([
-                            'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Service di Excel (".$this->formatTanggalExcel($data['tgl_service']).") lebih kecil atau sama dengan Tgl Service sebelumnya di database ".$this->formatTanggalExcel($rekapOnly['service_date']),
-                        ]);
-                    }
-                }
-            }
-        }
+        //     //Buat cek Tanggal service untuk service sekarang apakah Tanggal service lebih besar dari service setelahnya
+        //     if($rekapOnly['service_id'] > $data['service_ke']) {
+        //         if($formattedTglService > $rekapOnly['service_date']) {
+        //             if($this->context instanceof Command) {
+        //                 $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Service di Excel ($formattedTglService) lebih besar dari Tgl Service setelahnya di database ".$this->formatTanggalExcel($rekapOnly['service_date'])." pada KPB ".$rekapOnly['service_id']);
+        //             } else {
+        //                 $cekKpb = CekKpb::updateOrCreate(
+        //                     [
+        //                         'engine' => $data['no_engine'],
+        //                         'service_id' => $data['service_ke'],
+        //                         'file_name' => $this->fileName,
+        //                     ],
+        //                     [
+        //                         'buy_date' => $formattedTglBeli,
+        //                         'service_date' => $formattedTglService,
+        //                         'km' => $data['km'],
+        //                         'user_id' => $this->user_id,
+        //                     ]
+        //                 );
+        //                 $cekKpb->notes()->updateOrCreate([
+        //                     'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Service di Excel (".$this->formatTanggalExcel($data['tgl_service']).") lebih besar dari Tgl Service setelahnya di database ".$this->formatTanggalExcel($rekapOnly['service_date'])." pada KPB ".$rekapOnly['service_id'],
+        //                 ]);
+        //             }
+        //         }
+        //     }
+        //     //Buat cek Tanggal service untuk service sekarang apakah Tanggal service lebih kecil dari service sebelumnya
+        //     else {
+        //         if($formattedTglService <= $rekapOnly['service_date'] && $data['service_ke'] > 1) {
+        //             if ($this->context instanceof Command) {
+        //                 $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Service di Excel ($formattedTglService) lebih kecil atau sama dengan Tgl Service sebelumnya di database ".$this->formatTanggalExcel($rekapOnly['service_date']));
+        //             } else {
+        //                 $cekKpb = CekKpb::updateOrCreate(
+        //                     [
+        //                         'engine' => $data['no_engine'],
+        //                         'service_id' => $data['service_ke'],
+        //                         'file_name' => $this->fileName,
+        //                     ],
+        //                     [
+        //                         'buy_date' => $formattedTglBeli,
+        //                         'service_date' => $formattedTglService,
+        //                         'km' => $data['km'],
+        //                         'user_id' => $this->user_id,
+        //                     ]
+        //                 );
+        //                 $cekKpb->notes()->updateOrCreate([
+        //                     'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Service di Excel (".$this->formatTanggalExcel($data['tgl_service']).") lebih kecil atau sama dengan Tgl Service sebelumnya di database ".$this->formatTanggalExcel($rekapOnly['service_date']),
+        //                 ]);
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     /**
