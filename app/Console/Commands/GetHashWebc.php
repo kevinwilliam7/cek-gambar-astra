@@ -33,7 +33,9 @@ class GetHashWebc extends Command
         $difference_hash = new ImageHash(new DifferenceHash());
         $data = AstraWebc::where(function($q){
             $q->whereNull('dhash')->orWhereNull('phash');
-        })->get();
+        })
+        ->where('kode_ahass', '=', '03720')
+        ->get();
         foreach ($data as $key => $item) {
             try {
                 $url = $item->filename;

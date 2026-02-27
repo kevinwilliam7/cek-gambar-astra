@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\RekapKpb;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ahass;
 use App\Models\Motor;
 use App\Models\RekapKpb;
 use App\Services\DatatableService;
@@ -76,12 +77,16 @@ class RekapKpbController extends Controller
                 'label' => 'Desember'
             ],
         ];
+        $jenis_dealer = Ahass::select('jenis_dealer')
+            ->distinct()
+            ->pluck('jenis_dealer');
         $data = [
             'motor' => $motor,
             'status_description' => $status_description,
             'service_id' => $service_id,
             'tahun' => $tahun,
             'bulan' => $bulan,
+            'jenis_dealer' => $jenis_dealer
         ];
         return view('rekap_kpb.index', compact('data'));
     }
@@ -225,6 +230,11 @@ class RekapKpbController extends Controller
                     foreach ($values as $val) {
                         $query->orWhere('month', 'ILIKE', "{$val}_%");
                     }
+                });
+            }
+            if ($request->filled('jenis_dealer')) {
+                $q->whereHas('ahass', function ($query) use ($request) {
+                    $query->whereIn('jenis_dealer', $request->input('jenis_dealer', []));
                 });
             }
         });

@@ -3,12 +3,10 @@
 namespace App\Imports;
 
 use App\Models\AstraWebc;
-use App\Models\RekapKpb;
 use Maatwebsite\Excel\Row;
 use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
-use Maatwebsite\Excel\Concerns\WithLimit;
 
 class WebcImport implements OnEachRow, WithHeadingRow, WithChunkReading
 {
@@ -21,6 +19,12 @@ class WebcImport implements OnEachRow, WithHeadingRow, WithChunkReading
         $this->command = $command;
         $this->month = $month;
         $this->year = $year;
+    }
+
+    public function startRow(): int
+    {
+        return 5;           // ← mulai baca dari baris ke-5 (baris 1-4 dilewati)
+        // atau return 12;  // contoh loncat ke baris 12
     }
 
     public function onRow(Row $row)

@@ -328,6 +328,12 @@ class CekKpbImport implements ToCollection, WithMultipleSheets, WithHeadingRow
      */
     protected function checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService) {
         $rekap_kpbs = $this->rekapKpbCache->get($data['no_engine'] ?? null)[0] ?? null;
+        if($rekap_kpbs === null && $data['service_ke'] > 1) {
+            if ($this->context instanceof Command) {
+                $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli Excel {$formattedTglBeli} - Tidak ada data rekap KPB di database.");
+            }
+        }
+
         if(isset($rekap_kpbs) && $rekap_kpbs->buy_date !== $formattedTglBeli) {
             if ($this->context instanceof Command) {
                 $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli tidak sesuai (DB: {$rekap_kpbs->buy_date}, Excel: {$formattedTglBeli})");

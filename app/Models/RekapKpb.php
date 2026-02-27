@@ -10,4 +10,9 @@ class RekapKpb extends Model
     use SoftDeletes;
 
     protected $guarded = [];
+
+    public function ahass()
+    {
+        return $this->hasOne(Ahass::class, 'kode_ahass', 'ahass_code');
+    }
 }

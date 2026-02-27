@@ -2,13 +2,12 @@
 
 namespace App\Imports;
 
-use App\Models\RekapKpb;
-use Maatwebsite\Excel\Row;
-use Maatwebsite\Excel\Concerns\OnEachRow;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\ToArray;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 
-class RekapKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading
+class RekapKpbImport implements ToArray, WithHeadingRow, WithChunkReading
 {
     protected $command;
     protected $month;
@@ -17,51 +16,86 @@ class RekapKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading
     public function __construct($command = null, $month = null, $year = null)
     {
         $this->command = $command;
-        $this->month = $month;
-        $this->year = $year;
+        $this->month   = $month;
+        $this->year    = $year;
     }
 
-    public function onRow(Row $row)
+    public function array(array $rows)
     {
-        $data = $row->toArray();
-        RekapKpb::updateOrCreate(
+        $start = microtime(true);
+        $payload = [];
+
+        foreach ($rows as $row) {
+            $payload[] = [
+                'month'              => $this->month . '_' . $this->year,
+                'ttpk'               => $row['ttpk'] ?? null,
+                'service_id'         => $row['service_id'] ?? null,
+                'engine'             => $row['engine'] ?? null,
+
+                'md_code'            => $row['md_code'] ?? null,
+                'md_name'            => $row['md_name'] ?? null,
+                'ahass_code'         => $row['ahass_code'] ?? null,
+                'ahass_name'         => $row['ahass_name'] ?? null,
+                'type'               => $row['type'] ?? null,
+                'frame'              => $row['frame'] ?? null,
+                'payment_request'    => $row['payment_request'] ?? null,
+                'kpb'                => $row['kpb'] ?? null,
+                'buy_date'           => $row['buy_date'] ?? null,
+                'km'                 => isset($row['usage_km'])
+                    ? str_replace(',', '', $row['usage_km'])
+                    : null,
+                'service_date'       => $row['service_date'] ?? null,
+                'claim_letter'       => $row['claim_letter'] ?? null,
+                'received_date'      => $row['received_date'] ?? null,
+                'upload_date'        => $row['upload_date'] ?? null,
+                'due_date'           => $row['due_date'] ?? null,
+                'delay'              => $row['delay'] ?? null,
+                'ttpk_date'          => $row['ttpk_date'] ?? null,
+                'status_description' => $row['status_description'] ?? null,
+                'unpaid_reason'      => $row['unpaid_reason'] ?? null,
+                'dispensation'       => $row['dispensation'] ?? null,
+            ];
+        }
+
+        DB::table('rekap_kpbs')->upsert(
+            $payload,
+            // UNIQUE KEY (sesuai constraint kamu)
+            ['month', 'ttpk', 'service_id', 'engine'],
+            // kolom yang di-update
             [
-                'month' => $this->month . '_' . $this->year,
-                'ttpk' => $data['ttpk'] ?? null,
-                'service_id' => $data['service_id'] ?? null,
-                'engine' => $data['engine'] ?? null,
-            ],
-            [
-                'md_code' => $data['md_code'] ?? null,
-                'md_name' => $data['md_name'] ?? null,
-                'ahass_code' => $data['ahass_code'] ?? null,
-                'ahass_name' => $data['ahass_name'] ?? null,
-                'type' => $data['type'] ?? null,
-                'frame' => $data['frame'] ?? null,
-                'payment_request' => $data['payment_request'] ?? null,
-                'kpb' => $data['kpb'] ?? null,
-                'buy_date' => $data['buy_date'] ?? null,
-                'km' => str_replace(',', '', $data['usage_km']) ?? null,
-                'service_date' => $data['service_date'] ?? null,
-                'claim_letter' => $data['claim_letter'] ?? null,
-                'received_date' => $data['received_date'] ?? null,
-                'upload_date' => $data['upload_date'] ?? null,
-                'due_date' => $data['due_date'] ?? null,
-                'delay' => $data['delay'] ?? null,
-                'ttpk_date' => $data['ttpk_date'] ?? null,
-                'status_description' => $data['status_description'] ?? null,
-                'unpaid_reason' => $data['unpaid_reason'] ?? null,
-                'dispensation' => $data['dispensation'] ?? null,
+                'md_code',
+                'md_name',
+                'ahass_code',
+                'ahass_name',
+                'type',
+                'frame',
+                'payment_request',
+                'kpb',
+                'buy_date',
+                'km',
+                'service_date',
+                'claim_letter',
+                'received_date',
+                'upload_date',
+                'due_date',
+                'delay',
+                'ttpk_date',
+                'status_description',
+                'unpaid_reason',
+                'dispensation',
             ]
         );
-
+        $end = microtime(true);
         if ($this->command) {
-            $this->command->info($this->year . "_" . $this->month . " Berhasil import row: " . $data['engine'] ?? '');
+            $this->command->info(
+                "{$this->year}_{$this->month} UPSERT " . count($payload) . " rows"
+            );
+            $this->command->info("Time taken: " . ($end - $start) . " seconds");
         }
     }
 
     public function chunkSize(): int
     {
-        return 1000; // proses 1000 baris per sekali load
+        return 1000;
     }
 }

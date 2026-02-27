@@ -90,15 +90,33 @@ class DuplikasiGambar extends Command
                 // ->where('km', $km)
                 ->get();
 
+            // if ($duplicates->count() > 1) {
+            //     $duplikasi[] = [
+            //         'nomor_mesin' => $a->nomor_mesin,
+            //         'kpb_type' => $a->kpb_type,
+            //         'jumlah_duplikat' => $duplicates->count() - 1,
+            //         'phash' => $a->phash,
+            //         'filename' => $a->filename,
+            //         'detail' => $duplicates->map(fn($w) => "{$w->nomor_mesin} / {$w->filename}")->toArray(),
+            //     ];
+            // }
+
             if ($duplicates->count() > 1) {
-                $duplikasi[] = [
-                    'nomor_mesin' => $a->nomor_mesin,
-                    'kpb_type' => $a->kpb_type,
-                    'jumlah_duplikat' => $duplicates->count() - 1,
-                    'phash' => $a->phash,
-                    'filename' => $a->filename,
-                    'detail' => $duplicates->map(fn($w) => "{$w->nomor_mesin} {$w->kpb_type} {$w->no_polisi} {$w->filename}")->toArray(),
-                ];
+                // Ambil semua duplikat KECUALI record utama ($a)
+                $otherDuplicates = $duplicates->where('id', '!=', $a->id);
+
+                if ($otherDuplicates->count() > 0) {  // pastikan masih ada yang lain setelah di-exclude
+                    $duplikasi[] = [
+                        'nomor_mesin'     => $a->nomor_mesin,
+                        'kpb_type'        => $a->kpb_type,
+                        'jumlah_duplikat' => $otherDuplicates->count(),  // hitung yang lain saja
+                        'phash'           => $a->phash,
+                        'filename'        => $a->filename,
+                        'detail'          => $otherDuplicates->map(function ($w) {
+                            return "{$w->nomor_mesin} / {$w->filename}";
+                        })->toArray(),
+                    ];
+                }
             }
 
             $progress->advance();
