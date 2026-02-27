@@ -673,7 +673,7 @@
                 document.getElementById('clear-filters').addEventListener('click', function() {
                     // Uncheck semua checkbox
                     document.querySelectorAll(
-                        'input[type="checkbox"][name="service_id"], input[type="checkbox"][name="type_motor"], input[type="checkbox"][name="status_description"], input[type="checkbox"][name="tahun"], input[type="checkbox"][name="bulan"]'
+                        'input[type="checkbox"][name="service_id"], input[type="checkbox"][name="type_motor"], input[type="checkbox"][name="status_description"], input[type="checkbox"][name="tahun"], input[type="checkbox"][name="bulan"][name="jenis_dealer"]'
                     ).forEach(cb => {
                         cb.checked = false;
                     });
