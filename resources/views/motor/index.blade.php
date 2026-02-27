@@ -309,7 +309,7 @@
                     // close modal
                     HSOverlay.close('#hs-large-modal');
                     // reload jobs
-                    table1.draw();
+                    $('#table1').DataTable().draw();
                     data?.status == false ? '' : confetti();
                 })
                 .catch(error => {
