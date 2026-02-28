@@ -118,25 +118,45 @@ class MotorController extends Controller
                     );
                 }
             }
+            // ... setelah update Motor dan KPB kriteria ...
+
             $motor = Motor::findOrFail($request->id);
-            if (isset($request->link_foto) && is_array($request->link_foto) && count($request->link_foto) > 0) {
-                // 1. Ambil semua filename yang dikirim sekarang
-                $newFilenames = array_values($request->link_foto); // pastikan indexed array
 
-                // 2. Hapus gambar yang tidak ada lagi di list baru
-                $motor->images()
-                    ->whereNotIn('filename', $newFilenames)
-                    ->delete();
+            if (isset($request->link_foto) && is_array($request->link_foto)) {
 
-                // 3. Update / create gambar yang dikirim
-                foreach ($request->link_foto as $key => $filename) {
-                    $motor->images()->updateOrCreate(
-                        ['filename' => $filename],
-                        ['deskripsi' => $request->deskripsi_speedometer[$key] ?? null]
-                    );
+                // Filter hanya yang valid (string & tidak kosong setelah trim)
+                $validPhotos = [];
+                $validDescriptions = [];
+
+                foreach ($request->link_foto as $index => $filename) {
+                    $cleanFilename = is_string($filename) ? trim($filename) : '';
+                    if ($cleanFilename !== '') {
+                        $validPhotos[] = $cleanFilename;
+                        // Ambil deskripsi sesuai index asli (jika ada)
+                        $validDescriptions[] = $request->deskripsi_speedometer[$index] ?? null;
+                    }
+                    // Jika index tidak ada di deskripsi, biarkan null
+                }
+
+                if (count($validPhotos) > 0) {
+                    // Optional: hapus gambar lama yang tidak ada di list baru
+                    $motor->images()
+                        ->whereNotIn('filename', $validPhotos)
+                        ->delete();
+
+                    // Simpan / update hanya yang valid
+                    foreach ($validPhotos as $idx => $filename) {
+                        $motor->images()->updateOrCreate(
+                            ['filename' => $filename],
+                            ['deskripsi' => $validDescriptions[$idx] ?? null]
+                        );
+                    }
+                } else {
+                    // Jika setelah filter jadi kosong → hapus semua
+                    $motor->images()->delete();
                 }
             } else {
-                // Tidak ada link_foto → hapus semua
+                // Tidak ada field link_foto sama sekali → hapus semua
                 $motor->images()->delete();
             }
             DB::commit();
