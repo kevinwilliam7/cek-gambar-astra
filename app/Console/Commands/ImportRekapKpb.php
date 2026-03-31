@@ -31,7 +31,8 @@ class ImportRekapKpb extends Command
             $month_file = $this->argument('month'); // ambil dari input terminal
             $year_file = $this->argument('year');   // ambil dari input terminal
             $name_file = 'KPB_'.$month_file.'_'.$year_file.'.xlsx';
-            $excel = public_path('/storage/assets/rekap_kpb/'.$year_file.'/' . $name_file);
+            // $excel = public_path('/storage/assets/rekap_kpb/'.$year_file.'/' . $name_file);
+            $excel = storage_path('assets/rekap_kpb/'.$year_file.'/' . $name_file);
 
             if (!file_exists($excel)) {
                 $this->error("File tidak ditemukan: {$excel}");

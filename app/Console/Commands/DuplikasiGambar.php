@@ -113,7 +113,7 @@ class DuplikasiGambar extends Command
                         'phash'           => $a->phash,
                         'filename'        => $a->filename,
                         'detail'          => $otherDuplicates->map(function ($w) {
-                            return "{$w->nomor_mesin} / {$w->filename}";
+                            return "{$w->nomor_mesin} / {$w->filename} / tgl_service: {$w->tanggal_claim}";
                         })->toArray(),
                     ];
                 }

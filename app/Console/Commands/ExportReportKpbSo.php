@@ -237,9 +237,9 @@ class ExportReportKpbSo extends Command
                             'service_ke'  => $servisId,
                             'status'      => $ket,
                             'kode_nosin'  => $kode_nosin.'-'.$servisId,
-                            'material'    => $material,
-                            'jasa'        => $jasa,
-                            'pokok'       => $pokok,
+                            'material'    => $material ?? 0,
+                            'jasa'        => $jasa ?? 0,
+                            'pokok'       => $pokok ?? 0,
                         ];
                     }
                 }
@@ -289,18 +289,17 @@ class ExportReportKpbSo extends Command
                     foreach ($header as $idx => $colName) {
                         $colName = strtolower(trim($colName));
                         if (in_array($colName, [
-                            'no. surat klaim', 'no_mesin','kpb_type','tanggal_beli','tanggal_claim','km', 'noted'
+                            'no. surat klaim', 'no_mesin','kpb_type','tglb star','tgls star','km star', 'noted'
                         ])) {
                             $colMap[$colName] = $idx;
                         }
                     }
-
                     // CEK apakah semua kolom wajib ada
                     if (!isset($colMap['kpb_type']) ||
                         !isset($colMap['no_mesin']) ||
-                        !isset($colMap['tanggal_beli']) ||
-                        !isset($colMap['tanggal_claim']) ||
-                        !isset($colMap['km']) ||
+                        !isset($colMap['tglb star']) ||
+                        !isset($colMap['tgls star']) ||
+                        !isset($colMap['km star']) ||
                         !isset($colMap['noted']) ||
                         !isset($colMap['no. surat klaim'])) {
                         $this->warn("Kolom wajib tidak lengkap pada file: {$namaFile}");
@@ -314,9 +313,9 @@ class ExportReportKpbSo extends Command
                         if (
                             empty($row[$colMap['kpb_type']]) ||
                             empty($row[$colMap['no_mesin']])   ||
-                            empty($row[$colMap['tanggal_beli']])    ||
-                            empty($row[$colMap['tanggal_claim']]) ||
-                            empty($row[$colMap['km']]) ||
+                            empty($row[$colMap['tglb star']])    ||
+                            empty($row[$colMap['tgls star']]) ||
+                            empty($row[$colMap['km star']]) ||
                             empty($row[$colMap['no. surat klaim']])
                         ) {
                             continue;
@@ -345,6 +344,10 @@ class ExportReportKpbSo extends Command
                             "KPB2" => 'B',
                             "KPB3" => 'C',
                             "KPB4" => 'D',
+                            "1" => 'A',
+                            "2" => 'B',
+                            "3" => 'C',
+                            "4" => 'D',
                             default => '',
                         };
                         $key = substr($nosin, 0, 5) . '|' . $servisId;
@@ -361,9 +364,9 @@ class ExportReportKpbSo extends Command
                             'service_ke'  => $servisId,
                             'status'      => $ket,
                             'kode_nosin'  => $kode_nosin.'-'.$servisId,
-                            'material'    => $material,
-                            'jasa'        => $jasa,
-                            'pokok'       => $pokok,
+                            'material'    => $material ?? 0,
+                            'jasa'        => $jasa ?? 0,
+                            'pokok'       => $pokok ?? 0,
                         ];
                     }
                 }

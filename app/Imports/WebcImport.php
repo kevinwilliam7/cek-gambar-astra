@@ -21,12 +21,6 @@ class WebcImport implements OnEachRow, WithHeadingRow, WithChunkReading
         $this->year = $year;
     }
 
-    public function startRow(): int
-    {
-        return 5;           // ← mulai baca dari baris ke-5 (baris 1-4 dilewati)
-        // atau return 12;  // contoh loncat ke baris 12
-    }
-
     public function onRow(Row $row)
     {
         $sheetName = $row->getDelegate()->getWorksheet()->getTitle();
@@ -41,6 +35,26 @@ class WebcImport implements OnEachRow, WithHeadingRow, WithChunkReading
         }
 
         if (str_contains($data['photo_url'], 'https') === true) {
+            $updateData = [
+                'nama_region' => $data['nama_region'],
+                'nama_ahass' => $data['nama_ahass'],
+                'nomor_transaksi' => $data['nomor_transaksi'],
+                'nama_customer' => $data['nama_customer'] ?? null,
+                'no_handphone' => $data['no_handphone'] ?? null,
+                "type_motor" => $data['type_motor'] ?? null,
+                "no_polisi" => $data['no_polisi'] ?? null,
+                "tanggal_beli" => $data['tanggal_beli'] ?? null,
+                "tanggal_claim" => $data['tanggal_claim'] ?? null,
+                "validitas" => $data['validitas'],
+                "no_rangka" => $data['no_rangka'] ?? null,
+                "filename" => $data['photo_url'],
+            ];
+
+            // Jika sheet 1
+            if ($sheetName === 'Sheet1') {
+                $updateData['current_excel'] = true;
+            }
+
             AstraWebc::updateOrCreate(
                 [
                     'kode_ahass' => $data['kode_ahass'],
@@ -49,20 +63,7 @@ class WebcImport implements OnEachRow, WithHeadingRow, WithChunkReading
                     "km" => $data['km'] ?? null,
                     'nomor_pkb' => $data['pkb_number'] ?? null,
                 ],
-                [
-                    'nama_region' => $data['nama_region'],
-                    'nama_ahass' => $data['nama_ahass'],
-                    'nomor_transaksi' => $data['nomor_transaksi'],
-                    'nama_customer' => $data['nama_customer'] ?? null,
-                    'no_handphone' => $data['no_handphone'] ?? null,
-                    "type_motor" => $data['type_motor'] ?? null,
-                    "no_polisi" => $data['no_polisi'] ?? null,
-                    "tanggal_beli" => $data['tanggal_beli'] ?? null,
-                    "tanggal_claim" => $data['tanggal_claim'] ?? null,
-                    "validitas" => $data['validitas'],
-                    "no_rangka" => $data['no_rangka'] ?? null,
-                    "filename" => $data['photo_url'],
-                ],
+                $updateData
             );
         } else {
             if ($this->command) {
