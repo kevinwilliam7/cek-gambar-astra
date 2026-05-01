@@ -137,25 +137,25 @@ class ExportReportKpb extends Command
         $sheetFisikApproved = $export->createSheet();
         $sheetFisikApproved->setTitle('DATA APPROVED FISIK');
         $sheetFisikApproved->fromArray($headers, null, 'A1');
-        $sheetFisikApproved->fromArray($rowsFisikApproved, null, 'A2');
+        $sheetFisikApproved->fromArray($rowsFisikApproved, null, 'A2', true);
 
         // Sheet Digital Approved
         $sheetDigitalApproved = $export->createSheet();
         $sheetDigitalApproved->setTitle('DATA APPROVED DIGITAL');
         $sheetDigitalApproved->fromArray($headers, null, 'A1');
-        $sheetDigitalApproved->fromArray($rowsDigitalApproved, null, 'A2');
+        $sheetDigitalApproved->fromArray($rowsDigitalApproved, null, 'A2', true);
 
         // Sheet Fisik Rejected
         $sheetFisikRejected = $export->createSheet();
         $sheetFisikRejected->setTitle('DATA REJECTED FISIK');
         $sheetFisikRejected->fromArray($headers, null, 'A1');
-        $sheetFisikRejected->fromArray($rowsFisikRejected, null, 'A2');
+        $sheetFisikRejected->fromArray($rowsFisikRejected, null, 'A2', true);
 
         // Sheet Digital Rejected
         $sheetDigitalRejected = $export->createSheet();
         $sheetDigitalRejected->setTitle('DATA REJECTED DIGITAL');
         $sheetDigitalRejected->fromArray($headers, null, 'A1');
-        $sheetDigitalRejected->fromArray($rowsDigitalRejected, null, 'A2');
+        $sheetDigitalRejected->fromArray($rowsDigitalRejected, null, 'A2', true);
 
         //Sheet Lanjutan Data Klaim
         $dataKlaim = $this->buildDataKlaim(

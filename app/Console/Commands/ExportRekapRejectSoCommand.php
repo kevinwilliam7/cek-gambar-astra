@@ -41,7 +41,7 @@ class ExportRekapRejectSoCommand extends Command
 
         // Baca file masing-masing folder
         $rowsFisik   = $this->readFolderFisik($folderPathFisik, "Fisik");
-        $rowsDigital = $this->readFolderDigital($folderPathDigital, "Digital");
+        $rowsDigital = $this->readFolderFisik($folderPathDigital, "Digital");
 
         // --- Export Excel baru ---
         $export = new Spreadsheet();
@@ -106,79 +106,6 @@ class ExportRekapRejectSoCommand extends Command
     /**
      * Baca semua file Excel Fisik dalam folder tertentu & return data baris
      */
-    // private function readFolderFisikAA(string $folderPath, string $label = ''): array
-    // {
-    //     $rowsData = [];
-
-    //     if (!File::exists($folderPath)) {
-    //         $this->warn("Folder {$label} tidak ditemukan: {$folderPath}");
-    //         return [];
-    //     }
-
-    //     $files = File::files($folderPath);
-    //     $fileKe = 0;
-
-    //     $penomoranExcel = 0;
-    //     foreach ($files as $file) {
-    //         try {
-    //             $fileKe++;
-    //             $reader = IOFactory::createReaderForFile($file->getRealPath());
-    //             $spreadsheet = $reader->load($file->getRealPath());
-    //             // Ambil jumlah sheet
-    //             $jumlahSheet = $spreadsheet->getSheetCount();
-    //             // Ambil nama file (tanpa path)
-    //             $namaFile = basename($file->getRealPath());
-    //             // Ambil list nama sheet
-    //             $namaSheets = $spreadsheet->getSheetNames();
-    //             foreach($namaSheets as $sheet){
-    //                 // dd($sheet);
-    //                 $sheet2 = $spreadsheet->getSheetByName($sheet)->toArray();
-    //                 $header = $sheet2[0];
-
-    //                 // mapping kolom
-    //                 $colMap = [];
-    //                 foreach ($header as $idx => $colName) {
-    //                     $colName = strtolower(trim($colName));
-    //                     if (in_array($colName, ['no engine','service ke-','tgl beli','bulan beli','tahun beli','tgl service','km',''])) {
-    //                         $colMap[$colName] = $idx;
-    //                     }
-
-    //                     if (isset($colMap[''])) {
-    //                         foreach ($sheet2 as $i => $row) {
-    //                             if ($i === 0) continue;
-
-    //                             $ket = $row[$colMap['']] ?? null;
-    //                             if (!empty(trim($ket)) && !str_contains(strtolower($ket), 'revisi') && !str_contains(strtolower($ket), 'dispen')) {
-    //                                 $rowsData[] = [
-    //                                     'No.' => $penomoranExcel+=1,
-    //                                     'nama_ahass'   => preg_replace('/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/', '', ($namaFile ?? '-')),
-    //                                     'nomor_surat'  => $sheet ?? '-',
-    //                                     'engine'       => $row[$colMap['no engine']] ?? null,
-    //                                     'service_ke'   => $row[$colMap['service ke-']] ?? null,
-    //                                     'tgl_beli'     => $row[$colMap['tgl beli']] ?? null,
-    //                                     'tgl_service'  => $row[$colMap['tgl service']] ?? null,
-    //                                     'km'           => $row[$colMap['km']] ?? null,
-    //                                     ''          => $ket,
-    //                                 ];
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //             }
-
-    //             $this->info("Berhasil baca file {$label} ke-{$fileKe}: " . $file->getFilename());
-
-    //         } catch (\Throwable $e) {
-    //             $this->error("Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
-    //         }
-    //     }
-
-    //     return $rowsData;
-    // }
-
-    /**
-     * Baca semua file Excel Fisik dalam folder tertentu & return data baris
-     */
     private function readFolderFisik(string $folderPath, string $label = ''): array
     {
         $rowsData = [];
@@ -211,23 +138,23 @@ class ExportRekapRejectSoCommand extends Command
                         $colName = strtolower(trim($colName));
                         if (in_array($colName, [
                             'no engine','service ke-','tgl beli','bulan beli',
-                            'tahun beli','tgl service','km', 'noted'
+                            'tahun beli','tgl service','km', 'ket', 'keterangan'
                         ])) {
                             $colMap[$colName] = $idx;
                         }
 
                     }
 
-                    // CEK apakah semua kolom wajib ada
-                    if (!isset($colMap['service ke-']) ||
-                        !isset($colMap['no engine']) ||
-                        !isset($colMap['tgl beli']) ||
-                        !isset($colMap['tgl service']) ||
-                        !isset($colMap['km']) ||
-                        !isset($colMap['noted'])) {
+                    // Resolve 'ket' atau 'keterangan' → selalu pakai key 'ket'
+                    $colMap['ket'] = $colMap['ket'] ?? $colMap['keterangan'] ?? null;
 
-                        $this->warn("Kolom wajib tidak lengkap pada file: {$namaFile}");
-                        continue; // skip sheet
+                    // CEK apakah semua kolom wajib ada
+                    $requiredCols = ['service ke-', 'no engine', 'tgl beli', 'tgl service', 'km', 'ket'];
+                    $missingCols  = array_filter($requiredCols, fn($col) => !isset($colMap[$col]));
+
+                    if (!empty($missingCols)) {
+                        $this->warn("Kolom wajib tidak lengkap pada file: {$namaFile}. Kolom missing: " . implode(', ', $missingCols));
+                        continue;
                     }
 
                     // 2) PROSES ROW SEKALI SAJA (TIDAK DI DALAM LOOP HEADER)
@@ -244,8 +171,8 @@ class ExportRekapRejectSoCommand extends Command
                             continue;
                         }
 
-                        if (isset($colMap['noted'])) {
-                            $ket = $row[$colMap['noted']] ?? null;
+                        if (isset($colMap['ket'])) {
+                            $ket = $row[$colMap['ket']] ?? null;
                             if (!empty(trim($ket)) && !str_contains(strtolower($ket), 'revisi') && !str_contains(strtolower($ket), 'dispen')) {
                                 $rowsData[] = [
                                     'No.' => $penomoranExcel+=1,
@@ -256,7 +183,7 @@ class ExportRekapRejectSoCommand extends Command
                                     'tgl_beli'     => $row[$colMap['tgl beli']] ?? null,
                                     'tgl_service'  => $row[$colMap['tgl service']] ?? null,
                                     'km'           => $row[$colMap['km']] ?? null,
-                                    ''             => $ket,
+                                    'ket'          => $ket,
                                 ];
                             }
                         }
@@ -272,106 +199,6 @@ class ExportRekapRejectSoCommand extends Command
 
         return $rowsData;
     }
-
-    /**
-     * Baca semua file Excel Digital dalam folder tertentu & return data baris
-     */
-    // private function readFolderDigitalaaa(string $folderPath, string $label = ''): array
-    // {
-    //     $rowsData = [];
-
-    //     if (!File::exists($folderPath)) {
-    //         $this->warn("Folder {$label} tidak ditemukan: {$folderPath}");
-    //         return [];
-    //     }
-
-    //     // Ambil semua file, abaikan file sementara Excel (~$...)
-    //     $files = collect(File::files($folderPath))
-    //         ->reject(fn($f) => str_starts_with($f->getFilename(), '~$'));
-
-    //     $fileKe = 0;
-    //     $penomoranExcel = 0;
-
-    //     foreach ($files as $file) {
-    //         try {
-    //             $fileKe++;
-    //             $reader = IOFactory::createReaderForFile($file->getRealPath());
-    //             $spreadsheet = $reader->load($file->getRealPath());
-
-    //             $namaFile = basename($file->getRealPath());
-    //             $namaSheets = $spreadsheet->getSheetNames();
-
-    //             // 🔍 Log untuk memastikan jumlah sheet
-    //             $this->info("File {$namaFile} punya sheet: " . implode(', ', $namaSheets));
-
-    //             foreach ($namaSheets as $sheetName) {
-    //                 $sheet2 = $spreadsheet->getSheetByName($sheetName)->toArray();
-
-    //                 // Skip sheet kosong
-    //                 if (count($sheet2) <= 1) {
-    //                     $this->warn("Lewati sheet kosong: {$sheetName} di file {$namaFile}");
-    //                     continue;
-    //                 }
-
-    //                 $header = $sheet2[0];
-    //                 $colMap = [];
-
-    //                 // 🔍 Mapping kolom (case-insensitive)
-    //                 foreach ($header as $idx => $colName) {
-    //                     $colName = strtolower(trim($colName));
-    //                     if (in_array($colName, [
-    //                         'no. surat klaim', 'no_mesin', 'kpb_type',
-    //                         'tanggal_beli', 'tanggal_claim', 'km', 'noted'
-    //                     ])) {
-    //                         $colMap[$colName] = $idx;
-    //                     }
-    //                 }
-
-    //                 // Pastikan minimal kolom 'noted' dan 'no_mesin' ada
-    //                 if (!isset($colMap['noted']) || !isset($colMap['no_mesin'])) {
-    //                     $this->warn("Lewati sheet {$sheetName} di file {$namaFile} (kolom tidak lengkap)");
-    //                     continue;
-    //                 }
-
-    //                 // ✅ Loop baris dimulai di sini — hanya sekali per sheet
-    //                 foreach ($sheet2 as $i => $row) {
-    //                     if ($i === 0) continue;
-
-    //                     $ket = $row[$colMap['noted']] ?? null;
-    //                     $no_mesin = $row[$colMap['no_mesin']] ?? null;
-
-    //                     if (!str_contains(strtolower($ket ?? ''), 'ok')) {
-    //                         if (!empty(trim($no_mesin))) {
-    //                             $rowsData[] = [
-    //                                 'No.'          => ++$penomoranExcel,
-    //                                 'nama_ahass'   => preg_replace(
-    //                                     '/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/',
-    //                                     '',
-    //                                     ($this->cleanValue($namaFile) ?? '-')
-    //                                 ),
-    //                                 'nomor_surat'  => isset($colMap['no. surat klaim'])
-    //                                     ? ($row[$colMap['no. surat klaim']] ?? '-')
-    //                                     : '-',
-    //                                 'engine'       => $row[$colMap['no_mesin']] ?? null,
-    //                                 'service_ke'   => $row[$colMap['kpb_type']] ?? null,
-    //                                 'tgl_beli'     => $row[$colMap['tanggal_beli']] ?? null,
-    //                                 'tgl_service'  => $row[$colMap['tanggal_claim']] ?? null,
-    //                                 'km'           => $row[$colMap['km']] ?? null,
-    //                                 'noted'        => $ket ?? null,
-    //                             ];
-    //                         }
-    //                     }
-    //                 }
-    //             }
-
-    //             $this->info("✅ Berhasil baca file {$label} ke-{$fileKe}: " . $file->getFilename());
-    //         } catch (\Throwable $e) {
-    //             $this->error("❌ Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
-    //         }
-    //     }
-
-    //     return $rowsData;
-    // }
 
     /**
      * Baca semua file Excel Digital dalam folder tertentu & return data baris

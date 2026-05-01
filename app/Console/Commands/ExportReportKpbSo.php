@@ -43,10 +43,12 @@ class ExportReportKpbSo extends Command
 
         // Cache KPB Kriteria dulu biar gak bolak-balik query
         $kpbCache = KpbKriteria::all()->keyBy(fn($item) => $item->kode_nosin . '|' . $item->kpb_service_id);
+        // Cache Ahass juga biar gak bolak-balik query
+        $ahassCache = Ahass::all()->keyBy(fn($item) => $item->kode_ahass);
 
         // Baca file masing-masing folder
-        $rowsFisik   = $this->readFolderFisik($folderPathFisik, "Fisik", $kpbCache);
-        $rowsDigital = $this->readFolderDigital($folderPathDigital, "Digital", $kpbCache);
+        $rowsFisik   = $this->readFolderFisik($folderPathFisik, "Fisik", $kpbCache, $ahassCache);
+        $rowsDigital = $this->readFolderFisik($folderPathDigital, "Digital", $kpbCache, $ahassCache);
 
         // --- Export Excel baru ---
         $export = new Spreadsheet();
@@ -54,16 +56,16 @@ class ExportReportKpbSo extends Command
         // Sheet Fisik
         $sheetFisik = $export->getActiveSheet();
         $sheetFisik->setTitle('FISIK');
-        $headerFisik = ['Nama SO', 'No Surat', 'Nosin','Servis ID','Status','Kode Nosin','Material','Jasa','Pokok'];
-        $sheetFisik->fromArray($headerFisik, null, 'A1');
-        $sheetFisik->fromArray($rowsFisik, null, 'A2');
+        $headerFisik = ['Nama SO', 'No Surat', 'Nosin', 'Servis ID', 'Status', 'Kode Nosin', 'Material', 'Jasa', 'Pokok'];
+        $sheetFisik->fromArray($headerFisik, null, 'A1', true);
+        $sheetFisik->fromArray($rowsFisik, null, 'A2', true);
 
         // Sheet Digital
         $sheetDigital = $export->createSheet();
         $sheetDigital->setTitle('DIGITAL');
-        $headerDigital = ['Nama SO', 'No Surat', 'Nosin','Servis ID','Status','Kode Nosin','Material','Jasa','Pokok'];
-        $sheetDigital->fromArray($headerDigital, null, 'A1');
-        $sheetDigital->fromArray($rowsDigital, null, 'A2');
+        $headerDigital = ['Nama SO', 'No Surat', 'Nosin', 'Servis ID', 'Status', 'Kode Nosin', 'Material', 'Jasa', 'Pokok'];
+        $sheetDigital->fromArray($headerDigital, null, 'A1', true);
+        $sheetDigital->fromArray($rowsDigital, null, 'A2', true);
 
         // Hitung baris terakhir (jumlah data + header)
         $lastRowFisik   = count($rowsFisik) + 1;   // +1 header
@@ -133,7 +135,7 @@ class ExportReportKpbSo extends Command
     /**
      * Baca semua file Excel Fisik dalam folder tertentu & return data baris
      */
-    private function readFolderFisik(string $folderPath, string $label = '', $kpbCache): array
+    private function readFolderFisik(string $folderPath, string $label = '', $kpbCache, $ahassCache): array
     {
         $rowsData = [];
 
@@ -157,7 +159,7 @@ class ExportReportKpbSo extends Command
                 $namaFile = basename($file->getRealPath());
                 $namaSheets = $spreadsheet->getSheetNames();
 
-                foreach($namaSheets as $sheet){
+                foreach ($namaSheets as $sheet) {
                     $sheet2 = $spreadsheet->getSheetByName($sheet)->toArray();
                     $header = $sheet2[0];
 
@@ -166,24 +168,30 @@ class ExportReportKpbSo extends Command
                     foreach ($header as $idx => $colName) {
                         $colName = strtolower(trim($colName));
                         if (in_array($colName, [
-                            'no engine','service ke-','tgl beli','bulan beli',
-                            'tahun beli','tgl service','km', 'noted'
+                            'no engine',
+                            'service ke-',
+                            'tgl beli',
+                            'bulan beli',
+                            'tahun beli',
+                            'tgl service',
+                            'km',
+                            'ket',
+                            'keterangan'
                         ])) {
                             $colMap[$colName] = $idx;
                         }
-
                     }
 
-                    // CEK apakah semua kolom wajib ada
-                    if (!isset($colMap['service ke-']) ||
-                        !isset($colMap['no engine']) ||
-                        !isset($colMap['tgl beli']) ||
-                        !isset($colMap['tgl service']) ||
-                        !isset($colMap['km']) ||
-                        !isset($colMap['noted'])) {
+                    // Resolve 'ket' atau 'keterangan' → selalu pakai key 'ket'
+                    $colMap['ket'] = $colMap['ket'] ?? $colMap['keterangan'] ?? null;
 
-                        $this->warn("Kolom wajib tidak lengkap pada file: {$namaFile}");
-                        continue; // skip sheet
+                    // CEK apakah semua kolom wajib ada
+                    $requiredCols = ['service ke-', 'no engine', 'tgl beli', 'tgl service', 'km', 'ket'];
+                    $missingCols  = array_filter($requiredCols, fn($col) => !isset($colMap[$col]));
+
+                    if (!empty($missingCols)) {
+                        $this->warn("Kolom wajib tidak lengkap pada file: {$namaFile}. Kolom missing: " . implode(', ', $missingCols));
+                        continue;
                     }
 
                     // 2) PROSES ROW SEKALI SAJA (TIDAK DI DALAM LOOP HEADER)
@@ -202,23 +210,23 @@ class ExportReportKpbSo extends Command
                         $nosin = $row[$colMap['no engine']] ?? null;
                         $kode_nosin = substr($nosin, 0, 5);
 
-                        $ket = isset($colMap['noted']) && isset($row[$colMap['noted']])
-                            ? trim($row[$colMap['noted']])
+                        $ket = isset($colMap['ket']) && isset($row[$colMap['ket']])
+                            ? trim($row[$colMap['ket']])
                             : null;
-                        if(!empty($ket)) {
-                            if(str_contains(strtolower($ket), 'revisi')) {
+                        if (!empty($ket)) {
+                            if (str_contains(strtolower($ket), 'revisi')) {
                                 $ket = 'Revisi';
-                            } elseif(str_contains(strtolower($ket), 'dispen')) {
+                            } elseif (str_contains(strtolower($ket), 'dispen')) {
                                 $ket = 'Dispensasi';
                             } else {
                                 $ket = $ket;
                             }
                         } else {
-                            $ket = 'Ok';
+                            $ket = '';
                         }
 
                         $svc = $row[$colMap['service ke-']];
-                        $servisId = match($svc) {
+                        $servisId = match ($svc) {
                             "1" => 'A',
                             "2" => 'B',
                             "3" => 'C',
@@ -231,12 +239,12 @@ class ExportReportKpbSo extends Command
                         $jasa     = $kpb_kriteria ? $kpb_kriteria->jasa : null;
                         $pokok   = $kpb_kriteria ? ($material + $jasa) : null;
                         $rowsData[] = [
-                            'nama_so'     => preg_replace('/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/', '', $namaFile),
+                            'nama_so'     => $ahassCache->get(substr($sheet, 0, 5))->nama_ahass ?? 'Unknown',
                             'no_surat'    => $sheet ?? null,
                             'nosin'       => $nosin,
                             'service_ke'  => $servisId,
                             'status'      => $ket,
-                            'kode_nosin'  => $kode_nosin.'-'.$servisId,
+                            'kode_nosin'  => $kode_nosin . '-' . $servisId,
                             'material'    => $material ?? 0,
                             'jasa'        => $jasa ?? 0,
                             'pokok'       => $pokok ?? 0,
@@ -245,11 +253,10 @@ class ExportReportKpbSo extends Command
                 }
 
                 $this->info("Berhasil baca file {$label} ke-{$fileKe}: " . $file->getFilename());
-
             } catch (\Throwable $e) {
                 $this->error("Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
             }
-            $this->info("Time taken: ".(microtime(true) - $start)." sec");
+            $this->info("Time taken: " . (microtime(true) - $start) . " sec");
         }
 
         return $rowsData;
@@ -280,7 +287,7 @@ class ExportReportKpbSo extends Command
                 $namaFile = basename($file->getRealPath());
                 $namaSheets = $spreadsheet->getSheetNames();
 
-                foreach($namaSheets as $sheet){
+                foreach ($namaSheets as $sheet) {
                     $sheet2 = $spreadsheet->getSheetByName($sheet)->toArray();
                     $header = $sheet2[0];
 
@@ -289,19 +296,27 @@ class ExportReportKpbSo extends Command
                     foreach ($header as $idx => $colName) {
                         $colName = strtolower(trim($colName));
                         if (in_array($colName, [
-                            'no. surat klaim', 'no_mesin','kpb_type','tglb star','tgls star','km star', 'noted'
+                            'no. surat klaim',
+                            'no_mesin',
+                            'kpb_type',
+                            'tglb star',
+                            'tgls star',
+                            'km star',
+                            'noted'
                         ])) {
                             $colMap[$colName] = $idx;
                         }
                     }
                     // CEK apakah semua kolom wajib ada
-                    if (!isset($colMap['kpb_type']) ||
+                    if (
+                        !isset($colMap['kpb_type']) ||
                         !isset($colMap['no_mesin']) ||
                         !isset($colMap['tglb star']) ||
                         !isset($colMap['tgls star']) ||
                         !isset($colMap['km star']) ||
                         !isset($colMap['noted']) ||
-                        !isset($colMap['no. surat klaim'])) {
+                        !isset($colMap['no. surat klaim'])
+                    ) {
                         $this->warn("Kolom wajib tidak lengkap pada file: {$namaFile}");
                         continue; // skip sheet
                     }
@@ -326,10 +341,10 @@ class ExportReportKpbSo extends Command
                         $ket = isset($colMap['noted']) && isset($row[$colMap['noted']])
                             ? trim($row[$colMap['noted']])
                             : null;
-                        if(!empty($ket)) {
-                            if(str_contains(strtolower($ket), 'revisi')) {
+                        if (!empty($ket)) {
+                            if (str_contains(strtolower($ket), 'revisi')) {
                                 $ket = 'Revisi';
-                            } elseif(str_contains(strtolower($ket), 'dispen')) {
+                            } elseif (str_contains(strtolower($ket), 'dispen')) {
                                 $ket = 'Dispensasi';
                             } else {
                                 $ket = $ket;
@@ -339,7 +354,7 @@ class ExportReportKpbSo extends Command
                         }
 
                         $svc = $row[$colMap['kpb_type']];
-                        $servisId = match($svc) {
+                        $servisId = match ($svc) {
                             "KPB1" => 'A',
                             "KPB2" => 'B',
                             "KPB3" => 'C',
@@ -363,7 +378,7 @@ class ExportReportKpbSo extends Command
                             'nosin'       => $nosin,
                             'service_ke'  => $servisId,
                             'status'      => $ket,
-                            'kode_nosin'  => $kode_nosin.'-'.$servisId,
+                            'kode_nosin'  => $kode_nosin . '-' . $servisId,
                             'material'    => $material ?? 0,
                             'jasa'        => $jasa ?? 0,
                             'pokok'       => $pokok ?? 0,
@@ -372,11 +387,10 @@ class ExportReportKpbSo extends Command
                 }
 
                 $this->info("Berhasil baca file {$label} ke-{$fileKe}: " . $file->getFilename());
-
             } catch (\Throwable $e) {
                 $this->error("Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
             }
-            $this->info("Time taken: ".(microtime(true) - $start)." sec");
+            $this->info("Time taken: " . (microtime(true) - $start) . " sec");
         }
 
         return $rowsData;
@@ -405,5 +419,4 @@ class ExportReportKpbSo extends Command
         // Rapikan spasi
         return trim($val);
     }
-
 }
