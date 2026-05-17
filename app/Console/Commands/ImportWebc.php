@@ -4,25 +4,15 @@ namespace App\Console\Commands;
 
 use App\Imports\WebcImport;
 use Illuminate\Console\Command;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Support\Facades\File;
 use Maatwebsite\Excel\Facades\Excel;
 
+#[Signature('import:webc')]
+#[Description('Import Data Webc Excel')]
 class ImportWebc extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'import:webc';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Import Data Webc Excel';
-
     /**
      * Execute the console command.
      */

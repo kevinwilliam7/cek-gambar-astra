@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Models\Ahass;
 use Illuminate\Console\Command;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Support\Facades\File;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -11,11 +13,10 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
+#[Signature('export:rekap-approved-command {month} {year}')]
+#[Description('Rekap data dari file .xls untuk fisik & digital')]
 class ExportRekapApprovedCommand extends Command
 {
-    protected $signature = 'export:rekap-approved-command {month} {year}';
-    protected $description = 'Rekap data dari file .xls untuk fisik & digital';
-
     public function handle()
     {
         $month_file = $this->argument('month');

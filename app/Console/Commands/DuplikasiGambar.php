@@ -4,14 +4,15 @@ namespace App\Console\Commands;
 
 use App\Models\AstraWebc;
 use Illuminate\Console\Command;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\File;
 
+#[Signature('app:duplikasi-gambar {month} {year}')]
+#[Description('Untuk Mengecek Duplikasi Gambar / Foto Motor (interaktif pilih file)')]
 class DuplikasiGambar extends Command
 {
-    protected $signature = 'app:duplikasi-gambar {month} {year}';
-    protected $description = 'Untuk Mengecek Duplikasi Gambar / Foto Motor (interaktif pilih file)';
-
     public function handle()
     {
         $month = $this->argument('month');

@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Models\Ahass;
 use App\Models\KpbKriteria;
 use Illuminate\Console\Command;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Support\Facades\File;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -12,23 +14,11 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
+#[Signature('export:report-kpb {month} {year}')]
+#[Description('Rekap data dari file .xls untuk fisik & digital')]
 class ExportReportKpb extends Command
 {
     protected $list_data = [];
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'export:report-kpb {month} {year}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Rekap data dari file .xls untuk fisik & digital';
-
     /**
      * Execute the console command.
      */

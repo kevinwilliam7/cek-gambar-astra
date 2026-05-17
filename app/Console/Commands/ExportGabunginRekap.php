@@ -3,16 +3,17 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Support\Facades\File;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
+#[Signature('export:gabungin-rekap')]
+#[Description('Merge semua file Excel apa adanya tanpa mengubah kolom')]
 class ExportGabunginRekap extends Command
 {
-    protected $signature = 'export:gabungin-rekap';
-    protected $description = 'Merge semua file Excel apa adanya tanpa mengubah kolom';
-
     public function handle()
     {
         $folderPath = storage_path("assets/stnk_bpkb");

@@ -4,24 +4,14 @@ namespace App\Console\Commands;
 
 use App\Imports\RekapKpbImport;
 use Illuminate\Console\Command;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Maatwebsite\Excel\Facades\Excel;
 
+#[Signature('import:rekap-kpb {month} {year}')]
+#[Description('Import file Rekap KPB berdasarkan bulan dan tahun')]
 class ImportRekapKpb extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'import:rekap-kpb {month} {year}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Import file Rekap KPB berdasarkan bulan dan tahun';
-
     /**
      * Execute the console command.
      */

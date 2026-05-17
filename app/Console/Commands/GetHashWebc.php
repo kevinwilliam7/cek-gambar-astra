@@ -4,26 +4,16 @@ namespace App\Console\Commands;
 
 use App\Models\AstraWebc;
 use Illuminate\Console\Command;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Jenssegers\ImageHash\ImageHash;
 use Jenssegers\ImageHash\Implementations\DifferenceHash;
 use Jenssegers\ImageHash\Implementations\PerceptualHash;
 
+#[Signature('app:get-hash-webc')]
+#[Description('Untuk Mendapatkan Perceptual Hash dan Difference Hash dari Link Foto Webc Astra')]
 class GetHashWebc extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'app:get-hash-webc';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Untuk Mendapatkan Perceptual Hash dan Difference Hash dari Link Foto Webc Astra';
-
     /**
      * Execute the console command.
      */

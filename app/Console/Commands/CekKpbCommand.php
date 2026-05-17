@@ -5,13 +5,14 @@ namespace App\Console\Commands;
 use App\Helpers\ExcelCekKpbHelper;
 use App\Imports\CekKpbImport;
 use Illuminate\Console\Command;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Support\Facades\File;
 
+#[Signature('app:cek-kpb-command {month} {year}')]
+#[Description('Import data KPB dari file Excel')]
 class CekKpbCommand extends Command
 {
-    protected $signature = 'app:cek-kpb-command {month} {year}';
-    protected $description = 'Import data KPB dari file Excel';
-
     public function handle()
     {
         try {
