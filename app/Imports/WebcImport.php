@@ -11,14 +11,10 @@ use Maatwebsite\Excel\Concerns\WithChunkReading;
 class WebcImport implements OnEachRow, WithHeadingRow, WithChunkReading
 {
     protected $command;
-    protected $month;
-    protected $year;
 
-    public function __construct($command = null, $month = null, $year = null)
+    public function __construct($command = null)
     {
         $this->command = $command;
-        $this->month = $month;
-        $this->year = $year;
     }
 
     public function onRow(Row $row)
@@ -67,13 +63,13 @@ class WebcImport implements OnEachRow, WithHeadingRow, WithChunkReading
             );
         } else {
             if ($this->command) {
-                $this->command->warn($sheetName . " " . $this->year . "_" . $this->month . " Skip import webc row: " . ($data['no_mesin'] ?? '') . " karena photo_url tidak valid");
+                $this->command->warn($sheetName . "  Skip import webc row: " . ($data['no_mesin'] ?? '') . " karena photo_url tidak valid");
             }
         }
 
 
         if ($this->command) {
-            $this->command->info($sheetName . " " . $this->year . "_" . $this->month . " Berhasil import webc row: " . ($data['no_mesin'] ?? ''));
+            $this->command->info($sheetName . "  Berhasil import webc row: " . ($data['no_mesin'] ?? ''));
         }
     }
 

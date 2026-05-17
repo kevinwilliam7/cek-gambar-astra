@@ -47,8 +47,8 @@ class ExportReportKpbSo extends Command
         $ahassCache = Ahass::all()->keyBy(fn($item) => $item->kode_ahass);
 
         // Baca file masing-masing folder
-        $rowsFisik   = $this->readFolderFisik($folderPathFisik, "Fisik", $kpbCache, $ahassCache);
-        $rowsDigital = $this->readFolderFisik($folderPathDigital, "Digital", $kpbCache, $ahassCache);
+        $rowsFisik   = $this->readFolder($folderPathFisik, "Fisik", $kpbCache, $ahassCache);
+        $rowsDigital = $this->readFolder($folderPathDigital, "Digital", $kpbCache, $ahassCache);
 
         // --- Export Excel baru ---
         $export = new Spreadsheet();
@@ -135,7 +135,7 @@ class ExportReportKpbSo extends Command
     /**
      * Baca semua file Excel Fisik dalam folder tertentu & return data baris
      */
-    private function readFolderFisik(string $folderPath, string $label = '', $kpbCache, $ahassCache): array
+    private function readFolder(string $folderPath, string $label = '', $kpbCache, $ahassCache): array
     {
         $rowsData = [];
 
@@ -262,139 +262,139 @@ class ExportReportKpbSo extends Command
         return $rowsData;
     }
 
-    /**
-     * Baca semua file Excel Digital dalam folder tertentu & return data baris
-     */
-    private function readFolderDigital(string $folderPath, string $label = '', $kpbCache): array
-    {
-        $rowsData = [];
+    // /**
+    //  * Baca semua file Excel Digital dalam folder tertentu & return data baris
+    //  */
+    // private function readFolderDigital(string $folderPath, string $label = '', $kpbCache): array
+    // {
+    //     $rowsData = [];
 
-        if (!File::exists($folderPath)) {
-            $this->warn("Folder {$label} tidak ditemukan: {$folderPath}");
-            return [];
-        }
+    //     if (!File::exists($folderPath)) {
+    //         $this->warn("Folder {$label} tidak ditemukan: {$folderPath}");
+    //         return [];
+    //     }
 
-        $files = File::files($folderPath);
-        $fileKe = 0;
+    //     $files = File::files($folderPath);
+    //     $fileKe = 0;
 
-        foreach ($files as $file) {
-            $start = microtime(true);
-            try {
-                $fileKe++;
-                $reader = IOFactory::createReaderForFile($file->getRealPath());
-                $spreadsheet = $reader->load($file->getRealPath());
+    //     foreach ($files as $file) {
+    //         $start = microtime(true);
+    //         try {
+    //             $fileKe++;
+    //             $reader = IOFactory::createReaderForFile($file->getRealPath());
+    //             $spreadsheet = $reader->load($file->getRealPath());
 
-                $namaFile = basename($file->getRealPath());
-                $namaSheets = $spreadsheet->getSheetNames();
+    //             $namaFile = basename($file->getRealPath());
+    //             $namaSheets = $spreadsheet->getSheetNames();
 
-                foreach ($namaSheets as $sheet) {
-                    $sheet2 = $spreadsheet->getSheetByName($sheet)->toArray();
-                    $header = $sheet2[0];
+    //             foreach ($namaSheets as $sheet) {
+    //                 $sheet2 = $spreadsheet->getSheetByName($sheet)->toArray();
+    //                 $header = $sheet2[0];
 
-                    // 1) MAP HEADER SEKALI SAJA
-                    $colMap = [];
-                    foreach ($header as $idx => $colName) {
-                        $colName = strtolower(trim($colName));
-                        if (in_array($colName, [
-                            'no. surat klaim',
-                            'no_mesin',
-                            'kpb_type',
-                            'tglb star',
-                            'tgls star',
-                            'km star',
-                            'noted'
-                        ])) {
-                            $colMap[$colName] = $idx;
-                        }
-                    }
-                    // CEK apakah semua kolom wajib ada
-                    if (
-                        !isset($colMap['kpb_type']) ||
-                        !isset($colMap['no_mesin']) ||
-                        !isset($colMap['tglb star']) ||
-                        !isset($colMap['tgls star']) ||
-                        !isset($colMap['km star']) ||
-                        !isset($colMap['noted']) ||
-                        !isset($colMap['no. surat klaim'])
-                    ) {
-                        $this->warn("Kolom wajib tidak lengkap pada file: {$namaFile}");
-                        continue; // skip sheet
-                    }
+    //                 // 1) MAP HEADER SEKALI SAJA
+    //                 $colMap = [];
+    //                 foreach ($header as $idx => $colName) {
+    //                     $colName = strtolower(trim($colName));
+    //                     if (in_array($colName, [
+    //                         'no. surat klaim',
+    //                         'no_mesin',
+    //                         'kpb_type',
+    //                         'tglb star',
+    //                         'tgls star',
+    //                         'km star',
+    //                         'noted'
+    //                     ])) {
+    //                         $colMap[$colName] = $idx;
+    //                     }
+    //                 }
+    //                 // CEK apakah semua kolom wajib ada
+    //                 if (
+    //                     !isset($colMap['kpb_type']) ||
+    //                     !isset($colMap['no_mesin']) ||
+    //                     !isset($colMap['tglb star']) ||
+    //                     !isset($colMap['tgls star']) ||
+    //                     !isset($colMap['km star']) ||
+    //                     !isset($colMap['noted']) ||
+    //                     !isset($colMap['no. surat klaim'])
+    //                 ) {
+    //                     $this->warn("Kolom wajib tidak lengkap pada file: {$namaFile}");
+    //                     continue; // skip sheet
+    //                 }
 
-                    // 2) PROSES ROW SEKALI SAJA (TIDAK DI DALAM LOOP HEADER)
-                    foreach ($sheet2 as $i => $row) {
-                        if ($i === 0) continue;
+    //                 // 2) PROSES ROW SEKALI SAJA (TIDAK DI DALAM LOOP HEADER)
+    //                 foreach ($sheet2 as $i => $row) {
+    //                     if ($i === 0) continue;
 
-                        if (
-                            empty($row[$colMap['kpb_type']]) ||
-                            empty($row[$colMap['no_mesin']])   ||
-                            empty($row[$colMap['tglb star']])    ||
-                            empty($row[$colMap['tgls star']]) ||
-                            empty($row[$colMap['km star']]) ||
-                            empty($row[$colMap['no. surat klaim']])
-                        ) {
-                            continue;
-                        }
-                        $nosin = $row[$colMap['no_mesin']] ?? null;
-                        $kode_nosin = substr($nosin, 0, 5);
+    //                     if (
+    //                         empty($row[$colMap['kpb_type']]) ||
+    //                         empty($row[$colMap['no_mesin']])   ||
+    //                         empty($row[$colMap['tglb star']])    ||
+    //                         empty($row[$colMap['tgls star']]) ||
+    //                         empty($row[$colMap['km star']]) ||
+    //                         empty($row[$colMap['no. surat klaim']])
+    //                     ) {
+    //                         continue;
+    //                     }
+    //                     $nosin = $row[$colMap['no_mesin']] ?? null;
+    //                     $kode_nosin = substr($nosin, 0, 5);
 
-                        $ket = isset($colMap['noted']) && isset($row[$colMap['noted']])
-                            ? trim($row[$colMap['noted']])
-                            : null;
-                        if (!empty($ket)) {
-                            if (str_contains(strtolower($ket), 'revisi')) {
-                                $ket = 'Revisi';
-                            } elseif (str_contains(strtolower($ket), 'dispen')) {
-                                $ket = 'Dispensasi';
-                            } else {
-                                $ket = $ket;
-                            }
-                        } else {
-                            $ket = 'Ok';
-                        }
+    //                     $ket = isset($colMap['noted']) && isset($row[$colMap['noted']])
+    //                         ? trim($row[$colMap['noted']])
+    //                         : null;
+    //                     if (!empty($ket)) {
+    //                         if (str_contains(strtolower($ket), 'revisi')) {
+    //                             $ket = 'Revisi';
+    //                         } elseif (str_contains(strtolower($ket), 'dispen')) {
+    //                             $ket = 'Dispensasi';
+    //                         } else {
+    //                             $ket = $ket;
+    //                         }
+    //                     } else {
+    //                         $ket = 'Ok';
+    //                     }
 
-                        $svc = $row[$colMap['kpb_type']];
-                        $servisId = match ($svc) {
-                            "KPB1" => 'A',
-                            "KPB2" => 'B',
-                            "KPB3" => 'C',
-                            "KPB4" => 'D',
-                            "1" => 'A',
-                            "2" => 'B',
-                            "3" => 'C',
-                            "4" => 'D',
-                            default => '',
-                        };
-                        $key = substr($nosin, 0, 5) . '|' . $servisId;
-                        $kpb_kriteria = $kpbCache->get($key);
-                        $material = $kpb_kriteria ? $kpb_kriteria->material : null;
-                        $jasa     = $kpb_kriteria ? $kpb_kriteria->jasa : null;
-                        $pokok   = $kpb_kriteria ? ($material + $jasa) : null;
-                        $rowsData[] = [
-                            'nama_so'     => isset($colMap['no. surat klaim'])
-                                ? (Ahass::where('kode_ahass', substr($row[$colMap['no. surat klaim']], 0, 5))->first()->nama_ahass ?? preg_replace('/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/', '', $namaFile))
-                                : preg_replace('/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/', '', $namaFile),
-                            'no_surat'    => $row[$colMap['no. surat klaim']] ?? null,
-                            'nosin'       => $nosin,
-                            'service_ke'  => $servisId,
-                            'status'      => $ket,
-                            'kode_nosin'  => $kode_nosin . '-' . $servisId,
-                            'material'    => $material ?? 0,
-                            'jasa'        => $jasa ?? 0,
-                            'pokok'       => $pokok ?? 0,
-                        ];
-                    }
-                }
+    //                     $svc = $row[$colMap['kpb_type']];
+    //                     $servisId = match ($svc) {
+    //                         "KPB1" => 'A',
+    //                         "KPB2" => 'B',
+    //                         "KPB3" => 'C',
+    //                         "KPB4" => 'D',
+    //                         "1" => 'A',
+    //                         "2" => 'B',
+    //                         "3" => 'C',
+    //                         "4" => 'D',
+    //                         default => '',
+    //                     };
+    //                     $key = substr($nosin, 0, 5) . '|' . $servisId;
+    //                     $kpb_kriteria = $kpbCache->get($key);
+    //                     $material = $kpb_kriteria ? $kpb_kriteria->material : null;
+    //                     $jasa     = $kpb_kriteria ? $kpb_kriteria->jasa : null;
+    //                     $pokok   = $kpb_kriteria ? ($material + $jasa) : null;
+    //                     $rowsData[] = [
+    //                         'nama_so'     => isset($colMap['no. surat klaim'])
+    //                             ? (Ahass::where('kode_ahass', substr($row[$colMap['no. surat klaim']], 0, 5))->first()->nama_ahass ?? preg_replace('/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/', '', $namaFile))
+    //                             : preg_replace('/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/', '', $namaFile),
+    //                         'no_surat'    => $row[$colMap['no. surat klaim']] ?? null,
+    //                         'nosin'       => $nosin,
+    //                         'service_ke'  => $servisId,
+    //                         'status'      => $ket,
+    //                         'kode_nosin'  => $kode_nosin . '-' . $servisId,
+    //                         'material'    => $material ?? 0,
+    //                         'jasa'        => $jasa ?? 0,
+    //                         'pokok'       => $pokok ?? 0,
+    //                     ];
+    //                 }
+    //             }
 
-                $this->info("Berhasil baca file {$label} ke-{$fileKe}: " . $file->getFilename());
-            } catch (\Throwable $e) {
-                $this->error("Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
-            }
-            $this->info("Time taken: " . (microtime(true) - $start) . " sec");
-        }
+    //             $this->info("Berhasil baca file {$label} ke-{$fileKe}: " . $file->getFilename());
+    //         } catch (\Throwable $e) {
+    //             $this->error("Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());
+    //         }
+    //         $this->info("Time taken: " . (microtime(true) - $start) . " sec");
+    //     }
 
-        return $rowsData;
-    }
+    //     return $rowsData;
+    // }
 
 
     /**

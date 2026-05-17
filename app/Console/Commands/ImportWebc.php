@@ -14,7 +14,7 @@ class ImportWebc extends Command
      *
      * @var string
      */
-    protected $signature = 'import:webc {month} {year}';
+    protected $signature = 'import:webc';
 
     /**
      * The console command description.
@@ -29,10 +29,7 @@ class ImportWebc extends Command
     public function handle()
     {
         try {
-            $month_file = $this->argument('month');
-            $year_file  = $this->argument('year');
-
-            $folderPath = storage_path("assets/webc_excel/{$month_file}_{$year_file}");
+            $folderPath = storage_path("assets/webc_excel");
 
             // ✅ Cek folder
             if (!File::exists($folderPath)) {
@@ -79,7 +76,7 @@ class ImportWebc extends Command
                 $this->info("➡️  Mengimpor file ke-{$fileKe}: {$excel_file->getFilename()}");
 
                 Excel::import(
-                    new WebcImport($this, $month_file, $year_file),
+                    new WebcImport($this),
                     $excel_file
                 );
             }
