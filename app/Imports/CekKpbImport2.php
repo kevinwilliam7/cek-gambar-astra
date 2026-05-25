@@ -465,6 +465,7 @@ class CekKpbImport implements OnEachRow, WithHeadingRow, WithChunkReading, WithM
         $kriteriaKpb = $this->kpbKriteriaCache->get($enginePrefix . '|' . 'KPB '.$data['service_ke']);
         $selisihObj = (new \DateTime($formattedTglBeli))->diff(new \DateTime($formattedTglService));
         $selisihHari = $selisihObj->days * ($selisihObj->invert ? -1 : 1);
+        $selisihHari = $selisihHari + 1; // Tambahkan 1 hari untuk menghitung inklusif
         if($kriteriaKpb === null) {
             if($this->context instanceof Command) {
                 $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Kriteria KPB tidak ditemukan untuk pengecekan Tanggal Service maksimum.");
