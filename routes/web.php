@@ -57,4 +57,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/rekap-kpb', [RekapKpbController::class, 'datatable'])->name('rekap-kpb');
         Route::get('/cek-kpb', [CekKpbController::class, 'datatable'])->name('cek-kpb');
     });
+
+    Route::prefix('ai')->name('ai.')->group(function () {
+        Route::get('/analyze-image', [\App\Http\Controllers\AiController::class, 'index'])->name('analyze-image');
+    });
 });

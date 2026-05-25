@@ -71,7 +71,7 @@ class DuplikasiGambar extends Command
         foreach (array_slice($rows, 1) as $row) {
             $noEngine = trim($row['A'] ?? '');
             $serviceKe = trim($row['B'] ?? '');
-            $km = trim($row['C'] ?? '');
+            $km = trim($row['E'] ?? '');
 
             if (!$noEngine || !$serviceKe) {
                 $progress->advance();
@@ -110,11 +110,12 @@ class DuplikasiGambar extends Command
                     $duplikasi[] = [
                         'nomor_mesin'     => $a->nomor_mesin,
                         'kpb_type'        => $a->kpb_type,
+                        'km'              => $a->km,
                         'jumlah_duplikat' => $otherDuplicates->count(),  // hitung yang lain saja
                         'phash'           => $a->phash,
                         'filename'        => $a->filename,
                         'detail'          => $otherDuplicates->map(function ($w) {
-                            return "{$w->nomor_mesin} / {$w->filename} / tgl_service: {$w->tanggal_claim}";
+                            return "{$w->nomor_mesin} / {$w->filename} / tgl_service: {$w->tanggal_claim} / km: {$w->km}";
                         })->toArray(),
                     ];
                 }
@@ -132,7 +133,7 @@ class DuplikasiGambar extends Command
             $this->info("⚠️  Ditemukan " . count($duplikasi) . " duplikasi:\n");
 
             foreach ($duplikasi as $i => $item) {
-                $this->line(($i + 1) . ". {$item['nomor_mesin']} {$item['kpb_type']} → {$item['jumlah_duplikat']} duplikat ({$item['phash']})");
+                $this->line(($i + 1) . ". {$item['nomor_mesin']} {$item['kpb_type']} → {$item['jumlah_duplikat']} duplikat ({$item['km']})");
                 $this->line("   📷 Link Foto: {$item['filename']}");
                 foreach ($item['detail'] as $d) {
                     $this->line("   └─ {$d}");
