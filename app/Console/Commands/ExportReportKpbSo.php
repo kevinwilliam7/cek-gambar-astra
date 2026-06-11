@@ -15,7 +15,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-#[Signature('export:report-kpb-so-command {month} {year}')]
+#[Signature('export:report-kpb-so {month} {year}')]
 #[Description('Rekap data dari file .xls untuk fisik & digital punya ce Meiliani / SO')]
 class ExportReportKpbSo extends Command
 {
@@ -166,7 +166,11 @@ class ExportReportKpbSo extends Command
                             'tgl service',
                             'km',
                             'ket',
-                            'keterangan'
+                            'keterangan',
+                            'nomor skpb',
+                            'nomor surat',
+                            'surat',
+                            'no surat',
                         ])) {
                             $colMap[$colName] = $idx;
                         }
@@ -230,7 +234,7 @@ class ExportReportKpbSo extends Command
                         $pokok   = $kpb_kriteria ? ($material + $jasa) : null;
                         $rowsData[] = [
                             'nama_so'     => $ahassCache->get(substr($sheet, 0, 5))->nama_ahass ?? 'Unknown',
-                            'no_surat'    => $sheet ?? null,
+                            'no_surat'    => isset($colMap['nomor skpb']) ? $row[$colMap['nomor skpb']] : (isset($colMap['nomor surat']) ? $row[$colMap['nomor surat']] : (isset($colMap['surat']) ? $row[$colMap['surat']] : (isset($colMap['no surat']) ? $row[$colMap['no surat']] : ($sheet ?? null)))),
                             'nosin'       => $nosin,
                             'service_ke'  => $servisId,
                             'status'      => $ket,

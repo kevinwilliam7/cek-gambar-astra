@@ -293,7 +293,7 @@ class ExportReportKpb extends Command
                 $colMap = [];
                 foreach ($header as $idx => $colName) {
                     $colName = strtolower(trim($colName));
-                    if (in_array($colName, ['no engine', 'service ke-', 'tgl beli', 'bulan beli', 'tahun beli', 'tgl service', 'km', 'ket'])) {
+                    if (in_array($colName, ['no engine', 'service ke-', 'tgl beli', 'bulan beli', 'tahun beli', 'tgl service', 'km', 'ket', 'nomor skpb', 'nomor surat', 'surat', 'no surat'])) {
                         $colMap[$colName] = $idx;
                     }
                 }
@@ -316,7 +316,7 @@ class ExportReportKpb extends Command
                             $rowsData[] = [
                                 'No.' => $penomoranExcel += 1,
                                 'nama_ahass'   => $ahassCache->get(substr($nomorSuratClean, 0, 5))->nama_ahass ?? 'Unknown',
-                                'nomor_surat'  => $nomorSuratClean,
+                                'nomor_surat'  => isset($colMap['nomor skpb']) ? $row[$colMap['nomor skpb']] : (isset($colMap['nomor surat']) ? $row[$colMap['nomor surat']] : (isset($colMap['surat']) ? $row[$colMap['surat']] : (isset($colMap['no surat']) ? $row[$colMap['no surat']] : $nomorSuratClean))),
                                 'kode_ahass'   => substr($nomorSuratClean, 0, 5),
                                 'engine'       => $row[$colMap['no engine']] ?? null,
                                 'kode_nosin'   => $kode_mesin . '-' . $kode_service,
@@ -324,7 +324,7 @@ class ExportReportKpb extends Command
                                 'jasa'         => $jasa,
                                 'pokok'        => $pokok,
                                 'service_ke'   => $row[$colMap['service ke-']] ?? null,
-                                'tgl_beli'     => ($row[$colMap['tgl beli']] ?? null) . '/' . ($row[$colMap['bulan beli']] ?? null) . '/' . ($row[$colMap['tahun beli']] ?? null),
+                                'tgl_beli'     => ($row[$colMap['tgl beli']] ?? null) . '/' . (isset($colMap['bulan beli']) ? $row[$colMap['bulan beli']] : null) . '/' . (isset($colMap['tahun beli']) ? $row[$colMap['tahun beli']] : null),
                                 'tgl_service'  => $row[$colMap['tgl service']] ?? null,
                                 'km'           => $row[$colMap['km']] ?? null,
                                 'ket'          => $ket,
@@ -343,7 +343,7 @@ class ExportReportKpb extends Command
                             $rowsData[] = [
                                 'No.' => $penomoranExcel += 1,
                                 'nama_ahass'   => $ahassCache->get(substr($nomorSuratClean, 0, 5))->nama_ahass ?? 'Unknown',
-                                'nomor_surat'  => $nomorSuratClean,
+                                'nomor_surat'  => isset($colMap['nomor skpb']) ? $row[$colMap['nomor skpb']] : (isset($colMap['nomor surat']) ? $row[$colMap['nomor surat']] : (isset($colMap['surat']) ? $row[$colMap['surat']] : (isset($colMap['no surat']) ? $row[$colMap['no surat']] : $nomorSuratClean))),
                                 'kode_ahass'   => substr($nomorSuratClean, 0, 5),
                                 'engine'       => $row[$colMap['no engine']] ?? null,
                                 'kode_nosin'   => $kode_mesin . '-' . $kode_service,
@@ -351,7 +351,7 @@ class ExportReportKpb extends Command
                                 'jasa'         => $jasa,
                                 'pokok'        => $pokok,
                                 'service_ke'   => $row[$colMap['service ke-']] ?? null,
-                                'tgl_beli'     => ($row[$colMap['tgl beli']] ?? null) . '/' . ($row[$colMap['bulan beli']] ?? null) . '/' . ($row[$colMap['tahun beli']] ?? null),
+                                'tgl_beli'     => ($row[$colMap['tgl beli']] ?? null) . '' . (isset($colMap['bulan beli']) ? ('/'.$row[$colMap['bulan beli']]) : null) . '' . (isset($colMap['tahun beli']) ? ('/'.$row[$colMap['tahun beli']]) : null),
                                 'tgl_service'  => $row[$colMap['tgl service']] ?? null,
                                 'km'           => $row[$colMap['km']] ?? null,
                                 'ket'          => $ket,

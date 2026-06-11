@@ -29,7 +29,9 @@ class GetHashWebc extends Command
             // '09822',
             // '13198'
             // '13703',
-            '03720'
+            // '03720'
+            '13222',
+            '09821'
             ])
         ->get();
         foreach ($data as $key => $item) {

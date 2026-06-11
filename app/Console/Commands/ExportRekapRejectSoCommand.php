@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-#[Signature('export:rekap-reject-so-command {month} {year}')]
+#[Signature('export:rekap-reject-so {month} {year}')]
 #[Description('Rekap data dari file .xls untuk fisik & digital punya ce Meiliani / SO')]
 class ExportRekapRejectSoCommand extends Command
 {
@@ -128,7 +128,10 @@ class ExportRekapRejectSoCommand extends Command
                         $colName = strtolower(trim($colName));
                         if (in_array($colName, [
                             'no engine','service ke-','tgl beli','bulan beli',
-                            'tahun beli','tgl service','km', 'ket', 'keterangan'
+                            'tahun beli','tgl service','km', 'ket', 'keterangan',                            'nomor skpb',
+                            'nomor surat',
+                            'surat',
+                            'no surat',
                         ])) {
                             $colMap[$colName] = $idx;
                         }
@@ -166,11 +169,11 @@ class ExportRekapRejectSoCommand extends Command
                             if (!empty(trim($ket)) && !str_contains(strtolower($ket), 'revisi') && !str_contains(strtolower($ket), 'dispen')) {
                                 $rowsData[] = [
                                     'No.' => $penomoranExcel+=1,
-                                    'nama_ahass'   => preg_replace('/\s\d{2}\.\d{2}\.\d{4}\.xlsx$/', '', ($namaFile ?? '-')),
-                                    'nomor_surat'  => $sheet ?? '-',
+                                    'nama_ahass'   => Ahass::where('kode_ahass', substr($sheet, 0, 5))->first()->nama_ahass ?? 'Unknown',
+                                    'no_surat'    => isset($colMap['nomor skpb']) ? $row[$colMap['nomor skpb']] : (isset($colMap['nomor surat']) ? $row[$colMap['nomor surat']] : (isset($colMap['surat']) ? $row[$colMap['surat']] : (isset($colMap['no surat']) ? $row[$colMap['no surat']] : ($sheet ?? null)))),
                                     'engine'       => $row[$colMap['no engine']] ?? null,
                                     'service_ke'   => $row[$colMap['service ke-']] ?? null,
-                                    'tgl_beli'     => $row[$colMap['tgl beli']] ?? null,
+                                    'tgl_beli'     => ($row[$colMap['tgl beli']] ?? null) . '/' . (isset($colMap['bulan beli']) ? $row[$colMap['bulan beli']] : null) . '/' . (isset($colMap['tahun beli']) ? $row[$colMap['tahun beli']] : null),
                                     'tgl_service'  => $row[$colMap['tgl service']] ?? null,
                                     'km'           => $row[$colMap['km']] ?? null,
                                     'ket'          => $ket,
