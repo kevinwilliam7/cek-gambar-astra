@@ -23,7 +23,7 @@ class RekapKpbController extends Controller
             ->distinct()
             ->pluck('status_description');
         $service_id = [1,2,3,4];
-        $list_tahun = Carbon::now()->year - 10;
+        $list_tahun = Carbon::now()->year - 5;
         for ($i = Carbon::now()->year; $i >= $list_tahun; $i--) {
             $tahun[] = $i;
         }
