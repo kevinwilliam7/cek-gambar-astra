@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-#[Signature('export:report-kpb {month} {year}')]
+#[Signature('export:report-kpb {jenis} {month} {year}')]
 #[Description('Rekap data dari file .xls untuk fisik & digital')]
 class ExportReportKpb extends Command
 {
@@ -27,21 +27,28 @@ class ExportReportKpb extends Command
         $totalStart = microtime(true);
         $month_file = $this->argument('month');
         $year_file  = $this->argument('year');
+        $jenis_file = $this->argument('jenis');
 
         $month_name = \Carbon\Carbon::createFromDate($year_file, $month_file, 1)->translatedFormat('F');
         $next_month_name = \Carbon\Carbon::createFromDate($year_file, $month_file, 1)->addMonth()->translatedFormat('F');
 
         // 2 storage path: fisik & digital
-        $folderPathFisik   = storage_path("assets/list_kpb/kpb_{$month_file}_{$year_file}/fisik");
-        $folderPathDigital = storage_path("assets/list_kpb/kpb_{$month_file}_{$year_file}/digital");
+        $folderPathFisik   = storage_path("assets/list_kpb/{$jenis_file}/kpb_{$jenis_file}_{$month_file}_{$year_file}/fisik");
+        $folderPathDigital = storage_path("assets/list_kpb/{$jenis_file}/kpb_{$jenis_file}_{$month_file}_{$year_file}/digital");
 
         // Cache KPB Kriteria dulu biar gak bolak-balik query
         $kpbCache = KpbKriteria::all()->keyBy(fn($item) => $item->kode_nosin . '|' . $item->kpb_type);
         // Cache Ahass juga biar gak bolak-balik query
         $ahassCache = Ahass::all()->keyBy(fn($item) => $item->kode_ahass);
         $ahassListCache = Ahass::select('kode_ahass', 'nama_ahass')
-            ->where(function ($q) {
-                $q->where('jenis_dealer', 'H23')->orWhere('jenis_dealer', 'H123');
+            ->where(function ($q) use($jenis_file) {
+                if($jenis_file === 'so') {
+                    $q->where('jenis_dealer', '!=', 'H23')->where('jenis_dealer', '!=', 'H123');
+                } else if($jenis_file === 'dealer') {
+                    $q->where('jenis_dealer', 'H23')->orWhere('jenis_dealer', 'H123');
+                } else {
+                    $q->whereNotNull('jenis_dealer');
+                }
             })
             ->orderBy('nama_ahass', 'asc')
             ->get();
@@ -247,7 +254,7 @@ class ExportReportKpb extends Command
         // ===============================================
 
         // Simpan file
-        $exportPath = storage_path("exports/report_kpb_{$month_file}_{$year_file}.xlsx");
+        $exportPath = storage_path("exports/report_kpb_{$jenis_file}_{$month_file}_{$year_file}.xlsx");
         File::ensureDirectoryExists(dirname($exportPath));
 
         $writer = new XlsxWriter($export);
@@ -293,18 +300,20 @@ class ExportReportKpb extends Command
                 $colMap = [];
                 foreach ($header as $idx => $colName) {
                     $colName = strtolower(trim($colName));
-                    if (in_array($colName, ['no engine', 'service ke-', 'tgl beli', 'bulan beli', 'tahun beli', 'tgl service', 'km', 'ket', 'nomor skpb', 'nomor surat', 'surat', 'no surat'])) {
+                    if (in_array($colName, ['no engine', 'service ke-', 'tgl beli', 'bulan beli', 'tahun beli', 'tgl service', 'km', 'ket', 'keterangan', 'nomor skpb', 'nomor surat', 'surat', 'no surat'])) {
                         $colMap[$colName] = $idx;
                     }
                 }
 
-                if (isset($colMap['ket'])) {
+                if (isset($colMap['ket']) || isset($colMap['keterangan'])) {
                     foreach ($sheet2 as $i => $row) {
                         if ($i === 0) continue;
 
-                        $ket = $row[$colMap['ket']] ?? null;
+                        // $ket = $row[$colMap['ket']] ?? null;
+                        $ketCol = $colMap['ket'] ?? $colMap['keterangan'] ?? null;
+                        $ket = $ketCol !== null ? ($row[$ketCol] ?? null) : null;
                         //Untuk Approved Fisik & Digital
-                        if (!empty(trim($row[$colMap['no engine']] ?? null)) && empty(trim($ket)) && strtolower($status) === 'approved') {
+                        if (!empty(trim($row[$colMap['no engine']] ?? null)) && (empty(trim($ket)) || str_contains(strtolower($ket), 'revisi')) && strtolower($status) === 'approved') {
                             $kode_mesin = substr($row[$colMap['no engine']] ?? null, 0, 5);
                             $kode_service = $row[$colMap['service ke-']] == '1' ? 'A' : ($row[$colMap['service ke-']] == '2' ? 'B' : ($row[$colMap['service ke-']] == '3' ? 'C' : ($row[$colMap['service ke-']] == '4' ? 'D' : 'Unknown')));
                             // $kriteria_kpb = KpbKriteria::where('kpb_type', 'KPB ' . ($row[$colMap['service ke-']] ?? null))->where('kode_nosin', $kode_mesin)->first();
@@ -315,9 +324,9 @@ class ExportReportKpb extends Command
                             $pokok = $material + $jasa;
                             $rowsData[] = [
                                 'No.' => $penomoranExcel += 1,
-                                'nama_ahass'   => $ahassCache->get(substr($nomorSuratClean, 0, 5))->nama_ahass ?? 'Unknown',
-                                'nomor_surat'  => isset($colMap['nomor skpb']) ? $row[$colMap['nomor skpb']] : (isset($colMap['nomor surat']) ? $row[$colMap['nomor surat']] : (isset($colMap['surat']) ? $row[$colMap['surat']] : (isset($colMap['no surat']) ? $row[$colMap['no surat']] : $nomorSuratClean))),
-                                'kode_ahass'   => substr($nomorSuratClean, 0, 5),
+                                'nama_ahass'   => isset($nomorSuratClean) ? $ahassCache->get(substr($nomorSuratClean, 0, 5))->nama_ahass ?? 'Unknown' : (isset($colMap['nomor skpb']) ? $ahassCache->get(substr($row[$colMap['nomor skpb']], 0, 5))->nama_ahass ?? 'Unknown' : (isset($colMap['nomor surat']) ? $ahassCache->get(substr($row[$colMap['nomor surat']], 0, 5))->nama_ahass ?? 'Unknown' : (isset($colMap['surat']) ? $ahassCache->get(substr($row[$colMap['surat']], 0, 5))->nama_ahass ?? 'Unknown' : (isset($colMap['no surat']) ? $ahassCache->get(substr($row[$colMap['no surat']], 0, 5))->nama_ahass ?? 'Unknown' : 'Unknown')))),
+                                'nomor_surat'  => isset($colMap['nomor skpb']) ? $row[$colMap['nomor skpb']] : (isset($colMap['nomor surat']) ? $row[$colMap['nomor surat']] : (isset($colMap['surat']) ? $row[$colMap['surat']] : (isset($colMap['no surat']) ? $row[$colMap['no surat']] : $nomorSuratClean ?? throw new \Exception("Nomor surat tidak ditemukan di file {$file->getFilename()}")))),
+                                'kode_ahass'   => isset($nomorSuratClean) ? substr($nomorSuratClean, 0, 5) : (isset($colMap['nomor skpb']) ? substr($row[$colMap['nomor skpb']], 0, 5) : (isset($colMap['nomor surat']) ? substr($row[$colMap['nomor surat']], 0, 5) : (isset($colMap['surat']) ? substr($row[$colMap['surat']], 0, 5) : (isset($colMap['no surat']) ? substr($row[$colMap['no surat']], 0, 5) : 'Unknown')))),
                                 'engine'       => $row[$colMap['no engine']] ?? null,
                                 'kode_nosin'   => $kode_mesin . '-' . $kode_service,
                                 'material'     => $material,
@@ -327,11 +336,11 @@ class ExportReportKpb extends Command
                                 'tgl_beli'     => ($row[$colMap['tgl beli']] ?? null) . '/' . (isset($colMap['bulan beli']) ? $row[$colMap['bulan beli']] : null) . '/' . (isset($colMap['tahun beli']) ? $row[$colMap['tahun beli']] : null),
                                 'tgl_service'  => $row[$colMap['tgl service']] ?? null,
                                 'km'           => $row[$colMap['km']] ?? null,
-                                'ket'          => $ket,
+                                'ket'          => str_contains(strtolower($ket), 'revisi') ? 'Revisi' : $ket,
                             ];
                         }
                         // Untuk Rejected Fisik & Digital
-                        else if (!empty(trim($row[$colMap['no engine']] ?? null)) && !empty(trim($ket)) && strtolower($status) === 'rejected') {
+                        else if (!empty(trim($row[$colMap['no engine']] ?? null)) && !empty(trim($ket)) && !str_contains(strtolower($ket), 'revisi') && strtolower($status) === 'rejected') {
                             $kode_mesin = substr($row[$colMap['no engine']] ?? null, 0, 5);
                             $kode_service = $row[$colMap['service ke-']] == '1' ? 'A' : ($row[$colMap['service ke-']] == '2' ? 'B' : ($row[$colMap['service ke-']] == '3' ? 'C' : ($row[$colMap['service ke-']] == '4' ? 'D' : 'Unknown')));
                             // $kriteria_kpb = KpbKriteria::where('kpb_type', 'KPB ' . ($row[$colMap['service ke-']] ?? null))->where('kode_nosin', $kode_mesin)->first();
@@ -342,9 +351,9 @@ class ExportReportKpb extends Command
                             $pokok = $material + $jasa;
                             $rowsData[] = [
                                 'No.' => $penomoranExcel += 1,
-                                'nama_ahass'   => $ahassCache->get(substr($nomorSuratClean, 0, 5))->nama_ahass ?? 'Unknown',
-                                'nomor_surat'  => isset($colMap['nomor skpb']) ? $row[$colMap['nomor skpb']] : (isset($colMap['nomor surat']) ? $row[$colMap['nomor surat']] : (isset($colMap['surat']) ? $row[$colMap['surat']] : (isset($colMap['no surat']) ? $row[$colMap['no surat']] : $nomorSuratClean))),
-                                'kode_ahass'   => substr($nomorSuratClean, 0, 5),
+                                'nama_ahass'   => isset($nomorSuratClean) ? $ahassCache->get(substr($nomorSuratClean, 0, 5))->nama_ahass ?? 'Unknown' : (isset($colMap['nomor skpb']) ? $ahassCache->get(substr($row[$colMap['nomor skpb']], 0, 5))->nama_ahass ?? 'Unknown' : (isset($colMap['nomor surat']) ? $ahassCache->get(substr($row[$colMap['nomor surat']], 0, 5))->nama_ahass ?? 'Unknown' : (isset($colMap['surat']) ? $ahassCache->get(substr($row[$colMap['surat']], 0, 5))->nama_ahass ?? 'Unknown' : (isset($colMap['no surat']) ? $ahassCache->get(substr($row[$colMap['no surat']], 0, 5))->nama_ahass ?? 'Unknown' : 'Unknown')))),
+                                'nomor_surat'  => isset($colMap['nomor skpb']) ? $row[$colMap['nomor skpb']] : (isset($colMap['nomor surat']) ? $row[$colMap['nomor surat']] : (isset($colMap['surat']) ? $row[$colMap['surat']] : (isset($colMap['no surat']) ? $row[$colMap['no surat']] : $nomorSuratClean ?? throw new \Exception("Nomor surat tidak ditemukan di file {$file->getFilename()}")))),
+                                'kode_ahass'   => isset($nomorSuratClean) ? substr($nomorSuratClean, 0, 5) : (isset($colMap['nomor skpb']) ? substr($row[$colMap['nomor skpb']], 0, 5) : (isset($colMap['nomor surat']) ? substr($row[$colMap['nomor surat']], 0, 5) : (isset($colMap['surat']) ? substr($row[$colMap['surat']], 0, 5) : (isset($colMap['no surat']) ? substr($row[$colMap['no surat']], 0, 5) : 'Unknown')))),
                                 'engine'       => $row[$colMap['no engine']] ?? null,
                                 'kode_nosin'   => $kode_mesin . '-' . $kode_service,
                                 'material'     => $material,
@@ -360,7 +369,6 @@ class ExportReportKpb extends Command
                         }
                     }
                 }
-
                 $this->info("Berhasil baca file {$label} ke-{$fileKe}: " . $file->getFilename());
             } catch (\Throwable $e) {
                 $this->error("Gagal baca file {$label} {$file->getFilename()}: " . $e->getMessage());

@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-#[Signature('export:rekap-reject-command {month} {year}')]
+#[Signature('export:rekap-reject-command {jenis} {month} {year}')]
 #[Description('Rekap data dari file .xls untuk fisik & digital')]
 class ExportRekapRejectCommand extends Command
 {
@@ -21,13 +21,14 @@ class ExportRekapRejectCommand extends Command
     {
         $month_file = $this->argument('month');
         $year_file  = $this->argument('year');
+        $jenis_file = $this->argument('jenis');
 
         $month_name = \Carbon\Carbon::createFromDate($year_file, $month_file, 1)->translatedFormat('F');
         $next_month_name = \Carbon\Carbon::createFromDate($year_file, $month_file, 1)->addMonth()->translatedFormat('F');
 
         // 2 storage path: fisik & digital
-        $folderPathFisik   = storage_path("assets/list_kpb/kpb_{$month_file}_{$year_file}/fisik");
-        $folderPathDigital = storage_path("assets/list_kpb/kpb_{$month_file}_{$year_file}/digital");
+        $folderPathFisik   = storage_path("assets/list_kpb/{$jenis_file}/kpb_{$jenis_file}_{$month_file}_{$year_file}/fisik");
+        $folderPathDigital = storage_path("assets/list_kpb/{$jenis_file}/kpb_{$jenis_file}_{$month_file}_{$year_file}/digital");
 
         // Baca file masing-masing folder
         $rowsFisik   = $this->readFolder($folderPathFisik, "Fisik");
@@ -112,7 +113,7 @@ class ExportRekapRejectCommand extends Command
 
 
         // Simpan file
-        $exportPath = storage_path("exports/rekap_reject_{$month_file}_{$year_file}.xlsx");
+        $exportPath = storage_path("exports/rekap_reject_{$jenis_file}_{$month_file}_{$year_file}.xlsx");
         File::ensureDirectoryExists(dirname($exportPath));
 
         $writer = new XlsxWriter($export);
@@ -156,29 +157,35 @@ class ExportRekapRejectCommand extends Command
                 $colMap = [];
                 foreach ($header as $idx => $colName) {
                     $colName = strtolower(trim($colName));
-                    if (in_array($colName, ['no engine','service ke-','tgl beli','bulan beli','tahun beli','tgl service','km','ket', 'nomor skpb', 'nomor surat', 'surat', 'no surat'])) {
+                    if (in_array($colName, ['no engine','service ke-','tgl beli','bulan beli','tahun beli','tgl service','km','ket', 'keterangan', 'nomor skpb', 'nomor surat', 'surat', 'no surat'])) {
                         $colMap[$colName] = $idx;
                     }
                 }
 
-                if (isset($colMap['ket'])) {
+                if (isset($colMap['ket']) || isset($colMap['keterangan'])) {
                     foreach ($sheet2 as $i => $row) {
                         if ($i === 0) continue;
 
-                        $ket = $row[$colMap['ket']] ?? null;
+                        // $ket = $row[$colMap['ket']] ?? null;
+                        $ketCol = $colMap['ket'] ?? $colMap['keterangan'] ?? null;
+                        $ket = $ketCol !== null ? ($row[$ketCol] ?? null) : null;
                         if (!empty(trim($ket))) {
-                            $rowsData[] = [
-                                'No.' => $penomoranExcel+=1,
-                                'nama_ahass'   => Ahass::where('kode_ahass', substr($nomorSuratClean, 0, 5))->first()->nama_ahass ?? 'Unknown',
-                                'nomor_surat'  => isset($colMap['nomor skpb']) ? $row[$colMap['nomor skpb']] : (isset($colMap['nomor surat']) ? $row[$colMap['nomor surat']] : (isset($colMap['surat']) ? $row[$colMap['surat']] : (isset($colMap['no surat']) ? $row[$colMap['no surat']] : $nomorSuratClean))),
-                                'kode_ahass'   => substr($nomorSuratClean, 0, 5),
-                                'engine'       => $row[$colMap['no engine']] ?? null,
-                                'service_ke'   => $row[$colMap['service ke-']] ?? null,
-                                'tgl_beli'     => ($row[$colMap['tgl beli']] ?? null) . '/' . (isset($colMap['bulan beli']) ? $row[$colMap['bulan beli']] : null) . '/' . (isset($colMap['tahun beli']) ? $row[$colMap['tahun beli']] : null),
-                                'tgl_service'  => $row[$colMap['tgl service']] ?? null,
-                                'km'           => $row[$colMap['km']] ?? null,
-                                'ket'          => $ket,
-                            ];
+                            if(str_contains(strtolower($ket), 'revisi')) {
+                                // Jangan masukan ke dalam reject karena revisi berarti klaim diterima, hanya revisi data saja
+                            } else {
+                                $rowsData[] = [
+                                    'No.' => $penomoranExcel+=1,
+                                    'nama_ahass'   => isset($nomorSuratClean) ? Ahass::where('kode_ahass', substr($nomorSuratClean, 0, 5))->first()->nama_ahass ?? 'Unknown' : (isset($colMap['nomor skpb']) ? Ahass::where('kode_ahass', substr($row[$colMap['nomor skpb']], 0, 5))->first()->nama_ahass ?? 'Unknown' : (isset($colMap['nomor surat']) ? Ahass::where('kode_ahass', substr($row[$colMap['nomor surat']], 0, 5))->first()->nama_ahass ?? 'Unknown' : (isset($colMap['surat']) ? Ahass::where('kode_ahass', substr($row[$colMap['surat']], 0, 5))->first()->nama_ahass ?? 'Unknown' : (isset($colMap['no surat']) ? Ahass::where('kode_ahass', substr($row[$colMap['no surat']], 0, 5))->first()->nama_ahass ?? 'Unknown' : 'Unknown')))),
+                                    'nomor_surat'  => isset($colMap['nomor skpb']) ? $row[$colMap['nomor skpb']] : (isset($colMap['nomor surat']) ? $row[$colMap['nomor surat']] : (isset($colMap['surat']) ? $row[$colMap['surat']] : (isset($colMap['no surat']) ? $row[$colMap['no surat']] : $nomorSuratClean ?? throw new \Exception("Nomor surat tidak ditemukan di file {$file->getFilename()}")))),
+                                    'kode_ahass'   => isset($nomorSuratClean) ? substr($nomorSuratClean, 0, 5) : (isset($colMap['nomor skpb']) ? substr($row[$colMap['nomor skpb']], 0, 5) : (isset($colMap['nomor surat']) ? substr($row[$colMap['nomor surat']], 0, 5) : (isset($colMap['surat']) ? substr($row[$colMap['surat']], 0, 5) : (isset($colMap['no surat']) ? substr($row[$colMap['no surat']], 0, 5) : 'Unknown')))),
+                                    'engine'       => $row[$colMap['no engine']] ?? null,
+                                    'service_ke'   => $row[$colMap['service ke-']] ?? null,
+                                    'tgl_beli'     => ($row[$colMap['tgl beli']] ?? null) . '/' . (isset($colMap['bulan beli']) ? $row[$colMap['bulan beli']] : null) . '/' . (isset($colMap['tahun beli']) ? $row[$colMap['tahun beli']] : null),
+                                    'tgl_service'  => $row[$colMap['tgl service']] ?? null,
+                                    'km'           => $row[$colMap['km']] ?? null,
+                                    'ket'          => $ket,
+                                ];
+                            }
                         }
                     }
                 }

@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-#[Signature('export:rekap-approved-command {month} {year}')]
+#[Signature('export:rekap-approved-command {jenis} {month} {year}')]
 #[Description('Rekap data dari file .xls untuk fisik & digital')]
 class ExportRekapApprovedCommand extends Command
 {
@@ -21,13 +21,14 @@ class ExportRekapApprovedCommand extends Command
     {
         $month_file = $this->argument('month');
         $year_file  = $this->argument('year');
+        $jenis_file = $this->argument('jenis');
 
         $month_name = \Carbon\Carbon::createFromDate($year_file, $month_file, 1)->translatedFormat('F');
         $next_month_name = \Carbon\Carbon::createFromDate($year_file, $month_file, 1)->addMonth()->translatedFormat('F');
 
         // 2 storage path: fisik & digital
-        $folderPathFisik   = storage_path("assets/list_kpb/kpb_{$month_file}_{$year_file}/fisik");
-        $folderPathDigital = storage_path("assets/list_kpb/kpb_{$month_file}_{$year_file}/digital");
+        $folderPathFisik   = storage_path("assets/list_kpb/{$jenis_file}/kpb_{$jenis_file}_{$month_file}_{$year_file}/fisik");
+        $folderPathDigital = storage_path("assets/list_kpb/{$jenis_file}/kpb_{$jenis_file}_{$month_file}_{$year_file}/digital");
 
         // Baca file masing-masing folder
         $rowsFisik   = $this->readFolder($folderPathFisik, "Fisik");
@@ -112,7 +113,7 @@ class ExportRekapApprovedCommand extends Command
 
 
         // Simpan file
-        $exportPath = storage_path("exports/rekap_approved_{$month_file}_{$year_file}.xlsx");
+        $exportPath = storage_path("exports/rekap_approved_{$jenis_file}_{$month_file}_{$year_file}.xlsx");
         File::ensureDirectoryExists(dirname($exportPath));
 
         $writer = new XlsxWriter($export);

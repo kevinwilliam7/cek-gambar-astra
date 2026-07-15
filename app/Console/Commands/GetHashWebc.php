@@ -25,13 +25,7 @@ class GetHashWebc extends Command
             $q->whereNull('dhash')->orWhereNull('phash');
         })
         ->whereIn('kode_ahass', [
-            // '17555',
-            // '09822',
-            // '13198'
-            // '13703',
-            // '03720'
-            '13222',
-            '09821'
+                '03183',
             ])
         ->get();
         foreach ($data as $key => $item) {
