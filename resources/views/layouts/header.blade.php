@@ -130,6 +130,12 @@
                             href="{{ route('cek-kpb-digital.index') }}">
                             Cek KPB Digital
                         </a>
+                        <a class="py-1.5 px-2 inline-flex items-center gap-x-2 font-medium text-sm whitespace-nowrap rounded-md border border-transparent text-white hover:text-white/80 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-white/10 {{ request()->routeIs('webc.index')
+                            ? 'bg-white/10'
+                            : '' }}"
+                            href="{{ route('webc.index') }}">
+                            Webconsole
+                        </a>
                     </div>
                 </div>
             </div>

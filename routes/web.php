@@ -9,6 +9,7 @@ use App\Http\Controllers\Motor\MotorController as MotorMotorController;
 use App\Http\Controllers\File\FileController as FileFileController;
 use App\Http\Controllers\MotorController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\AstraWebcController;
 use App\Http\Controllers\RekapKpb\RekapKpbController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,11 +55,15 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('file')->name('file.')->group(function () {
         Route::get('/', [FileFileController::class, 'index'])->name('index');
     });
+    Route::prefix('webc')->name('webc.')->group(function () {
+        Route::get('/', [AstraWebcController::class, 'index'])->name('index');
+    });
     Route::prefix('datatable')->name('datatable.')->group(function () {
         Route::get('/ahass', [AhassController::class, 'datatable'])->name('ahass');
         Route::get('/motor', [MotorMotorController::class, 'datatable'])->name('motor');
         Route::get('/rekap-kpb', [RekapKpbController::class, 'datatable'])->name('rekap-kpb');
         Route::get('/cek-kpb', [CekKpbController::class, 'datatable'])->name('cek-kpb');
+        Route::get('/astra-webc', [AstraWebcController::class, 'datatable'])->name('astra-webc');
     });
 
     Route::prefix('ai')->name('ai.')->group(function () {
