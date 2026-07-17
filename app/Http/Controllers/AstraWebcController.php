@@ -22,7 +22,13 @@ class AstraWebcController extends Controller
             ->orderBy('validitas')
             ->pluck('validitas');
 
-        return view('astra_webc.index', compact('ahass', 'validitas'));
+        $jenis_dealer = Ahass::select('jenis_dealer')
+            ->distinct()
+            ->whereNotNull('jenis_dealer')
+            ->orderBy('jenis_dealer')
+            ->pluck('jenis_dealer');
+
+        return view('astra_webc.index', compact('ahass', 'validitas', 'jenis_dealer'));
     }
 
     /**
@@ -70,6 +76,12 @@ class AstraWebcController extends Controller
                         ->groupBy('phash')
                         ->havingRaw('COUNT(*) > 1');
                   });
+        }
+        // Filter jenis_dealer (via relasi ahass)
+        if ($request->filled('jenis_dealer')) {
+            $query->whereHas('ahass', function ($q) use ($request) {
+                $q->whereIn('jenis_dealer', $request->input('jenis_dealer', []));
+            });
         }
 
         // Pre-compute phash yang duplikat (1 query, bukan correlated subquery)

@@ -10,4 +10,9 @@ class AstraWebc extends Model
     use SoftDeletes;
 
     protected $guarded = [];
+
+    public function ahass()
+    {
+        return $this->belongsTo(Ahass::class, 'kode_ahass', 'kode_ahass');
+    }
 }
