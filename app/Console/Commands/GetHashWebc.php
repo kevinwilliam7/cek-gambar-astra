@@ -24,9 +24,6 @@ class GetHashWebc extends Command
         $data = AstraWebc::where(function($q){
             $q->whereNull('dhash')->orWhereNull('phash');
         })
-        ->whereIn('kode_ahass', [
-                '03183',
-            ])
         ->get();
         foreach ($data as $key => $item) {
             try {
