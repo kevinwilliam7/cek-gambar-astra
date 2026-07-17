@@ -190,8 +190,6 @@
                                     @php
                                         $headers = [
                                             'Nama AHASS',
-                                            'Kode AHASS',
-                                            'No Transaksi',
                                             'Type Motor',
                                             'No Mesin',
                                             'No Rangka',
@@ -263,8 +261,6 @@
                     },
                     columns: [
                         { data: 'nama_ahass',      name: 'nama_ahass' },
-                        { data: 'kode_ahass',      name: 'kode_ahass' },
-                        { data: 'nomor_transaksi', name: 'nomor_transaksi' },
                         { data: 'type_motor',      name: 'type_motor' },
                         { data: 'nomor_mesin',     name: 'nomor_mesin' },
                         { data: 'no_rangka',       name: 'no_rangka' },
