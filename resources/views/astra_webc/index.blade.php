@@ -228,6 +228,7 @@
                                 <tr>
                                     @php
                                         $headers = [
+                                            '',
                                             'Nama AHASS',
                                             'Type Motor',
                                             'No Mesin',
@@ -242,6 +243,7 @@
                                     @endphp
                                     @foreach ($headers as $header)
                                         <th scope="col">
+                                            @if($header !== '')
                                             <button type="button"
                                                 class="px-5 py-2.5 text-start w-full flex items-center gap-x-1 text-sm text-nowrap whitespace-nowrap font-normal text-gray-500 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-500 dark:focus:bg-neutral-700">
                                                 {{ $header }}
@@ -253,6 +255,7 @@
                                                     <path d="m7 9 5-5 5 5"></path>
                                                 </svg>
                                             </button>
+                                            @endif
                                         </th>
                                     @endforeach
                                 </tr>
@@ -300,6 +303,23 @@
                         }
                     },
                     columns: [
+                        {
+                            // Kolom expand (dt-control)
+                            data: 'duplicates_count',
+                            orderable: false,
+                            searchable: false,
+                            className: 'text-center',
+                            render: function(data) {
+                                if (parseInt(data) > 0) {
+                                    return `<button class="expand-btn inline-flex items-center justify-center size-5 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-600 transition-colors" title="Lihat duplikat">
+                                        <svg class="size-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    </button>`;
+                                }
+                                return '';
+                            }
+                        },
                         { data: 'nama_ahass',      name: 'nama_ahass' },
                         { data: 'type_motor',      name: 'type_motor' },
                         { data: 'nomor_mesin',     name: 'nomor_mesin' },
@@ -409,8 +429,55 @@
                     table1.draw();
                 });
 
-                    table1.draw();
+                // ===== Expand Child Row (duplikat) =====
+                function buildChildRows(rows) {
+                    if (!rows.length) return '<tr><td colspan="11" class="px-5 py-3 text-sm text-gray-400">Tidak ada duplikat ditemukan.</td></tr>';
+                    return rows.map(r => {
+                        const filename = r.filename
+                            ? `<a href="${r.filename}" target="_blank" class="text-indigo-500 underline text-xs">Lihat File</a>`
+                            : '-';
+                        return `<tr class="bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-400">
+                            <td class="px-5 py-2 text-xs text-indigo-400">↳</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.nama_ahass ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.type_motor ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.nomor_mesin ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.no_rangka ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.kpb_type ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.km ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.tanggal_beli ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.tanggal_claim ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs" colspan="2">${filename}</td>
+                        </tr>`;
+                    }).join('');
+                }
+
+                $('#table1 tbody').on('click', 'tr .expand-btn', function() {
+                    const tr   = $(this).closest('tr');
+                    const row  = table1.row(tr);
+                    const data = row.data();
+
+                    if (!data || !data.phash) return;
+
+                    if (tr.hasClass('dt-hasChild')) {
+                        // Tutup child row
+                        row.child.hide();
+                        tr.removeClass('dt-hasChild');
+                        $(this).find('svg path').attr('d', 'M12 4.5v15m7.5-7.5h-15'); // plus icon
+                        $(this).closest('td').find('button').removeClass('bg-red-100 text-red-600').addClass('bg-indigo-100 text-indigo-600');
+                    } else {
+                        // Buka child row
+                        $.getJSON('{{ route("datatable.astra-webc.duplicates") }}', {
+                            phash: data.phash,
+                            exclude_id: data.id
+                        }, function(duplicates) {
+                            row.child($(buildChildRows(duplicates))).show();
+                            tr.addClass('dt-hasChild');
+                        });
+                        $(this).find('svg path').attr('d', 'M19.5 12h-15'); // minus icon
+                        $(this).closest('td').find('button').removeClass('bg-indigo-100 text-indigo-600').addClass('bg-red-100 text-red-600');
+                    }
                 });
+
             });
         });
     </script>

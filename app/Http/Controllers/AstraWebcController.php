@@ -72,8 +72,38 @@ class AstraWebcController extends Controller
                   });
         }
 
+        // Pre-compute phash yang duplikat (1 query, bukan correlated subquery)
+        $duplicatePhashes = AstraWebc::select('phash')
+            ->whereNotNull('phash')
+            ->groupBy('phash')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('phash')
+            ->toArray();
+
         return DataTables::of($query)
             ->addIndexColumn()
+            ->addColumn('duplicates_count', function ($row) use ($duplicatePhashes) {
+                return in_array($row->phash, $duplicatePhashes) ? 1 : 0;
+            })
             ->make(true);
+    }
+
+    /**
+     * Get duplicate rows by phash (for expand child row)
+     */
+    public function getDuplicates(Request $request)
+    {
+        $phash = $request->input('phash');
+        $excludeId = $request->input('exclude_id');
+
+        if (!$phash) {
+            return response()->json([]);
+        }
+
+        $rows = AstraWebc::where('phash', $phash)
+            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->get(['id', 'kode_ahass', 'nama_ahass', 'nomor_mesin', 'type_motor', 'tanggal_beli', 'no_rangka', 'kpb_type', 'tanggal_claim', 'km', 'filename']);
+
+        return response()->json($rows);
     }
 }

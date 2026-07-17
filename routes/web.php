@@ -64,6 +64,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/rekap-kpb', [RekapKpbController::class, 'datatable'])->name('rekap-kpb');
         Route::get('/cek-kpb', [CekKpbController::class, 'datatable'])->name('cek-kpb');
         Route::get('/astra-webc', [AstraWebcController::class, 'datatable'])->name('astra-webc');
+        Route::get('/astra-webc/duplicates', [AstraWebcController::class, 'getDuplicates'])->name('astra-webc.duplicates');
     });
 
     Route::prefix('ai')->name('ai.')->group(function () {
