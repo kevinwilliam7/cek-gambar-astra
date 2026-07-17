@@ -164,6 +164,45 @@
                                 </div>
                                 <!-- End Dropdown Validitas -->
 
+                                <!-- ===== Dropdown Foto Sama ===== -->
+                                <div class="hs-dropdown [--auto-close:inside] inline-block">
+                                    <button id="hs-webc-foto-sama" type="button"
+                                        class="hs-dropdown-toggle py-1 px-3 flex items-center gap-x-1 border border-gray-200 text-sm text-start text-gray-800 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
+                                        aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
+                                        Foto Sama
+                                        <span id="indicator-foto_sama" class="hidden relative flex h-2 w-2 ms-2">
+                                            <span
+                                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                                        </span>
+                                        <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
+                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m6 9 6 6 6-6" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- Dropdown Menu Foto Sama -->
+                                    <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 w-full hidden z-20 max-w-xs bg-white rounded-xl shadow-xl before:absolute before:-top-4 before:start-0 before:w-full before:h-5 dark:bg-neutral-900"
+                                        role="menu" aria-orientation="vertical" aria-labelledby="hs-webc-foto-sama">
+                                        <div class="p-4 sm:p-6">
+                                            <div class="space-y-0.5">
+                                                <div class="flex items-center">
+                                                    <label
+                                                        class="p-2 group w-full inline-flex items-center cursor-pointer text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800">
+                                                        <input type="checkbox" name="foto_sama"
+                                                            class="shrink-0 size-4.5 bg-black border-black rounded-sm focus:ring-0 focus:ring-offset-0 checked:text-black disabled:opacity-50 disabled:pointer-events-none"
+                                                            value="1">
+                                                        <span class="ms-2 text-gray-800 dark:text-neutral-400">Ya (Hanya Duplikat)</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- End Dropdown Menu Foto Sama -->
+                                </div>
+                                <!-- End Dropdown Foto Sama -->
+
                             </div>
                             <!-- End Filter Bar -->
                         </div>
@@ -257,6 +296,7 @@
                             d.tanggal_claim_sampai = document.getElementById('tanggal_claim_sampai').value;
                             d.kode_ahass = Array.from(document.querySelectorAll('input[name="kode_ahass"]:checked')).map(cb => cb.value);
                             d.validitas  = Array.from(document.querySelectorAll('input[name="validitas"]:checked')).map(cb => cb.value);
+                            d.foto_sama  = Array.from(document.querySelectorAll('input[name="foto_sama"]:checked')).map(cb => cb.value);
                         }
                     },
                     columns: [
@@ -338,7 +378,7 @@
                 });
 
                 // ===== Filter Checkbox =====
-                ['kode_ahass', 'validitas'].forEach(name => {
+                ['kode_ahass', 'validitas', 'foto_sama'].forEach(name => {
                     document.querySelectorAll(`input[name="${name}"]`).forEach(cb => {
                         cb.addEventListener('change', () => {
                             const checked = document.querySelectorAll(`input[name="${name}"]:checked`).length > 0;
@@ -357,14 +397,17 @@
 
                     // Uncheck semua checkbox
                     document.querySelectorAll(
-                        'input[name="kode_ahass"], input[name="validitas"]'
+                        'input[name="kode_ahass"], input[name="validitas"], input[name="foto_sama"]'
                     ).forEach(cb => { cb.checked = false; });
 
                     // Sembunyikan semua indicator
-                    ['tanggal_claim', 'kode_ahass', 'validitas'].forEach(field => {
+                    ['tanggal_claim', 'kode_ahass', 'validitas', 'foto_sama'].forEach(field => {
                         const el = document.getElementById(`indicator-${field}`);
                         if (el) el.classList.add('hidden');
                     });
+
+                    table1.draw();
+                });
 
                     table1.draw();
                 });

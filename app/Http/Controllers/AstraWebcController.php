@@ -60,6 +60,18 @@ class AstraWebcController extends Controller
             $query->whereIn('elimination', $request->input('elimination', []));
         }
 
+        // Filter foto_sama (phash duplikat)
+        if ($request->filled('foto_sama') && in_array('1', $request->input('foto_sama', []))) {
+            $query->whereNotNull('phash')
+                  ->whereIn('phash', function ($q) {
+                      $q->select('phash')
+                        ->from('astra_webcs')
+                        ->whereNotNull('phash')
+                        ->groupBy('phash')
+                        ->havingRaw('COUNT(*) > 1');
+                  });
+        }
+
         return DataTables::of($query)
             ->addIndexColumn()
             ->make(true);
