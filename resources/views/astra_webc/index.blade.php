@@ -102,19 +102,36 @@
                                     <!-- Dropdown Menu Kode AHASS -->
                                     <div class="hs-dropdown-menu transition-[opacity,margin] duration-[0.1ms] md:duration-[150ms] hs-dropdown-open:opacity-100 opacity-0 w-full hidden z-20 max-w-xs bg-white rounded-xl shadow-xl before:absolute before:-top-4 before:start-0 before:w-full before:h-5 dark:bg-neutral-900"
                                         role="menu" aria-orientation="vertical" aria-labelledby="hs-webc-ahass">
-                                        <div class="p-4 sm:p-6">
-                                            <div class="space-y-0.5 max-h-64 overflow-y-auto">
+                                        <div class="p-4 sm:p-5 space-y-3">
+                                            <!-- Search Input -->
+                                            <div class="relative">
+                                                <input type="text" id="ahass-search"
+                                                    placeholder="Cari AHASS..."
+                                                    class="w-full py-1.5 ps-8 pe-3 text-sm border border-gray-200 rounded-lg dark:bg-neutral-800 dark:border-neutral-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                <svg class="absolute start-2.5 top-1/2 -translate-y-1/2 size-3.5 text-gray-400 dark:text-neutral-500"
+                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="2" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803a7.5 7.5 0 0 0 10.607 0Z" />
+                                                </svg>
+                                            </div>
+                                            <!-- End Search Input -->
+                                            <div id="ahass-list" class="space-y-0.5 max-h-56 overflow-y-auto">
                                                 @foreach ($ahass as $a)
-                                                    <div class="flex items-center">
+                                                    <div class="ahass-item flex items-center" data-name="{{ strtolower($a->nama_ahass) }} {{ strtolower($a->kode_ahass) }}">
                                                         <label
                                                             class="p-2 group w-full inline-flex items-center cursor-pointer text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800">
                                                             <input type="checkbox" name="kode_ahass"
                                                                 class="shrink-0 size-4.5 border-gray-300 rounded-sm text-indigo-600 checked:border-indigo-600 focus:ring-indigo-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-500 dark:checked:bg-indigo-500 dark:checked:border-indigo-500 dark:focus:ring-offset-gray-800"
                                                                 value="{{ $a->kode_ahass }}">
-                                                            <span class="ms-2 text-gray-800 dark:text-neutral-400">{{ $a->nama_ahass }}</span>
+                                                            <span class="ms-2 text-gray-800 dark:text-neutral-400 leading-tight">
+                                                                <span class="block font-medium">{{ $a->nama_ahass }}</span>
+                                                                <span class="text-xs text-gray-400 dark:text-neutral-500">{{ $a->kode_ahass }}</span>
+                                                            </span>
                                                         </label>
                                                     </div>
                                                 @endforeach
+                                                <p id="ahass-empty" class="hidden px-2 py-3 text-sm text-gray-400 text-center">Tidak ditemukan</p>
                                             </div>
                                         </div>
                                     </div>
@@ -437,6 +454,28 @@
                         if (indicator) indicator.classList.toggle('hidden', !dari && !sampai);
                         table1.draw();
                     });
+                });
+
+                // ===== AHASS Live Search =====
+                const ahassSearch = document.getElementById('ahass-search');
+
+                // Cegah Preline HSDropdown intercept keyboard saat mengetik
+                ahassSearch.addEventListener('keydown',  e => e.stopPropagation());
+                ahassSearch.addEventListener('keyup',    e => e.stopPropagation());
+                ahassSearch.addEventListener('keypress', e => e.stopPropagation());
+                ahassSearch.addEventListener('click',    e => e.stopPropagation());
+
+                ahassSearch.addEventListener('input', function() {
+                    const keyword = this.value.toLowerCase().trim();
+                    const items   = document.querySelectorAll('#ahass-list .ahass-item');
+                    let visibleCount = 0;
+                    items.forEach(item => {
+                        const match = item.dataset.name.includes(keyword);
+                        item.style.display = match ? '' : 'none';
+                        if (match) visibleCount++;
+                    });
+                    const emptyMsg = document.getElementById('ahass-empty');
+                    if (emptyMsg) emptyMsg.classList.toggle('hidden', visibleCount > 0);
                 });
 
                 // ===== Filter Checkbox =====
