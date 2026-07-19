@@ -145,7 +145,7 @@
                                 @php
                                     $headers = [
                                         '',
-                                        'Nama AHASS',
+                                        'Nama File',
                                         'Type Motor',
                                         'No Mesin',
                                         'No Rangka',
@@ -268,7 +268,7 @@
                                 return '';
                             }
                         },
-                        { data: 'nama_ahass', name: 'nama_ahass', render: function(data) { return data ?? '-'; } },
+                        { data: 'nama_file', name: 'nama_file', render: function(data) { return data ?? '-'; } },
                         { data: 'type_motor', name: 'type_motor', render: function(data) { return data ?? '-'; } },
                         { data: 'engine', name: 'engine', render: function(data) { return data ?? '-'; } },
                         { data: 'no_rangka', name: 'no_rangka', render: function(data) { return data ?? '-'; } },
