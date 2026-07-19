@@ -153,6 +153,7 @@ class CekKpbController extends Controller
 
     public function getAllLogJobList() {
         $logs = LogActivity::where('logable_type', 'ilike', '%Job%')
+            ->whereNull('util')
             ->limit(10)
             ->orderBy('created_at', 'desc')
             ->get();
