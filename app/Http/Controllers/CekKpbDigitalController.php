@@ -35,6 +35,7 @@ class CekKpbDigitalController extends Controller
             ->toArray();
 
         $query = CekKpbDigital::with(['notes', 'user', 'astraWebcs'])
+            ->whereHas('notes', function($q){})
             ->where(function ($q) use ($request) {
                 if ($request->filled('type_motor')) {
                     $values = $request->input('type_motor', []);
