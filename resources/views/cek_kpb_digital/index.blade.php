@@ -143,7 +143,20 @@
                         <table id="table1" class="min-w-full divide-y divide-gray-200 border-t border-gray-200 dark:border-neutral-700 dark:divide-neutral-700">
                             <thead id="thead1" class="bg-gray-50 dark:bg-neutral-700/50">
                                 @php
-                                    $headers = ['', 'Nama File', 'Service ID', 'Nomor Mesin', 'Kode Nosin', 'Catatan'];
+                                    $headers = [
+                                        '',
+                                        'Nama AHASS',
+                                        'Type Motor',
+                                        'No Mesin',
+                                        'No Rangka',
+                                        'KPB Type',
+                                        'KM',
+                                        'Tgl Beli',
+                                        'Tgl Claim',
+                                        'Validitas',
+                                        'Filename',
+                                        'Catatan'
+                                    ];
                                 @endphp
                                 <tr>
                                     @foreach ($headers as $header)
@@ -189,12 +202,10 @@
                 <rect x="19.5" y="28.5" width="139" height="39" rx="7.5" stroke="currentColor" class="stroke-gray-100 dark:stroke-neutral-700/30"></rect>
                 <rect x="27" y="36" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
                 <rect x="59" y="39" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-100 dark:fill-neutral-700/70"></rect>
-                <g filter="url(#filter14)">
-                    <rect x="12" y="6" width="154" height="40" rx="8" fill="currentColor" class="fill-white dark:fill-neutral-800" shape-rendering="crispEdges"></rect>
-                    <rect x="20" y="14" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
-                    <rect x="52" y="17" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
-                    <rect x="52" y="29" width="106" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
-                </g>
+                <rect x="12" y="6" width="154" height="40" rx="8" fill="currentColor" class="fill-white dark:fill-neutral-800" shape-rendering="crispEdges"></rect>
+                <rect x="20" y="14" width="24" height="24" rx="4" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
+                <rect x="52" y="17" width="60" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
+                <rect x="52" y="29" width="106" height="6" rx="3" fill="currentColor" class="fill-gray-200 dark:fill-neutral-700"></rect>
                 </svg>
                 <div class="max-w-sm mx-auto">
                     <p class="mt-2 font-medium text-gray-800 dark:text-neutral-200">No data</p>
@@ -246,7 +257,7 @@
                     },
                     columns: [
                         {
-                            data: 'has_duplicates',
+                            data: 'duplicates_count',
                             orderable: false,
                             searchable: false,
                             className: 'text-center',
@@ -257,25 +268,45 @@
                                 return '';
                             }
                         },
-                        {
-                            data: 'file_name', name: 'file_name',
-                            render: function(data, type, row) {
-                                return `<div class="flex items-center gap-x-3"><span class="relative size-9 shrink-0 bg-gray-100 rounded-full dark:bg-neutral-700"><img class="absolute inset-0 size-full object-cover rounded-full px-2 py-2" src="https://images.seeklogo.com/logo-png/31/2/honda-logo-png_seeklogo-310689.png" alt="Post Image"></span><div class="grow"><a class="font-medium text-gray-800 underline-offset-2 hover:underline hover:decoration-2 hover:text-indigo-700 dark:text-neutral-200 dark:hover:text-indigo-400" href="#">${data ?? '-'}</a><ul class="flex flex-wrap items-center whitespace-nowrap gap-1.5"><li class="inline-flex items-center relative text-xs text-gray-500"><p class="text-xs text-gray-500 dark:text-neutral-400">${row?.user?.name ?? '-'}</p></li></ul></div></div>`;
-                            }
+                        { data: 'nama_ahass', name: 'nama_ahass', render: function(data) { return data ?? '-'; } },
+                        { data: 'type_motor', name: 'type_motor', render: function(data) { return data ?? '-'; } },
+                        { data: 'engine', name: 'engine', render: function(data) { return data ?? '-'; } },
+                        { data: 'no_rangka', name: 'no_rangka', render: function(data) { return data ?? '-'; } },
+                        { data: 'service_id', name: 'service_id', render: function(data) { return data ? 'KPB ' + data : '-'; } },
+                        { data: 'km', name: 'km', render: function(data) { return data ? `${data} km` : '-'; } },
+                        { data: 'buy_date', name: 'buy_date', render: function(data) { return data ?? '-'; } },
+                        { data: 'service_date', name: 'service_date',
+                          render: function(data) {
+                              if (!data) return '<span class="text-gray-300 dark:text-neutral-600">-</span>';
+                              return `<div class="flex items-center gap-1.5">
+                                  <span class="shrink-0 size-2 inline-block bg-blue-500 rounded-full"></span>
+                                  <span class="block text-sm text-gray-800 dark:text-neutral-200">${data}</span>
+                              </div>`;
+                          }
                         },
-                        { data: 'service_id', name: 'service_id' },
-                        {
-                            data: 'engine', name: 'engine',
-                            render: function(data, type, row) {
-                                return `<div class="flex items-center gap-x-3"><div class="grow"><a class="font-medium text-gray-800 underline-offset-2 hover:underline hover:decoration-2 hover:text-indigo-700 dark:text-neutral-200 dark:hover:text-indigo-400" href="#">${data ?? '-'}</a><ul class="flex flex-wrap items-center whitespace-nowrap gap-1.5"><li class="inline-flex items-center relative text-xs text-gray-500"><p class="text-xs text-gray-500 dark:text-neutral-400">${row?.motor?.type_motor ?? '-'}</p></li></ul></div></div>`;
-                            }
+                        { data: 'validitas', name: 'validitas',
+                          render: function(data) {
+                              if (!data) return '<span class="text-gray-300 dark:text-neutral-600">-</span>';
+                              const isValid = data.toLowerCase().includes('valid');
+                              const color = isValid ? 'bg-violet-500' : 'bg-red-500';
+                              return `<div class="flex items-center gap-1.5">
+                                  <span class="shrink-0 size-2 inline-block ${color} rounded-full"></span>
+                                  <span class="block text-sm text-gray-800 dark:text-neutral-200">${data}</span>
+                              </div>`;
+                          }
                         },
-                        {
-                            data: 'kode_nosin', name: 'kode_nosin', orderable: false, searchable: false,
-                            render: function(data) {
-                                if (!data) return '<span class="text-gray-300 dark:text-neutral-600">-</span>';
-                                return `<span class="inline-flex items-center gap-1.5 py-0.5 px-2 text-xs font-medium bg-gray-100 text-gray-700 rounded-full dark:bg-neutral-700 dark:text-neutral-300">${data}</span>`;
-                            }
+                        { data: 'filename', name: 'filename',
+                          orderable: false,
+                          render: function(data) {
+                              if (!data) return '<span class="text-gray-300 dark:text-neutral-600">-</span>';
+                              return `<a href="${data}" target="_blank" rel="noopener noreferrer"
+                                  class="inline-flex items-center gap-x-1 text-indigo-600 underline underline-offset-2 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm">
+                                  <svg class="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                  </svg>
+                                  Lihat File
+                              </a>`;
+                          }
                         },
                         {
                             data: 'notes', name: 'notes', searchable: false, orderable: false,
@@ -288,6 +319,26 @@
                     createdRow: function(row, data) {
                         $(row).addClass('hover:bg-gray-50 dark:hover:bg-neutral-800 text-sm text-gray-800 dark:text-white');
                         $('td', row).addClass('py-3 px-5');
+                    },
+                    drawCallback: function(settings) {
+                        const api = this.api();
+                        api.rows().every(function() {
+                            const data = this.data();
+                            const tr = $(this.node());
+                            
+                            if (parseInt(data.duplicates_count) > 0 && !tr.hasClass('dt-hasChild')) {
+                                const row = this;
+                                $.getJSON('{{ route("datatable.cek-kpb-digital.duplicates") }}', { phash: data.phash, exclude_id: data.astra_webc_id }, function(duplicates) {
+                                    row.child($(buildChildRows(duplicates))).show();
+                                    tr.addClass('dt-hasChild');
+                                    
+                                    // Ubah icon tombol expand menjadi minus (-)
+                                    const btn = tr.find('.expand-btn');
+                                    btn.removeClass('bg-indigo-100 text-indigo-600').addClass('bg-red-100 text-red-600');
+                                    btn.find('svg path').attr('d', 'M19.5 12h-15');
+                                });
+                            }
+                        });
                     },
                     language: {
                         emptyTable: document.getElementById('empty-table-template').innerHTML,
@@ -324,10 +375,23 @@
 
                 // Expand Child Rows
                 function buildChildRows(rows) {
-                    if (!rows.length) return '<tr><td colspan="6" class="px-5 py-3 text-sm text-gray-400">Tidak ada data engine sama ditemukan.</td></tr>';
+                    if (!rows.length) return '<tr><td colspan="12" class="px-5 py-3 text-sm text-gray-400">Tidak ada duplikat ditemukan.</td></tr>';
                     return rows.map(r => {
-                        const notes = (r.notes ?? []).map(n => `<li>${n.message}</li>`).join('');
-                        return `<tr class="bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-400"><td class="px-5 py-2 text-xs text-indigo-400">&#8627;</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.file_name ?? '-'}</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.service_id ?? '-'}</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.engine ?? '-'}</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.kode_nosin ?? '-'}</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${notes ? '<ul class="list-disc ms-3">' + notes + '</ul>' : '-'}</td></tr>`;
+                        const filename = r.filename
+                            ? `<a href="${r.filename}" target="_blank" class="text-indigo-500 underline text-xs">Lihat File</a>`
+                            : '-';
+                        return `<tr class="bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-400">
+                            <td class="px-5 py-2 text-xs text-indigo-400">↳</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.nama_ahass ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.type_motor ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.nomor_mesin ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.no_rangka ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.kpb_type ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.km ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.tanggal_beli ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.tanggal_claim ?? '-'}</td>
+                            <td class="px-5 py-2 text-xs" colspan="3">${filename}</td>
+                        </tr>`;
                     }).join('');
                 }
 
@@ -335,7 +399,7 @@
                     const tr = $(this).closest('tr');
                     const row = table1.row(tr);
                     const data = row.data();
-                    if (!data || !data.engine) return;
+                    if (!data || !data.phash) return;
 
                     if (tr.hasClass('dt-hasChild')) {
                         row.child.hide();
@@ -343,7 +407,7 @@
                         $(this).find('svg path').attr('d', 'M12 4.5v15m7.5-7.5h-15');
                         $(this).closest('td').find('button').removeClass('bg-red-100 text-red-600').addClass('bg-indigo-100 text-indigo-600');
                     } else {
-                        $.getJSON('{{ route("datatable.cek-kpb-digital.duplicates") }}', { engine: data.engine, exclude_id: data.id }, function(duplicates) {
+                        $.getJSON('{{ route("datatable.cek-kpb-digital.duplicates") }}', { phash: data.phash, exclude_id: data.astra_webc_id }, function(duplicates) {
                             row.child($(buildChildRows(duplicates))).show();
                             tr.addClass('dt-hasChild');
                         });

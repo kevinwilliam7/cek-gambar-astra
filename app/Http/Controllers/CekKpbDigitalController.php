@@ -26,14 +26,15 @@ class CekKpbDigitalController extends Controller
 
     public function datatable(Request $request)
     {
-        $duplicateEngines = CekKpbDigital::select('engine')
-            ->whereNotNull('engine')
-            ->groupBy('engine')
+        // Ambil list duplicate phashes dari astra_webcs
+        $duplicatePhashes = \App\Models\AstraWebc::select('phash')
+            ->whereNotNull('phash')
+            ->groupBy('phash')
             ->havingRaw('COUNT(*) > 1')
-            ->pluck('engine')
+            ->pluck('phash')
             ->toArray();
 
-        $query = CekKpbDigital::with(['notes', 'user'])
+        $query = CekKpbDigital::with(['notes', 'user', 'astraWebcs'])
             ->where(function ($q) use ($request) {
                 if ($request->filled('type_motor')) {
                     $values = $request->input('type_motor', []);
@@ -51,14 +52,56 @@ class CekKpbDigitalController extends Controller
 
         return DataTables::of($query)
             ->addIndexColumn()
-            ->addColumn('has_duplicates', function ($row) use ($duplicateEngines) {
-                return in_array($row->engine, $duplicateEngines) ? 1 : 0;
+            ->addColumn('duplicates_count', function ($row) use ($duplicatePhashes) {
+                $webc = $row->astra_webc;
+                if ($webc && $webc->phash) {
+                    return in_array($webc->phash, $duplicatePhashes) ? 1 : 0;
+                }
+                return 0;
             })
-            ->addColumn('kode_nosin', function ($row) {
-                return $row->engine ? substr($row->engine, 0, 5) : null;
+            ->addColumn('phash', function ($row) {
+                return $row->astra_webc?->phash;
+            })
+            ->addColumn('astra_webc_id', function ($row) {
+                return $row->astra_webc?->id;
+            })
+            ->addColumn('nama_ahass', function ($row) {
+                return $row->astra_webc?->nama_ahass;
+            })
+            ->addColumn('type_motor', function ($row) {
+                return $row->astra_webc?->type_motor ?? $row->motor?->type_motor;
+            })
+            ->addColumn('no_rangka', function ($row) {
+                return $row->astra_webc?->no_rangka;
+            })
+            ->addColumn('validitas', function ($row) {
+                return $row->astra_webc?->validitas;
+            })
+            ->addColumn('filename', function ($row) {
+                return $row->astra_webc?->filename;
             })
             ->make(true);
     }
+
+    /**
+     * Ambil data duplikat berdasarkan phash dari astra_webcs.
+     */
+    public function getDuplicates(Request $request)
+    {
+        $phash     = $request->input('phash');
+        $excludeId = $request->input('exclude_id');
+
+        if (!$phash) {
+            return response()->json([]);
+        }
+
+        $rows = \App\Models\AstraWebc::where('phash', $phash)
+            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
+            ->get(['id', 'kode_ahass', 'nama_ahass', 'nomor_mesin', 'type_motor', 'tanggal_beli', 'no_rangka', 'kpb_type', 'tanggal_claim', 'km', 'filename']);
+
+        return response()->json($rows);
+    }
+
 
     public function getAllLogJobList() {
         $logs = LogActivity::where('logable_type', 'ilike', '%Job%')

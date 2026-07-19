@@ -147,55 +147,56 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
     /**
      * Untuk mengecek foto speedometer yang duplikat / sama
      */
-    private function checkDuplicateImage($data, $rowNum, $formattedTglBeli, $formattedTglService){
-        $duplikasi = [];
-        $noEngine = $data['no_engine'];
+    private function checkDuplicateImage($data, $rowNum, $formattedTglBeli, $formattedTglService)
+    {
+        $noEngine  = $data['no_engine'];
         $serviceKe = $data['service_ke'];
 
+        // Selalu catat record ini ke dalam cek_kpb_digitals
+        $cekKpbDigital = CekKpbDigital::updateOrCreate(
+            [
+                'engine'     => $noEngine,
+                'service_id' => $serviceKe,
+                'file_name'  => $this->fileName,
+            ],
+            [
+                'buy_date'     => $formattedTglBeli,
+                'service_date' => $formattedTglService,
+                'km'           => $data['km'],
+                'user_id'      => $this->user_id,
+            ]
+        );
+
+        // Cari record astra_webc yang cocok berdasarkan nomor_mesin dan kpb_type
         $a = AstraWebc::where('nomor_mesin', $noEngine)
             ->where('kpb_type', 'KPB' . $serviceKe)
             ->first();
         
-        $duplicates = AstraWebc::where('phash', $a->phash)
-            // ->where('km', $km)
-            ->get();
-
-        if ($duplicates->count() > 1) {
-            // Ambil semua duplikat KECUALI record utama ($a)
-            $otherDuplicates = $duplicates->where('id', '!=', $a->id);
-
-            if ($otherDuplicates->count() > 0) {  // pastikan masih ada yang lain setelah di-exclude
-                $duplikasi[] = [
-                    'nomor_mesin'     => $a->nomor_mesin,
-                    'kpb_type'        => $a->kpb_type,
-                    'km'              => $a->km,
-                    'jumlah_duplikat' => $otherDuplicates->count(),  // hitung yang lain saja
-                    'phash'           => $a->phash,
-                    'filename'        => $a->filename,
-                    'detail'          => $otherDuplicates->map(function ($w) {
-                        return "{$w->nomor_mesin} / {$w->filename} / tgl_service: {$w->tanggal_claim} / km: {$w->km}";
-                    })->toArray(),
-                ];
-            }
+        if (!$a) {
+            $cekKpbDigital->notes()->updateOrCreate([
+                'message' => "⚠️ Baris {$rowNum}: Tidak ditemukan data claim padanan di AstraWebc.",
+            ]);
+            return;
         }
 
-        foreach ($duplikasi as $i => $item) {
-            $cekKpbDigital = CekKpbDigital::updateOrCreate(
-                [
-                    'engine' => $data['no_engine'],
-                    'service_id' => $data['service_ke'],
-                    'file_name' => $this->fileName,
-                ],
-                [
-                    'buy_date' => $formattedTglBeli,
-                    'service_date' => $formattedTglService,
-                    'km' => $data['km'],
-                    'user_id' => $this->user_id,
-                ]
-            );
+        if (!$a->phash) {
             $cekKpbDigital->notes()->updateOrCreate([
-                'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Foto Speedometer Duplicate.",
+                'message' => "⚠️ Baris {$rowNum}: Data claim padanan ditemukan tetapi tidak memiliki foto (pHash kosong).",
             ]);
+            return;
+        }
+
+        // Cari duplikat photo berdasarkan phash di AstraWebc
+        $duplicates = AstraWebc::where('phash', $a->phash)->get();
+
+        if ($duplicates->count() > 1) {
+            $otherDuplicates = $duplicates->where('id', '!=', $a->id);
+
+            if ($otherDuplicates->count() > 0) {
+                $cekKpbDigital->notes()->updateOrCreate([
+                    'message' => "⚠️ Baris {$rowNum}: Foto Speedometer Duplicate.",
+                ]);
+            }
         }
     }
 }
