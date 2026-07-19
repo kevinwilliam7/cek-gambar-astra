@@ -50,7 +50,7 @@ Route::middleware(['auth'])->group(function () {
             return request()->header('X-Forwarded-For');
         });
     });
-    Route::prefix('cek-kpb.digital')->name('cek-kpb-digital.')->group(function () {
+    Route::prefix('cek-kpb-digital')->name('cek-kpb-digital.')->group(function () {
         Route::get('/', [CekKpbDigitalController::class, 'index'])->name('index');
         Route::post('/store', [CekKpbDigitalController::class, 'store'])->name('store');
     });
