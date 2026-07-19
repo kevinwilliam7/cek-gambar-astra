@@ -3,6 +3,7 @@
 use App\Http\Controllers\AhassController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CekKpbController;
+use App\Http\Controllers\CekKpbDigitalController;
 use App\Http\Controllers\Home\AhassDatatableController;
 use App\Http\Controllers\Home\HomeController as HomeHomeController;
 use App\Http\Controllers\Motor\MotorController as MotorMotorController;
@@ -50,7 +51,8 @@ Route::middleware(['auth'])->group(function () {
         });
     });
     Route::prefix('cek-kpb.digital')->name('cek-kpb-digital.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\CekKpbDigitalController::class, 'index'])->name('index');
+        Route::get('/', [CekKpbDigitalController::class, 'index'])->name('index');
+        Route::post('/store', [CekKpbDigitalController::class, 'store'])->name('store');
     });
     Route::prefix('file')->name('file.')->group(function () {
         Route::get('/', [FileFileController::class, 'index'])->name('index');
@@ -63,6 +65,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/motor', [MotorMotorController::class, 'datatable'])->name('motor');
         Route::get('/rekap-kpb', [RekapKpbController::class, 'datatable'])->name('rekap-kpb');
         Route::get('/cek-kpb', [CekKpbController::class, 'datatable'])->name('cek-kpb');
+        Route::get('/cek-kpb-digital', [CekKpbDigitalController::class, 'datatable'])->name('cek-kpb-digital');
+        Route::get('/cek-kpb-digital/duplicates', [CekKpbDigitalController::class, 'getDuplicates'])->name('cek-kpb-digital.duplicates');
         Route::get('/astra-webc', [AstraWebcController::class, 'datatable'])->name('astra-webc');
         Route::get('/astra-webc/duplicates', [AstraWebcController::class, 'getDuplicates'])->name('astra-webc.duplicates');
     });
