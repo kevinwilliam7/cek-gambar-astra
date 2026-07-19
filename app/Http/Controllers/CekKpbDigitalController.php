@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Jobs\CekKpbDigitalJob;
 use App\Models\CekKpbDigital;
+use App\Models\LogActivity;
 use App\Models\Motor;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
@@ -58,6 +60,27 @@ class CekKpbDigitalController extends Controller
             ->make(true);
     }
 
+    public function getAllLogJobList() {
+        $logs = LogActivity::where('logable_type', 'ilike', '%Job%')
+            ->where('util', 'KPB Digital')
+            ->limit(10)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Format created_at menjadi "5 Agustus 2025 05:00 WIB"
+        Carbon::setLocale('id'); // untuk nama bulan dalam bahasa Indonesia
+
+        $logs->transform(function($log) {
+            // ubah timezone ke Asia/Jakarta
+            $created = Carbon::parse($log->created_at)->timezone('Asia/Jakarta');
+            $log->created_at_human = $created->translatedFormat('j F Y H:i') . ' WIB';
+            return $log;
+        });
+
+        return response()->json($logs);
+    }
+
+
     public function store(Request $request)
     {
         try {
@@ -83,26 +106,5 @@ class CekKpbDigitalController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
-    }
-
-    public function getDuplicates(Request $request)
-    {
-        $engine    = $request->input('engine');
-        $excludeId = $request->input('exclude_id');
-
-        if (!$engine) {
-            return response()->json([]);
-        }
-
-        $rows = CekKpbDigital::with(['notes'])
-            ->where('engine', $engine)
-            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
-            ->get(['id', 'file_name', 'service_id', 'engine', 'user_id'])
-            ->map(function ($row) {
-                $row->kode_nosin = $row->engine ? substr($row->engine, 0, 5) : null;
-                return $row;
-            });
-
-        return response()->json($rows);
     }
 }

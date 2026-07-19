@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('cek-kpb-digital')->name('cek-kpb-digital.')->group(function () {
         Route::get('/', [CekKpbDigitalController::class, 'index'])->name('index');
         Route::post('/store', [CekKpbDigitalController::class, 'store'])->name('store');
+        Route::get('/getAllLogJobs', [CekKpbDigitalController::class, 'getAllLogJobList'])->name('getAllLogJobs');
     });
     Route::prefix('file')->name('file.')->group(function () {
         Route::get('/', [FileFileController::class, 'index'])->name('index');

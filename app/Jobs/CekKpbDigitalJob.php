@@ -59,6 +59,7 @@ class CekKpbDigitalJob implements ShouldQueue
                 'user_agent'   => $this->user_agent,
                 'status'       => 'success',
                 'description'  => "{$this->fileName} berhasil.",
+                'util'         => 'KPB Digital',
             ]);
         } catch (\Throwable $e) {
             Log::error("❌ Gagal import KPB Digital {$this->path}: " . $e->getMessage());
@@ -71,6 +72,7 @@ class CekKpbDigitalJob implements ShouldQueue
                 'user_agent'   => $this->user_agent,
                 'status'       => 'failed',
                 'description'  => "{$this->fileName} gagal: " . $e->getMessage(),
+                'util'         => 'KPB Digital',
             ]);
         }
     }
@@ -86,6 +88,7 @@ class CekKpbDigitalJob implements ShouldQueue
             'user_agent'   => $this->user_agent,
             'status'       => 'failed',
             'description'  => "{$this->fileName} gagal: " . $exception->getMessage(),
+            'util'         => 'KPB Digital',
         ]);
     }
 }

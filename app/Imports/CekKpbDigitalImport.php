@@ -6,6 +6,7 @@ use App\Models\CekKpbDigital;
 use App\Models\CekKpbDigitalProgress;
 use App\Models\KpbKriteria;
 use App\Models\RekapKpb;
+use App\Models\AstraWebc;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
@@ -73,12 +74,7 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
                     $formattedTglBeli    = $this->formatTanggalExcel($tgl_beli);
                     $formattedTglService = $this->formatTanggalExcel($data['tgl_service']);
 
-                    $this->checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService);
-                    $this->checkDuplicateEngine($data, $rowNum, $formattedTglBeli, $formattedTglService);
-                    $this->checkEngineLength($data, $rowNum, $formattedTglBeli, $formattedTglService);
-                    $this->checkBuyDateEqualsServiceDate($data, $rowNum, $formattedTglBeli, $formattedTglService);
-                    $this->checkServiceDateExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
-                    $this->checkKmExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                    $this->checkDuplicateImage($data, $rowNum, $formattedTglBeli, $formattedTglService);
                 }
             }
         });
@@ -148,162 +144,58 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
     // Check Functions
     // -------------------------------------------------------------------------
 
-    protected function checkEngineLength($data, $rowNum, $formattedTglBeli, $formattedTglService)
-    {
-        if (strlen($data['no_engine']) !== 12) {
-            $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - No Engine " . strlen($data['no_engine']) . " karakter.";
-            if ($this->context instanceof Command) {
-                $this->log($message);
-                return;
-            }
-            $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message);
-        }
-    }
+    /**
+     * Untuk mengecek foto speedometer yang duplikat / sama
+     */
+    private function checkDuplicateImage($data, $rowNum, $formattedTglBeli, $formattedTglService){
+        $duplikasi = [];
+        $noEngine = $data['no_engine'];
+        $serviceKe = $data['service_ke'];
 
-    protected function checkDuplicateEngine($data, $rowNum, $formattedTglBeli, $formattedTglService)
-    {
-        $engineKey = strtoupper(trim($data['no_engine']));
-        $serviceId = (int) $data['service_ke'];
-        $km        = (int) $data['km'];
+        $a = AstraWebc::where('nomor_mesin', $noEngine)
+            ->where('kpb_type', 'KPB' . $serviceKe)
+            ->first();
+        
+        $duplicates = AstraWebc::where('phash', $a->phash)
+            // ->where('km', $km)
+            ->get();
 
-        $this->duplicateEngines[$engineKey][$serviceId] = [
-            'tgl_service' => $formattedTglService,
-            'tgl_beli'    => $formattedTglBeli,
-            'service_id'  => $serviceId,
-            'km'          => $km,
-            'row'         => $rowNum,
-        ];
+        if ($duplicates->count() > 1) {
+            // Ambil semua duplikat KECUALI record utama ($a)
+            $otherDuplicates = $duplicates->where('id', '!=', $a->id);
 
-        $sorted = collect($this->duplicateEngines[$engineKey])->sortBy('service_id')->values();
-        $prev   = null;
-
-        foreach ($sorted as $curr) {
-            if ($prev) {
-                // 1️⃣ Tgl Beli berbeda
-                if ($curr['tgl_beli'] !== $prev['tgl_beli']) {
-                    $msg = "⚠️ Baris {$curr['row']}: No Engine {$engineKey} Tgl Beli berbeda dgn sebelumnya. Excel: {$curr['tgl_beli']}, Sebelumnya: {$prev['tgl_beli']}";
-                    if ($this->context instanceof Command) { $this->log($msg); }
-                    else { $this->upsert(array_merge(['no_engine' => $engineKey, 'service_ke' => $curr['service_id'], 'km' => $curr['km'], '_buy_date' => $curr['tgl_beli'], '_service_date' => $curr['tgl_service']]), $msg); }
-                }
-                // 2️⃣ KM turun
-                if ($curr['km'] <= $prev['km']) {
-                    $msg = "⚠️ Baris {$curr['row']}: No Engine {$engineKey} - KM {$curr['km']} lebih kecil atau sama dengan sebelumnya ({$prev['km']}) pada Service ID {$prev['service_id']}";
-                    if ($this->context instanceof Command) { $this->log($msg); }
-                    else { $this->upsert(array_merge(['no_engine' => $engineKey, 'service_ke' => $curr['service_id'], 'km' => $curr['km'], '_buy_date' => $curr['tgl_beli'], '_service_date' => $curr['tgl_service']]), $msg); }
-                }
-                // 3️⃣ Tgl Service mundur
-                if ($curr['tgl_service'] <= $prev['tgl_service']) {
-                    $msg = "⚠️ Baris {$curr['row']}: No Engine {$engineKey} - Tgl Service {$curr['tgl_service']} lebih kecil atau sama dengan sebelumnya ({$prev['tgl_service']}) pada Service ID {$prev['service_id']}";
-                    if ($this->context instanceof Command) { $this->log($msg); }
-                    else { $this->upsert(array_merge(['no_engine' => $engineKey, 'service_ke' => $curr['service_id'], 'km' => $curr['km'], '_buy_date' => $curr['tgl_beli'], '_service_date' => $curr['tgl_service']]), $msg); }
-                }
-                // 4️⃣ Duplikat Service ID
-                if ($curr['service_id'] === $prev['service_id']) {
-                    $msg = "⚠️ No Engine {$engineKey} memiliki duplikat Service ID {$curr['service_id']} (baris {$curr['row']} dan {$prev['row']})";
-                    if ($this->context instanceof Command) { $this->log($msg); }
-                    else { $this->upsert(array_merge(['no_engine' => $engineKey, 'service_ke' => $curr['service_id'], 'km' => $curr['km'], '_buy_date' => $curr['tgl_beli'], '_service_date' => $curr['tgl_service']]), $msg); }
-                }
-            }
-            $prev = $curr;
-        }
-    }
-
-    protected function checkBuyDateEqualsServiceDate($data, $rowNum, $formattedTglBeli, $formattedTglService)
-    {
-        if ($data['tgl_service'] === $formattedTglBeli) {
-            $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Service sama dengan Tgl Beli.";
-            if ($this->context instanceof Command) { $this->log($message); return; }
-            $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message);
-        }
-    }
-
-    protected function checkKpbCompareRekap($data, $rowNum, $formattedTglBeli, $formattedTglService)
-    {
-        $rekap_kpbs = $this->rekapKpbCache->get($data['no_engine'] ?? null)[0] ?? null;
-        if ($rekap_kpbs === null && $data['service_ke'] > 1) {
-            if ($this->context instanceof Command) {
-                $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tidak ada data rekap KPB di database.");
+            if ($otherDuplicates->count() > 0) {  // pastikan masih ada yang lain setelah di-exclude
+                $duplikasi[] = [
+                    'nomor_mesin'     => $a->nomor_mesin,
+                    'kpb_type'        => $a->kpb_type,
+                    'km'              => $a->km,
+                    'jumlah_duplikat' => $otherDuplicates->count(),  // hitung yang lain saja
+                    'phash'           => $a->phash,
+                    'filename'        => $a->filename,
+                    'detail'          => $otherDuplicates->map(function ($w) {
+                        return "{$w->nomor_mesin} / {$w->filename} / tgl_service: {$w->tanggal_claim} / km: {$w->km}";
+                    })->toArray(),
+                ];
             }
         }
 
-        if (isset($rekap_kpbs) && $rekap_kpbs->buy_date !== $formattedTglBeli) {
-            $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli tidak sesuai (DB: {$rekap_kpbs->buy_date}, Excel: {$formattedTglBeli})";
-            if ($this->context instanceof Command) { $this->log($message); }
-            else { $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message); }
-        }
-
-        foreach ($this->rekapKpbCache->get($data['no_engine'], collect())->toArray() as $rekapOnly) {
-            if ($rekapOnly['service_id'] > $data['service_ke']) {
-                if ($data['km'] > $rekapOnly['km']) {
-                    $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM Excel ({$data['km']}) lebih besar dari KM KPB setelahnya ({$rekapOnly['km']}) pada KPB {$rekapOnly['service_id']}";
-                    if ($this->context instanceof Command) { $this->log($message); }
-                    else { $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message); }
-                }
-                if ($formattedTglService > $rekapOnly['service_date']) {
-                    $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Service Excel ({$formattedTglService}) lebih besar dari Tgl Service setelahnya ({$rekapOnly['service_date']}) pada KPB {$rekapOnly['service_id']}";
-                    if ($this->context instanceof Command) { $this->log($message); }
-                    else { $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message); }
-                }
-            } else {
-                if ($data['km'] <= $rekapOnly['km'] && $data['service_ke'] > 1) {
-                    $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM Excel ({$data['km']}) lebih kecil atau sama dengan KM sebelumnya ({$rekapOnly['km']})";
-                    if ($this->context instanceof Command) { $this->log($message); }
-                    else { $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message); }
-                }
-                if ($formattedTglService <= $rekapOnly['service_date'] && $data['service_ke'] > 1) {
-                    $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Service Excel ({$formattedTglService}) lebih kecil atau sama dengan Tgl Service sebelumnya ({$rekapOnly['service_date']})";
-                    if ($this->context instanceof Command) { $this->log($message); }
-                    else { $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message); }
-                }
-            }
-        }
-    }
-
-    private function checkServiceDateExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService)
-    {
-        $enginePrefix = substr($data['no_engine'], 0, 5);
-        $kriteriaKpb  = $this->kpbKriteriaCache->get($enginePrefix . '|' . 'KPB ' . $data['service_ke']);
-        $selisihObj   = (new \DateTime($formattedTglBeli))->diff(new \DateTime($formattedTglService));
-        $selisihHari  = $selisihObj->days * ($selisihObj->invert ? -1 : 1) + 1;
-
-        if ($kriteriaKpb === null) {
-            $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Kriteria KPB tidak ditemukan untuk pengecekan Tanggal Service maksimum.";
-            if ($this->context instanceof Command) { $this->log($message); }
-            else { $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message); }
-            return;
-        }
-
-        if ($selisihHari <= 0) {
-            $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Service ({$formattedTglService}) lebih kecil atau sama dengan Tgl Beli ({$formattedTglBeli})";
-            if ($this->context instanceof Command) { $this->log($message); }
-            else { $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message); }
-        } elseif ($selisihHari > $kriteriaKpb->hari_maksimum) {
-            $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Selisih Hari ({$selisihHari} hari) melebihi batas maksimum ({$kriteriaKpb->hari_maksimum} hari)";
-            if ($this->context instanceof Command) { $this->log($message); }
-            else { $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message); }
-        }
-    }
-
-    private function checkKmExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService)
-    {
-        $enginePrefix = substr($data['no_engine'], 0, 5);
-        $kriteriaKpb  = $this->kpbKriteriaCache->get($enginePrefix . '|' . 'KPB ' . $data['service_ke']);
-
-        if ($kriteriaKpb === null) {
-            $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Kriteria KPB tidak ditemukan untuk pengecekan KM maksimum.";
-            if ($this->context instanceof Command) { $this->log($message); }
-            else { $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message); }
-            return;
-        }
-
-        if ($data['km'] > $kriteriaKpb->km_maksimum) {
-            $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM ({$data['km']}) melebihi batas maksimum ({$kriteriaKpb->km_maksimum} KM)";
-            if ($this->context instanceof Command) { $this->log($message); }
-            else { $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message); }
-        } elseif ($data['km'] <= 1) {
-            $message = "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM ({$data['km']}) tidak valid.";
-            if ($this->context instanceof Command) { $this->log($message); }
-            else { $this->upsert(array_merge($data, ['_buy_date' => $formattedTglBeli, '_service_date' => $formattedTglService]), $message); }
+        foreach ($duplikasi as $i => $item) {
+            $cekKpbDigital = CekKpbDigital::updateOrCreate(
+                [
+                    'engine' => $data['no_engine'],
+                    'service_id' => $data['service_ke'],
+                    'file_name' => $this->fileName,
+                ],
+                [
+                    'buy_date' => $formattedTglBeli,
+                    'service_date' => $formattedTglService,
+                    'km' => $data['km'],
+                    'user_id' => $this->user_id,
+                ]
+            );
+            $cekKpbDigital->notes()->updateOrCreate([
+                'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Foto Speedometer Duplicate.",
+            ]);
         }
     }
 }

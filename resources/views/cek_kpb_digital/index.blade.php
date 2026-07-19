@@ -1,12 +1,22 @@
 @extends('layouts.app')
 @section('title', 'Ahass | Cek KPB Digital')
 @section('main-content')
-    <div class="relative px-2 sm:px-5 py-5 before:absolute before:top-0 before:start-0 before:-z-1 before:w-full before:h-112.5 before:bg-slate-900 dark:before:bg-slate-950 animate-slide-down">
+    <div
+        class="relative px-2 sm:px-5 py-5
+     before:absolute before:top-0 before:start-0 before:-z-1 before:w-full before:h-112.5 before:bg-slate-900 dark:before:bg-slate-950
+     animate-slide-down">
         <div class="max-w-max mx-auto flex flex-col gap-y-5 pt-4 md:pt-16">
+            <!-- Header -->
             <div class="mb-4 flex flex-col justify-center gap-y-3 text-center">
-                <h1 class="text-2xl md:text-3xl font-semibold text-white">Cek Kupon Perawatan Berkala Digital (KPB Digital)</h1>
-                <p class="text-sm text-white/70">Pengecekan Klaim KPB Digital</p>
+                <h1 class="text-2xl md:text-3xl font-semibold text-white">
+                    Cek Kupon Perawatan Berkala Digital (KPB Digital)
+                </h1>
+                <p class="text-sm text-white/70">
+                    Pengecekan Klaim KPB Digital
+                </p>
             </div>
+            <!-- End Header -->
+
             <div class="bg-white border border-gray-200 shadow-xs rounded-xl dark:bg-neutral-800 dark:border-neutral-700">
                 <div class="grid grid-cols-1 md:grid-cols-12">
                     <div class="md:col-span-4 flex-1 flex flex-col h-full">
@@ -31,6 +41,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Table in Card -->
             <div class="flex flex-col bg-white border border-gray-200 shadow-xs rounded-xl dark:bg-neutral-800 dark:border-neutral-700">
                 <div class="border-b border-gray-200 dark:border-neutral-700">
@@ -190,18 +201,18 @@
                     <p class="mb-5 text-sm text-gray-500 dark:text-neutral-500">No data here yet.</p>
                 </div>
             </div>
-        \`;
+        `;
 
         function renderJobs(jobs) {
             jobsContainer.innerHTML = '';
             if (jobs.length === 0) { jobsContainer.innerHTML = noData; return; }
             jobs.forEach(job => {
-                const progress = job.cek_kpb_progress ?? {};
+                const progress = job.cek_kpb_digital_progress ?? {};
                 const jobId = progress.job_id ?? job.id;
                 const total = progress.total ?? 0;
                 const current = progress.progress ?? 0;
                 const percent = total > 0 ? ((current / total) * 100).toFixed(1) : '0.0';
-                const html = \`<div class="mt-5 flex flex-col"><div class="py-2.5 border-t border-dashed border-gray-200 dark:border-neutral-700"><div class="flex items-center gap-3"><div class="grow"><p class="text-sm text-gray-800 dark:text-neutral-200">${job.file_name ?? '(belum ada file)'}</p><div class="mt-2 flex flex-col gap-x-3"><span class="block mb-1.5 text-xs text-gray-500 dark:text-neutral-400">${percent}% &middot; ${current} / ${total} Checked</span><div class="flex w-full h-1 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-700"><div class="flex flex-col justify-center overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap" style="width: ${percent}%"></div></div></div></div></div></div></div>\`;
+                const html = `<div class="mt-5 flex flex-col"><div class="py-2.5 border-t border-dashed border-gray-200 dark:border-neutral-700"><div class="flex items-center gap-3"><div class="grow"><p class="text-sm text-gray-800 dark:text-neutral-200">${job.file_name ?? '(belum ada file)'}</p><div class="mt-2 flex flex-col gap-x-3"><span class="block mb-1.5 text-xs text-gray-500 dark:text-neutral-400">${percent}% &middot; ${current} / ${total} Checked</span><div class="flex w-full h-1 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-700"><div class="flex flex-col justify-center overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap" style="width: ${percent}%"></div></div></div></div></div></div></div>`;
                 jobsContainer.insertAdjacentHTML('beforeend', html);
             });
         }
@@ -212,13 +223,13 @@
             logs.forEach(log => {
                 const sc = log.status === 'failed' ? 'bg-red-100 text-red-800 dark:bg-red-500/10 dark:text-red-500' : 'bg-green-100 text-green-800 dark:bg-green-500/10 dark:text-green-500';
                 const sl = log.status === 'failed' ? 'Gagal' : 'Berhasil';
-                const html = \`<div class="p-5 mt-2 space-y-4 flex flex-col bg-white border border-gray-200 rounded-xl dark:bg-neutral-800 dark:border-neutral-700"><div class="flex flex-wrap justify-between items-center gap-2"><span class="font-medium text-gray-800 dark:text-neutral-200">${log.file_name}</span><span class="inline-flex items-center gap-1.5 py-px px-2 text-xs font-medium rounded-full ${sc}">${sl}</span></div><ul class="space-y-2"><li class="flex justify-between items-center"><span class="text-xs uppercase text-gray-500 dark:text-neutral-500">IP address:</span><span class="text-sm text-gray-800 dark:text-neutral-200">${log.ip_address}</span></li><li class="flex justify-between items-center"><span class="text-xs uppercase text-gray-500 dark:text-neutral-500">Deskripsi:</span><span class="text-sm text-gray-800 dark:text-neutral-200">${log.description}</span></li><li class="flex justify-between items-center"><span class="text-xs uppercase text-gray-500 dark:text-neutral-500">Recent activity:</span><span class="text-sm text-gray-800 dark:text-neutral-200">${log.created_at_human}</span></li></ul></div>\`;
+                const html = `<div class="p-5 mt-2 space-y-4 flex flex-col bg-white border border-gray-200 rounded-xl dark:bg-neutral-800 dark:border-neutral-700"><div class="flex flex-wrap justify-between items-center gap-2"><span class="font-medium text-gray-800 dark:text-neutral-200">${log.file_name}</span><span class="inline-flex items-center gap-1.5 py-px px-2 text-xs font-medium rounded-full ${sc}">${sl}</span></div><ul class="space-y-2"><li class="flex justify-between items-center"><span class="text-xs uppercase text-gray-500 dark:text-neutral-500">IP address:</span><span class="text-sm text-gray-800 dark:text-neutral-200">${log.ip_address}</span></li><li class="flex justify-between items-center"><span class="text-xs uppercase text-gray-500 dark:text-neutral-500">Deskripsi:</span><span class="text-sm text-gray-800 dark:text-neutral-200">${log.description}</span></li><li class="flex justify-between items-center"><span class="text-xs uppercase text-gray-500 dark:text-neutral-500">Recent activity:</span><span class="text-sm text-gray-800 dark:text-neutral-200">${log.created_at_human}</span></li></ul></div>`;
                 logsContainer.insertAdjacentHTML('beforeend', html);
             });
         }
 
-        fetch('/cek-kpb/getAllJobs').then(r => r.json()).then(renderJobs).catch(e => console.error(e));
-        fetch('/cek-kpb/getAllLogJobs').then(r => r.json()).then(renderLogs).catch(e => console.error(e));
+        fetch('/cek-kpb-digital/getAllJobs').then(r => r.json()).then(renderJobs).catch(e => console.error(e));
+        fetch('/cek-kpb-digital/getAllLogJobs').then(r => r.json()).then(renderLogs).catch(e => console.error(e));
 
         window.addEventListener('load', () => {
             $(document).ready(() => {
@@ -241,7 +252,7 @@
                             className: 'text-center',
                             render: function(data) {
                                 if (parseInt(data) > 0) {
-                                    return \`<button class="expand-btn inline-flex items-center justify-center size-5 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-600 transition-colors" title="Lihat data engine sama"><svg class="size-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></button>\`;
+                                    return `<button class="expand-btn inline-flex items-center justify-center size-5 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-600 transition-colors" title="Lihat data engine sama"><svg class="size-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></button>`;
                                 }
                                 return '';
                             }
@@ -249,28 +260,28 @@
                         {
                             data: 'file_name', name: 'file_name',
                             render: function(data, type, row) {
-                                return \`<div class="flex items-center gap-x-3"><span class="relative size-9 shrink-0 bg-gray-100 rounded-full dark:bg-neutral-700"><img class="absolute inset-0 size-full object-cover rounded-full px-2 py-2" src="https://images.seeklogo.com/logo-png/31/2/honda-logo-png_seeklogo-310689.png" alt="Post Image"></span><div class="grow"><a class="font-medium text-gray-800 underline-offset-2 hover:underline hover:decoration-2 hover:text-indigo-700 dark:text-neutral-200 dark:hover:text-indigo-400" href="#">${data ?? '-'}</a><ul class="flex flex-wrap items-center whitespace-nowrap gap-1.5"><li class="inline-flex items-center relative text-xs text-gray-500"><p class="text-xs text-gray-500 dark:text-neutral-400">${row?.user?.name ?? '-'}</p></li></ul></div></div>\`;
+                                return `<div class="flex items-center gap-x-3"><span class="relative size-9 shrink-0 bg-gray-100 rounded-full dark:bg-neutral-700"><img class="absolute inset-0 size-full object-cover rounded-full px-2 py-2" src="https://images.seeklogo.com/logo-png/31/2/honda-logo-png_seeklogo-310689.png" alt="Post Image"></span><div class="grow"><a class="font-medium text-gray-800 underline-offset-2 hover:underline hover:decoration-2 hover:text-indigo-700 dark:text-neutral-200 dark:hover:text-indigo-400" href="#">${data ?? '-'}</a><ul class="flex flex-wrap items-center whitespace-nowrap gap-1.5"><li class="inline-flex items-center relative text-xs text-gray-500"><p class="text-xs text-gray-500 dark:text-neutral-400">${row?.user?.name ?? '-'}</p></li></ul></div></div>`;
                             }
                         },
                         { data: 'service_id', name: 'service_id' },
                         {
                             data: 'engine', name: 'engine',
                             render: function(data, type, row) {
-                                return \`<div class="flex items-center gap-x-3"><div class="grow"><a class="font-medium text-gray-800 underline-offset-2 hover:underline hover:decoration-2 hover:text-indigo-700 dark:text-neutral-200 dark:hover:text-indigo-400" href="#">${data ?? '-'}</a><ul class="flex flex-wrap items-center whitespace-nowrap gap-1.5"><li class="inline-flex items-center relative text-xs text-gray-500"><p class="text-xs text-gray-500 dark:text-neutral-400">${row?.motor?.type_motor ?? '-'}</p></li></ul></div></div>\`;
+                                return `<div class="flex items-center gap-x-3"><div class="grow"><a class="font-medium text-gray-800 underline-offset-2 hover:underline hover:decoration-2 hover:text-indigo-700 dark:text-neutral-200 dark:hover:text-indigo-400" href="#">${data ?? '-'}</a><ul class="flex flex-wrap items-center whitespace-nowrap gap-1.5"><li class="inline-flex items-center relative text-xs text-gray-500"><p class="text-xs text-gray-500 dark:text-neutral-400">${row?.motor?.type_motor ?? '-'}</p></li></ul></div></div>`;
                             }
                         },
                         {
                             data: 'kode_nosin', name: 'kode_nosin', orderable: false, searchable: false,
                             render: function(data) {
                                 if (!data) return '<span class="text-gray-300 dark:text-neutral-600">-</span>';
-                                return \`<span class="inline-flex items-center gap-1.5 py-0.5 px-2 text-xs font-medium bg-gray-100 text-gray-700 rounded-full dark:bg-neutral-700 dark:text-neutral-300">${data}</span>\`;
+                                return `<span class="inline-flex items-center gap-1.5 py-0.5 px-2 text-xs font-medium bg-gray-100 text-gray-700 rounded-full dark:bg-neutral-700 dark:text-neutral-300">${data}</span>`;
                             }
                         },
                         {
                             data: 'notes', name: 'notes', searchable: false, orderable: false,
                             render: function(data, type, row) {
                                 if (!row?.notes?.length) return '<span class="text-gray-300 dark:text-neutral-600">-</span>';
-                                return '<ul class="list-disc ms-4 text-sm text-gray-800 dark:text-neutral-200">' + row.notes.map(n => \`<li>${n.message}</li>\`).join('') + '</ul>';
+                                return '<ul class="list-disc ms-4 text-sm text-gray-800 dark:text-neutral-200">' + row.notes.map(n => `<li>${n.message}</li>`).join('') + '</ul>';
                             }
                         },
                     ],
@@ -292,10 +303,10 @@
                 $('#info-table1').append($('.dt-info'));
 
                 ['service_id', 'type_motor'].forEach(name => {
-                    document.querySelectorAll(\`input[name="${name}"]\`).forEach(cb => {
+                    document.querySelectorAll(`input[name="${name}"]`).forEach(cb => {
                         cb.addEventListener('change', () => {
-                            const checked = document.querySelectorAll(\`input[name="${name}"]:checked\`).length > 0;
-                            const indicator = document.getElementById(\`indicator-${name}\`);
+                            const checked = document.querySelectorAll(`input[name="${name}"]:checked`).length > 0;
+                            const indicator = document.getElementById(`indicator-${name}`);
                             if (indicator) indicator.classList.toggle('hidden', !checked);
                             table1.draw();
                         });
@@ -305,7 +316,7 @@
                 document.getElementById('clear-filters').addEventListener('click', function() {
                     document.querySelectorAll('input[type="checkbox"][name="service_id"], input[type="checkbox"][name="type_motor"]').forEach(cb => { cb.checked = false; });
                     ['service_id', 'type_motor'].forEach(field => {
-                        const el = document.getElementById(\`indicator-${field}\`);
+                        const el = document.getElementById(`indicator-${field}`);
                         if (el) el.classList.add('hidden');
                     });
                     table1.draw();
@@ -315,8 +326,8 @@
                 function buildChildRows(rows) {
                     if (!rows.length) return '<tr><td colspan="6" class="px-5 py-3 text-sm text-gray-400">Tidak ada data engine sama ditemukan.</td></tr>';
                     return rows.map(r => {
-                        const notes = (r.notes ?? []).map(n => \`<li>${n.message}</li>\`).join('');
-                        return \`<tr class="bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-400"><td class="px-5 py-2 text-xs text-indigo-400">&#8627;</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.file_name ?? '-'}</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.service_id ?? '-'}</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.engine ?? '-'}</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.kode_nosin ?? '-'}</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${notes ? '<ul class="list-disc ms-3">' + notes + '</ul>' : '-'}</td></tr>\`;
+                        const notes = (r.notes ?? []).map(n => `<li>${n.message}</li>`).join('');
+                        return `<tr class="bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-400"><td class="px-5 py-2 text-xs text-indigo-400">&#8627;</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.file_name ?? '-'}</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.service_id ?? '-'}</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.engine ?? '-'}</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${r.kode_nosin ?? '-'}</td><td class="px-5 py-2 text-xs text-gray-700 dark:text-neutral-300">${notes ? '<ul class="list-disc ms-3">' + notes + '</ul>' : '-'}</td></tr>`;
                     }).join('');
                 }
 
