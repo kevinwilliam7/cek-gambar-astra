@@ -239,7 +239,7 @@
             });
         }
 
-        fetch('/cek-kpb-digital/getAllJobs').then(r => r.json()).then(renderJobs).catch(e => console.error(e));
+        fetch('/cek-kpb/getAllJobs').then(r => r.json()).then(renderJobs).catch(e => console.error(e));
         fetch('/cek-kpb-digital/getAllLogJobs').then(r => r.json()).then(renderLogs).catch(e => console.error(e));
 
         window.addEventListener('load', () => {
