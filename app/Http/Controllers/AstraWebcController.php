@@ -108,6 +108,50 @@ class AstraWebcController extends Controller
                 ->count();
         }
 
+        $lastImportedDealerRow = AstraWebc::query()
+            ->join('ahass', 'astra_webcs.kode_ahass', '=', 'ahass.kode_ahass')
+            ->whereIn('ahass.jenis_dealer', ['H23', 'H123'])
+            ->orderBy('astra_webcs.id', 'desc')
+            ->select('astra_webcs.kode_ahass', 'astra_webcs.nama_ahass')
+            ->first();
+            
+        $lastImportedDealerCount = 0;
+        if ($lastImportedDealerRow && $dealerLatest) {
+            $dDate = \Carbon\Carbon::parse($dealerLatest);
+            $lastImportedDealerCount = AstraWebc::where('kode_ahass', $lastImportedDealerRow->kode_ahass)
+                ->whereRaw("TO_CHAR(
+                    CASE 
+                        WHEN astra_webcs.tanggal_claim LIKE '%/%' THEN TO_DATE(astra_webcs.tanggal_claim, 'DD/MM/YYYY')
+                        WHEN astra_webcs.tanggal_claim LIKE '____-__-__%' THEN TO_DATE(astra_webcs.tanggal_claim, 'YYYY-MM-DD')
+                        ELSE TO_DATE(astra_webcs.tanggal_claim, 'DD-MM-YYYY')
+                    END,
+                    'YYYY-MM'
+                ) = ?", [$dDate->format('Y-m')])
+                ->count();
+        }
+
+        $lastImportedSORow = AstraWebc::query()
+            ->join('ahass', 'astra_webcs.kode_ahass', '=', 'ahass.kode_ahass')
+            ->whereNotIn('ahass.jenis_dealer', ['H23', 'H123'])
+            ->orderBy('astra_webcs.id', 'desc')
+            ->select('astra_webcs.kode_ahass', 'astra_webcs.nama_ahass')
+            ->first();
+
+        $lastImportedSOCount = 0;
+        if ($lastImportedSORow && $soLatest) {
+            $sDate = \Carbon\Carbon::parse($soLatest);
+            $lastImportedSOCount = AstraWebc::where('kode_ahass', $lastImportedSORow->kode_ahass)
+                ->whereRaw("TO_CHAR(
+                    CASE 
+                        WHEN astra_webcs.tanggal_claim LIKE '%/%' THEN TO_DATE(astra_webcs.tanggal_claim, 'DD/MM/YYYY')
+                        WHEN astra_webcs.tanggal_claim LIKE '____-__-__%' THEN TO_DATE(astra_webcs.tanggal_claim, 'YYYY-MM-DD')
+                        ELSE TO_DATE(astra_webcs.tanggal_claim, 'DD-MM-YYYY')
+                    END,
+                    'YYYY-MM'
+                ) = ?", [$sDate->format('Y-m')])
+                ->count();
+        }
+
         $dashboard = [
             'missing_phash_total' => AstraWebc::whereNull('phash')->count(),
             'missing_phash_dealer' => $missingPhashCounts->get('Dealer', 0),
@@ -116,6 +160,10 @@ class AstraWebcController extends Controller
             'last_so_claim' => $this->formatDashboardDate($soLatest),
             'count_dealer_claim' => $dealerMonthCount,
             'count_so_claim' => $soMonthCount,
+            'last_imported_ahass_dealer' => $lastImportedDealerRow ? $lastImportedDealerRow->nama_ahass : '-',
+            'last_imported_ahass_so' => $lastImportedSORow ? $lastImportedSORow->nama_ahass : '-',
+            'last_imported_ahass_dealer_count' => $lastImportedDealerCount,
+            'last_imported_ahass_so_count' => $lastImportedSOCount,
         ];
 
         return view('astra_webc.index', compact('ahass', 'validitas', 'jenis_dealer', 'dashboard'));
