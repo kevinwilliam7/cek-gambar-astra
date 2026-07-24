@@ -72,12 +72,50 @@ class AstraWebcController extends Controller
             ")
             ->pluck('total', 'dealer_category');
 
+        $dealerLatest = $latestClaims->get('Dealer');
+        $dealerMonthCount = 0;
+        if ($dealerLatest) {
+            $dDate = \Carbon\Carbon::parse($dealerLatest);
+            $dealerMonthCount = AstraWebc::query()
+                ->join('ahass', 'astra_webcs.kode_ahass', '=', 'ahass.kode_ahass')
+                ->whereIn('ahass.jenis_dealer', ['H23', 'H123'])
+                ->whereRaw("TO_CHAR(
+                    CASE 
+                        WHEN astra_webcs.tanggal_claim LIKE '%/%' THEN TO_DATE(astra_webcs.tanggal_claim, 'DD/MM/YYYY')
+                        WHEN astra_webcs.tanggal_claim LIKE '____-__-__%' THEN TO_DATE(astra_webcs.tanggal_claim, 'YYYY-MM-DD')
+                        ELSE TO_DATE(astra_webcs.tanggal_claim, 'DD-MM-YYYY')
+                    END,
+                    'YYYY-MM'
+                ) = ?", [$dDate->format('Y-m')])
+                ->count();
+        }
+
+        $soLatest = $latestClaims->get('SO');
+        $soMonthCount = 0;
+        if ($soLatest) {
+            $sDate = \Carbon\Carbon::parse($soLatest);
+            $soMonthCount = AstraWebc::query()
+                ->join('ahass', 'astra_webcs.kode_ahass', '=', 'ahass.kode_ahass')
+                ->whereNotIn('ahass.jenis_dealer', ['H23', 'H123'])
+                ->whereRaw("TO_CHAR(
+                    CASE 
+                        WHEN astra_webcs.tanggal_claim LIKE '%/%' THEN TO_DATE(astra_webcs.tanggal_claim, 'DD/MM/YYYY')
+                        WHEN astra_webcs.tanggal_claim LIKE '____-__-__%' THEN TO_DATE(astra_webcs.tanggal_claim, 'YYYY-MM-DD')
+                        ELSE TO_DATE(astra_webcs.tanggal_claim, 'DD-MM-YYYY')
+                    END,
+                    'YYYY-MM'
+                ) = ?", [$sDate->format('Y-m')])
+                ->count();
+        }
+
         $dashboard = [
             'missing_phash_total' => AstraWebc::whereNull('phash')->count(),
             'missing_phash_dealer' => $missingPhashCounts->get('Dealer', 0),
             'missing_phash_so' => $missingPhashCounts->get('SO', 0),
-            'last_dealer_claim' => $this->formatDashboardDate($latestClaims->get('Dealer')),
-            'last_so_claim' => $this->formatDashboardDate($latestClaims->get('SO')),
+            'last_dealer_claim' => $this->formatDashboardDate($dealerLatest),
+            'last_so_claim' => $this->formatDashboardDate($soLatest),
+            'count_dealer_claim' => $dealerMonthCount,
+            'count_so_claim' => $soMonthCount,
         ];
 
         return view('astra_webc.index', compact('ahass', 'validitas', 'jenis_dealer', 'dashboard'));

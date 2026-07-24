@@ -57,7 +57,13 @@
                             </svg>
                         </div>
                     </div>
-                    <p class="relative mt-4 text-sm text-slate-600 dark:text-neutral-400">Tanggal claim terbaru untuk AHASS Dealer (H23 & H123).</p>
+                    
+                    <div class="relative mt-4 flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1.5 rounded-lg bg-sky-100 px-2.5 py-1 text-[0.75rem] font-semibold text-sky-700 dark:bg-sky-500/10 dark:text-sky-400">
+                            Total Claim: {{ number_format($dashboard['count_dealer_claim']) }}
+                        </span>
+                    </div>
+                    <p class="relative mt-3 text-[0.75rem] text-slate-500 dark:text-neutral-400">Jumlah claim terbaru untuk AHASS Dealer (H23 & H123) pada bulan tersebut.</p>
                 </div>
 
                 <div class="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:shadow-slate-200/50 dark:border-neutral-700/60 dark:bg-neutral-800/80 dark:hover:shadow-neutral-900/50">
@@ -73,7 +79,13 @@
                             </svg>
                         </div>
                     </div>
-                    <p class="relative mt-4 text-sm text-slate-600 dark:text-neutral-400">Tanggal claim terbaru untuk AHASS SO (Selain H23 & H123).</p>
+                    
+                    <div class="relative mt-4 flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-100 px-2.5 py-1 text-[0.75rem] font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                            Total Claim: {{ number_format($dashboard['count_so_claim']) }}
+                        </span>
+                    </div>
+                    <p class="relative mt-3 text-[0.75rem] text-slate-500 dark:text-neutral-400">Jumlah claim terbaru untuk AHASS SO (Selain H23 & H123) pada bulan tersebut.</p>
                 </div>
             </div>
             <!-- End Mini Dashboard -->
