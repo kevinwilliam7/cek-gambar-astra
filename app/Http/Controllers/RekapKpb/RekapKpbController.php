@@ -80,13 +80,70 @@ class RekapKpbController extends Controller
         $jenis_dealer = Ahass::select('jenis_dealer')
             ->distinct()
             ->pluck('jenis_dealer');
+        $latestMonth = RekapKpb::orderBy('id', 'desc')->value('month');
+        $jumlahTtpk = 0;
+        $listTtpkDateDealer = [];
+        $listTtpkDateSO = [];
+        
+        if ($latestMonth) {
+            $jumlahTtpk = RekapKpb::where('month', $latestMonth)->count();
+                
+            $listTtpkDateDealer = RekapKpb::query()
+                ->join('ahass', 'rekap_kpbs.ahass_code', '=', 'ahass.kode_ahass')
+                ->where('rekap_kpbs.month', $latestMonth)
+                ->whereIn('ahass.jenis_dealer', ['H23', 'H123'])
+                ->whereNotNull('rekap_kpbs.ttpk_date')
+                ->select('rekap_kpbs.ttpk_date')
+                ->distinct('rekap_kpbs.ttpk_date')
+                ->orderBy('rekap_kpbs.ttpk_date', 'desc')
+                ->get();
+
+            $listTtpkDateSO = RekapKpb::query()
+                ->join('ahass', 'rekap_kpbs.ahass_code', '=', 'ahass.kode_ahass')
+                ->where('rekap_kpbs.month', $latestMonth)
+                ->whereNotIn('ahass.jenis_dealer', ['H23', 'H123'])
+                ->whereNotNull('rekap_kpbs.ttpk_date')
+                ->select('rekap_kpbs.ttpk_date')
+                ->distinct('rekap_kpbs.ttpk_date')
+                ->orderBy('rekap_kpbs.ttpk_date', 'desc')
+                ->get();
+        }
+
+        $ttpkTerakhirDealer = RekapKpb::query()
+            ->join('ahass', 'rekap_kpbs.ahass_code', '=', 'ahass.kode_ahass')
+            ->whereIn('ahass.jenis_dealer', ['H23', 'H123'])
+            ->whereNotNull('rekap_kpbs.ttpk')
+            ->where('rekap_kpbs.ttpk', '!=', '')
+            ->orderBy('rekap_kpbs.ttpk_date', 'desc')
+            ->select('rekap_kpbs.ttpk', 'rekap_kpbs.ttpk_date')
+            ->first();
+        
+        $ttpkTerakhirSO = RekapKpb::query()
+            ->join('ahass', 'rekap_kpbs.ahass_code', '=', 'ahass.kode_ahass')
+            ->whereNotIn('ahass.jenis_dealer', ['H23', 'H123'])
+            ->whereNotNull('rekap_kpbs.ttpk')
+            ->where('rekap_kpbs.ttpk', '!=', '')
+            ->orderBy('rekap_kpbs.ttpk_date', 'desc')
+            ->select('rekap_kpbs.ttpk', 'rekap_kpbs.ttpk_date')
+            ->first();
+
         $data = [
             'motor' => $motor,
             'status_description' => $status_description,
             'service_id' => $service_id,
             'tahun' => $tahun,
             'bulan' => $bulan,
-            'jenis_dealer' => $jenis_dealer
+            'jenis_dealer' => $jenis_dealer,
+            'dashboard' => [
+                'latest_month' => $latestMonth,
+                'jumlah_ttpk' => $jumlahTtpk,
+                'list_ttpk_date_dealer' => $listTtpkDateDealer,
+                'list_ttpk_date_so' => $listTtpkDateSO,
+                'ttpk_terakhir_dealer' => $ttpkTerakhirDealer ? $ttpkTerakhirDealer->ttpk : '-',
+                'ttpk_terakhir_dealer_date' => $ttpkTerakhirDealer ? $ttpkTerakhirDealer->ttpk_date : '-',
+                'ttpk_terakhir_so' => $ttpkTerakhirSO ? $ttpkTerakhirSO->ttpk : '-',
+                'ttpk_terakhir_so_date' => $ttpkTerakhirSO ? $ttpkTerakhirSO->ttpk_date : '-',
+            ]
         ];
         return view('rekap_kpb.index', compact('data'));
     }

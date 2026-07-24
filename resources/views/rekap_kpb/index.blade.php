@@ -17,6 +17,98 @@
             </div>
             <!-- End Header -->
 
+            <!-- Mini Dashboard -->
+            <div class="grid gap-4 md:grid-cols-3">
+                <div class="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:shadow-slate-200/50 dark:border-neutral-700/60 dark:bg-neutral-800/80 dark:hover:shadow-neutral-900/50">
+                    <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-amber-500/10 blur-2xl transition-all duration-500 group-hover:bg-amber-500/20 dark:bg-amber-500/5 dark:group-hover:bg-amber-500/15"></div>
+                    <div class="relative flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[0.7rem] font-bold uppercase tracking-widest text-slate-500 dark:text-neutral-400">Total Rekap</p>
+                            <p class="mt-1.5 text-3xl font-extrabold tracking-tight text-slate-800 dark:text-white">{{ number_format($data['dashboard']['jumlah_ttpk']) }}</p>
+                        </div>
+                        <div class="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-amber-500/30 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-8.5 15A2 2 0 0 0 3.5 22h17a2 2 0 0 0 1.71-3.14l-8.5-15a2 2 0 0 0-3.42 0Z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="relative mt-3 text-[0.75rem] text-slate-500 dark:text-neutral-400">Total rekap data pada bulan terakhir di database</p>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:shadow-slate-200/50 dark:border-neutral-700/60 dark:bg-neutral-800/80 dark:hover:shadow-neutral-900/50">
+                    <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-sky-500/10 blur-2xl transition-all duration-500 group-hover:bg-sky-500/20 dark:bg-sky-500/5 dark:group-hover:bg-sky-500/15"></div>
+                    <div class="relative flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[0.7rem] font-bold uppercase tracking-widest text-slate-500 dark:text-neutral-400">TTPK Terakhir Dealer</p>
+                            <p class="mt-1.5 text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white md:text-3xl">{{ $data['dashboard']['ttpk_terakhir_dealer_date'] }}</p>
+                        </div>
+                        <div class="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 text-white shadow-lg shadow-sky-500/30 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
+                            </svg>
+                        </div>
+                    </div>
+                
+                    <p class="relative mt-3 text-[0.75rem] text-slate-500 dark:text-neutral-400">TTPK terakhir yang di-import untuk kategori Dealer (H23 & H123).</p>
+                    <div class="mt-4">
+                        <button type="button" class="hs-collapse-toggle inline-flex items-center gap-x-1 text-[0.75rem] font-semibold text-slate-500 hover:text-sky-600 focus:outline-none dark:text-neutral-400 dark:hover:text-sky-400" id="collapse-dealer-list" aria-expanded="false" aria-controls="collapse-dealer-list-heading" data-hs-collapse="#collapse-dealer-list-heading">
+                            <span class="hs-collapse-open:hidden">Tampilkan List Tanggal</span>
+                            <span class="hs-collapse-open:block hidden">Sembunyikan List Tanggal</span>
+                            <svg class="hs-collapse-open:rotate-180 shrink-0 size-3.5 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </button>
+                        <div id="collapse-dealer-list-heading" class="hs-collapse hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="collapse-dealer-list">
+                            <div class="mt-2 max-h-32 overflow-y-auto space-y-2 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 pr-2">
+                                @foreach($data['dashboard']['list_ttpk_date_dealer'] as $item)
+                                <div class="flex items-center justify-between text-[0.75rem]">
+                                    <span class="font-medium text-slate-700 dark:text-neutral-300">Tanggal TTPK</span>
+                                    <span class="text-slate-500 dark:text-neutral-500">{{ \Carbon\Carbon::parse($item->ttpk_date)->format('d-m-Y') }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:shadow-slate-200/50 dark:border-neutral-700/60 dark:bg-neutral-800/80 dark:hover:shadow-neutral-900/50">
+                    <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-emerald-500/10 blur-2xl transition-all duration-500 group-hover:bg-emerald-500/20 dark:bg-emerald-500/5 dark:group-hover:bg-emerald-500/15"></div>
+                    <div class="relative flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[0.7rem] font-bold uppercase tracking-widest text-slate-500 dark:text-neutral-400">TTPK Terakhir SO</p>
+                            <p class="mt-1.5 text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white md:text-3xl">{{ $data['dashboard']['ttpk_terakhir_so_date'] }}</p>
+                        </div>
+                        <div class="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6 1.5a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <p class="relative mt-3 text-[0.75rem] text-slate-500 dark:text-neutral-400">TTPK terakhir yang di-import untuk kategori SO (Selain H23 & H123).</p>
+                    <div class="mt-4">
+                        <button type="button" class="hs-collapse-toggle inline-flex items-center gap-x-1 text-[0.75rem] font-semibold text-slate-500 hover:text-emerald-600 focus:outline-none dark:text-neutral-400 dark:hover:text-emerald-400" id="collapse-so-list" aria-expanded="false" aria-controls="collapse-so-list-heading" data-hs-collapse="#collapse-so-list-heading">
+                            <span class="hs-collapse-open:hidden">Tampilkan List Tanggal</span>
+                            <span class="hs-collapse-open:block hidden">Sembunyikan List Tanggal</span>
+                            <svg class="hs-collapse-open:rotate-180 shrink-0 size-3.5 transition-transform" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </button>
+                        <div id="collapse-so-list-heading" class="hs-collapse hidden w-full overflow-hidden transition-[height] duration-300" aria-labelledby="collapse-so-list">
+                            <div class="mt-2 max-h-32 overflow-y-auto space-y-2 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 pr-2">
+                                @foreach($data['dashboard']['list_ttpk_date_so'] as $item)
+                                <div class="flex items-center justify-between text-[0.75rem]">
+                                    <span class="font-medium text-slate-700 dark:text-neutral-300">Tanggal TTPK</span>
+                                    <span class="text-slate-500 dark:text-neutral-500">{{ \Carbon\Carbon::parse($item->ttpk_date)->format('d-m-Y') }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Mini Dashboard -->
+
             <!-- Table in Card -->
             <div
                 class="flex flex-col bg-white border border-gray-200 shadow-xs rounded-xl dark:bg-neutral-800 dark:border-neutral-700">
