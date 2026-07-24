@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AstraWebc;
 use App\Models\Ahass;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -28,7 +29,58 @@ class AstraWebcController extends Controller
             ->orderBy('jenis_dealer')
             ->pluck('jenis_dealer');
 
-        return view('astra_webc.index', compact('ahass', 'validitas', 'jenis_dealer'));
+        $latestClaims = AstraWebc::query()
+            ->join('ahass', 'astra_webcs.kode_ahass', '=', 'ahass.kode_ahass')
+            ->whereNotNull('astra_webcs.tanggal_claim')
+            ->where('astra_webcs.tanggal_claim', '!=', '')
+            ->selectRaw("
+                CASE 
+                    WHEN ahass.jenis_dealer IN ('H23', 'H123') THEN 'Dealer'
+                    ELSE 'SO'
+                END as dealer_category,
+                MAX(
+                    CASE 
+                        WHEN astra_webcs.tanggal_claim LIKE '%/%' THEN TO_DATE(astra_webcs.tanggal_claim, 'DD/MM/YYYY')
+                        WHEN astra_webcs.tanggal_claim LIKE '____-__-__%' THEN TO_DATE(astra_webcs.tanggal_claim, 'YYYY-MM-DD')
+                        ELSE TO_DATE(astra_webcs.tanggal_claim, 'DD-MM-YYYY')
+                    END
+                ) as latest_claim
+            ")
+            ->groupByRaw("
+                CASE 
+                    WHEN ahass.jenis_dealer IN ('H23', 'H123') THEN 'Dealer'
+                    ELSE 'SO'
+                END
+            ")
+            ->pluck('latest_claim', 'dealer_category');
+
+        $missingPhashCounts = AstraWebc::query()
+            ->join('ahass', 'astra_webcs.kode_ahass', '=', 'ahass.kode_ahass')
+            ->whereNull('astra_webcs.phash')
+            ->selectRaw("
+                CASE 
+                    WHEN ahass.jenis_dealer IN ('H23', 'H123') THEN 'Dealer'
+                    ELSE 'SO'
+                END as dealer_category,
+                COUNT(*) as total
+            ")
+            ->groupByRaw("
+                CASE 
+                    WHEN ahass.jenis_dealer IN ('H23', 'H123') THEN 'Dealer'
+                    ELSE 'SO'
+                END
+            ")
+            ->pluck('total', 'dealer_category');
+
+        $dashboard = [
+            'missing_phash_total' => AstraWebc::whereNull('phash')->count(),
+            'missing_phash_dealer' => $missingPhashCounts->get('Dealer', 0),
+            'missing_phash_so' => $missingPhashCounts->get('SO', 0),
+            'last_dealer_claim' => $this->formatDashboardDate($latestClaims->get('Dealer')),
+            'last_so_claim' => $this->formatDashboardDate($latestClaims->get('SO')),
+        ];
+
+        return view('astra_webc.index', compact('ahass', 'validitas', 'jenis_dealer', 'dashboard'));
     }
 
     /**
@@ -36,7 +88,15 @@ class AstraWebcController extends Controller
      */
     public function datatable(Request $request)
     {
-        $query = AstraWebc::query();
+        $duplicatePhashes = AstraWebc::select('phash')
+            ->whereNotNull('phash')
+            ->groupBy('phash')
+            ->havingRaw('COUNT(*) > 1');
+
+        $query = AstraWebc::query()
+            ->leftJoinSub($duplicatePhashes, 'duplicate_phashes', 'astra_webcs.phash', '=', 'duplicate_phashes.phash')
+            ->select('astra_webcs.*')
+            ->selectRaw('CASE WHEN duplicate_phashes.phash IS NULL THEN 0 ELSE 1 END as duplicates_count');
 
         // Filter range tanggal_claim
         if ($request->filled('tanggal_claim_dari')) {
@@ -84,19 +144,8 @@ class AstraWebcController extends Controller
             });
         }
 
-        // Pre-compute phash yang duplikat (1 query, bukan correlated subquery)
-        $duplicatePhashes = AstraWebc::select('phash')
-            ->whereNotNull('phash')
-            ->groupBy('phash')
-            ->havingRaw('COUNT(*) > 1')
-            ->pluck('phash')
-            ->toArray();
-
         return DataTables::of($query)
             ->addIndexColumn()
-            ->addColumn('duplicates_count', function ($row) use ($duplicatePhashes) {
-                return in_array($row->phash, $duplicatePhashes) ? 1 : 0;
-            })
             ->make(true);
     }
 
@@ -117,5 +166,14 @@ class AstraWebcController extends Controller
             ->get(['id', 'kode_ahass', 'nama_ahass', 'nomor_mesin', 'type_motor', 'tanggal_beli', 'no_rangka', 'kpb_type', 'tanggal_claim', 'km', 'filename']);
 
         return response()->json($rows);
+    }
+
+    private function formatDashboardDate(?string $value): string
+    {
+        if (!$value) {
+            return '-';
+        }
+
+        return Carbon::parse($value)->format('d/m/Y');
     }
 }

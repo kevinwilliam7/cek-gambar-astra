@@ -17,6 +17,67 @@
             </div>
             <!-- End Header -->
 
+            <!-- Mini Dashboard -->
+            <div class="grid gap-4 md:grid-cols-3">
+                <div class="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:shadow-slate-200/50 dark:border-neutral-700/60 dark:bg-neutral-800/80 dark:hover:shadow-neutral-900/50">
+                    <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-amber-500/10 blur-2xl transition-all duration-500 group-hover:bg-amber-500/20 dark:bg-amber-500/5 dark:group-hover:bg-amber-500/15"></div>
+                    <div class="relative flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[0.7rem] font-bold uppercase tracking-widest text-slate-500 dark:text-neutral-400">Belum ada phash</p>
+                            <p class="mt-1.5 text-3xl font-extrabold tracking-tight text-slate-800 dark:text-white">{{ number_format($dashboard['missing_phash_total']) }}</p>
+                        </div>
+                        <div class="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-amber-500/30 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-8.5 15A2 2 0 0 0 3.5 22h17a2 2 0 0 0 1.71-3.14l-8.5-15a2 2 0 0 0-3.42 0Z" />
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <div class="relative mt-4 flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center gap-1.5 rounded-lg bg-sky-100 px-2.5 py-1 text-[0.75rem] font-semibold text-sky-700 dark:bg-sky-500/10 dark:text-sky-400">
+                            Dealer: {{ number_format($dashboard['missing_phash_dealer']) }}
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-100 px-2.5 py-1 text-[0.75rem] font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                            SO: {{ number_format($dashboard['missing_phash_so']) }}
+                        </span>
+                    </div>
+                    <p class="relative mt-3 text-[0.75rem] text-slate-500 dark:text-neutral-400">Data yang belum memiliki nilai hash gambar.</p>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:shadow-slate-200/50 dark:border-neutral-700/60 dark:bg-neutral-800/80 dark:hover:shadow-neutral-900/50">
+                    <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-sky-500/10 blur-2xl transition-all duration-500 group-hover:bg-sky-500/20 dark:bg-sky-500/5 dark:group-hover:bg-sky-500/15"></div>
+                    <div class="relative flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[0.7rem] font-bold uppercase tracking-widest text-slate-500 dark:text-neutral-400">Terakhir Claim Dealer</p>
+                            <p class="mt-1.5 text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white md:text-3xl">{{ $dashboard['last_dealer_claim'] }}</p>
+                        </div>
+                        <div class="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 text-white shadow-lg shadow-sky-500/30 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="relative mt-4 text-sm text-slate-600 dark:text-neutral-400">Tanggal claim terbaru untuk AHASS Dealer (H23 & H123).</p>
+                </div>
+
+                <div class="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 backdrop-blur-xl p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:shadow-slate-200/50 dark:border-neutral-700/60 dark:bg-neutral-800/80 dark:hover:shadow-neutral-900/50">
+                    <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-emerald-500/10 blur-2xl transition-all duration-500 group-hover:bg-emerald-500/20 dark:bg-emerald-500/5 dark:group-hover:bg-emerald-500/15"></div>
+                    <div class="relative flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[0.7rem] font-bold uppercase tracking-widest text-slate-500 dark:text-neutral-400">Terakhir Claim SO</p>
+                            <p class="mt-1.5 text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white md:text-3xl">{{ $dashboard['last_so_claim'] }}</p>
+                        </div>
+                        <div class="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6 1.5a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="relative mt-4 text-sm text-slate-600 dark:text-neutral-400">Tanggal claim terbaru untuk AHASS SO (Selain H23 & H123).</p>
+                </div>
+            </div>
+            <!-- End Mini Dashboard -->
+
             <!-- Table in Card -->
             <div
                 class="flex flex-col bg-white border border-gray-200 shadow-xs rounded-xl dark:bg-neutral-800 dark:border-neutral-700">
