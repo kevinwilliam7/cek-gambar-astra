@@ -75,6 +75,7 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
                     $formattedTglService = $this->formatTanggalExcel($data['tgl_service']);
 
                     $this->checkDuplicateImage($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                    $this->checkDateMismatch($data, $rowNum, $formattedTglBeli, $formattedTglService);
                 }
             }
         });
@@ -197,6 +198,37 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
                     'message' => "⚠️ Baris {$rowNum}: Foto Speedometer Duplicate.",
                 ]);
             }
+        }
+    }
+
+    /**
+     * Memeriksa kesesuaian tanggal beli dan tanggal service dengan data WebC
+     */
+    private function checkDateMismatch($cekKpbDigital, $rowNum, $formattedTglBeli, $formattedTglService)
+    {
+        $a = AstraWebc::where('nomor_mesin', $cekKpbDigital->engine)
+            ->where('kpb_type', 'KPB' . $cekKpbDigital->service_id)
+            ->first();
+        
+        if (!$a) {
+            $cekKpbDigital->notes()->updateOrCreate([
+                'message' => "⚠️ Data Webc tidak ditemukan",
+            ]);
+            return;
+        }
+        $webcTglBeli = $a->tanggal_beli ? $this->formatTanggalExcel($a->tanggal_beli) : null;
+        $webcTglService = $a->tanggal_claim ? $this->formatTanggalExcel($a->tanggal_claim) : null;
+
+        if ($formattedTglBeli && $webcTglBeli && $formattedTglBeli !== $webcTglBeli) {
+            $cekKpbDigital->notes()->updateOrCreate([
+                'message' => "⚠️ Baris {$rowNum}: Tanggal Beli tidak sesuai dengan Webconsole (Excel: {$formattedTglBeli}, WebC: {$webcTglBeli}).",
+            ]);
+        }
+
+        if ($formattedTglService && $webcTglService && $formattedTglService !== $webcTglService) {
+            $cekKpbDigital->notes()->updateOrCreate([
+                'message' => "⚠️ Baris {$rowNum}: Tanggal Service tidak sesuai dengan Webconsole (Excel: {$formattedTglService}, WebC: {$webcTglService}).",
+            ]);
         }
     }
 }
