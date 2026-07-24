@@ -74,8 +74,10 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
                     $formattedTglBeli    = $this->formatTanggalExcel($tgl_beli);
                     $formattedTglService = $this->formatTanggalExcel($data['tgl_service']);
 
-                    $this->checkDuplicateImage($data, $rowNum, $formattedTglBeli, $formattedTglService);
-                    $this->checkDateMismatch($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                    $cekKpbDigital = $this->checkDuplicateImage($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                    if ($cekKpbDigital) {
+                        $this->checkDateMismatch($cekKpbDigital, $rowNum, $formattedTglBeli, $formattedTglService);
+                    }
                 }
             }
         });
@@ -177,14 +179,14 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
             $cekKpbDigital->notes()->updateOrCreate([
                 'message' => "⚠️ Baris {$rowNum}: Tidak ditemukan data claim padanan di AstraWebc.",
             ]);
-            return;
+            return $cekKpbDigital;
         }
 
         if (!$a->phash) {
             $cekKpbDigital->notes()->updateOrCreate([
                 'message' => "⚠️ Baris {$rowNum}: Data claim padanan ditemukan tetapi tidak memiliki foto (pHash kosong).",
             ]);
-            return;
+            return $cekKpbDigital;
         }
 
         // Cari duplikat photo berdasarkan phash di AstraWebc
@@ -199,6 +201,8 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
                 ]);
             }
         }
+        
+        return $cekKpbDigital;
     }
 
     /**
@@ -215,6 +219,12 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
                 'message' => "⚠️ Data Webc tidak ditemukan",
             ]);
             return;
+        }
+
+        if (!$a->phash) {
+            $cekKpbDigital->notes()->updateOrCreate([
+                'message' => "⚠️ Baris {$rowNum}: Gambar belum ada phash di AstraWebc.",
+            ]);
         }
         $webcTglBeli = $a->tanggal_beli ? $this->formatTanggalExcel($a->tanggal_beli) : null;
         $webcTglService = $a->tanggal_claim ? $this->formatTanggalExcel($a->tanggal_claim) : null;
