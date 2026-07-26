@@ -71,12 +71,13 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
                     $tgl_beli           = isset($data['bulan_beli'])
                         ? $data['tgl_beli'] . '/' . $data['bulan_beli'] . '/' . $data['tahun_beli']
                         : $data['tgl_beli'];
+                    $km = $data['km'];
                     $formattedTglBeli    = $this->formatTanggalExcel($tgl_beli);
                     $formattedTglService = $this->formatTanggalExcel($data['tgl_service']);
 
                     $cekKpbDigital = $this->checkDuplicateImage($data, $rowNum, $formattedTglBeli, $formattedTglService);
                     if ($cekKpbDigital) {
-                        $this->checkDateMismatch($cekKpbDigital, $rowNum, $formattedTglBeli, $formattedTglService);
+                        $this->checkDateMismatch($cekKpbDigital, $rowNum, $formattedTglBeli, $formattedTglService, $km);
                     }
                 }
             }
@@ -226,19 +227,19 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
                 'message' => "⚠️ Baris {$rowNum}: Gambar belum ada phash di AstraWebc.",
             ]);
         }
-        $webcTglBeli = $a->tanggal_beli ? $this->formatTanggalExcel($a->tanggal_beli) : null;
         $webcTglService = $a->tanggal_claim ? $this->formatTanggalExcel($a->tanggal_claim) : null;
-
-        if ($formattedTglBeli && $webcTglBeli && $formattedTglBeli !== $webcTglBeli) {
-            $cekKpbDigital->notes()->updateOrCreate([
-                'message' => "⚠️ Baris {$rowNum}: Tanggal Beli tidak sesuai dengan Webconsole (Excel: {$formattedTglBeli}, WebC: {$webcTglBeli}).",
-            ]);
-        }
+        $webcKm = $a->km ?? null;
 
         if ($formattedTglService && $webcTglService && $formattedTglService !== $webcTglService) {
             $cekKpbDigital->notes()->updateOrCreate([
                 'message' => "⚠️ Baris {$rowNum}: Tanggal Service tidak sesuai dengan Webconsole (Excel: {$formattedTglService}, WebC: {$webcTglService}).",
             ]);
         }
+
+        if ($km && $webcKm && $km !== $webcKm) {
+            $cekKpbDigital->notes()->updateOrCreate([
+                'message' => "⚠️ Baris {$rowNum}: KM tidak sesuai dengan Webconsole (Excel: {$km}, WebC: {$webcKm}).",
+            ]);
+        }   
     }
 }
