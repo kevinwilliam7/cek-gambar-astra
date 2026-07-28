@@ -209,7 +209,7 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
     /**
      * Memeriksa kesesuaian tanggal beli dan tanggal service dengan data WebC
      */
-    private function checkDateMismatch($cekKpbDigital, $rowNum, $formattedTglBeli, $formattedTglService)
+    private function checkDateMismatch($cekKpbDigital, $rowNum, $formattedTglBeli, $formattedTglService, $km)
     {
         $a = AstraWebc::where('nomor_mesin', $cekKpbDigital->engine)
             ->where('kpb_type', 'KPB' . $cekKpbDigital->service_id)
@@ -236,7 +236,7 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
             ]);
         }
 
-        if ($km && $webcKm && $km !== $webcKm) {
+        if ($km && $webcKm && (int) $km !== (int) $webcKm) {
             $cekKpbDigital->notes()->updateOrCreate([
                 'message' => "⚠️ Baris {$rowNum}: KM tidak sesuai dengan Webconsole (Excel: {$km}, WebC: {$webcKm}).",
             ]);
