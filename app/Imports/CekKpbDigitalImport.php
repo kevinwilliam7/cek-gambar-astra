@@ -240,6 +240,15 @@ class CekKpbDigitalImport implements ToCollection, WithMultipleSheets, WithHeadi
             $cekKpbDigital->notes()->updateOrCreate([
                 'message' => "⚠️ Baris {$rowNum}: KM tidak sesuai dengan Webconsole (Excel: {$km}, WebC: {$webcKm}).",
             ]);
-        }   
+        }
+
+        // //jika tanggal beli dengan tanggal beli webc selisih lebih dari 3 hari atau kurang dari 3 hari
+        // $diff = abs(strtotime($formattedTglBeli) - strtotime($webcTglService));
+        // $days = floor($diff / (60 * 60 * 24));
+        // if ($days > 3) {
+        //     $cekKpbDigital->notes()->updateOrCreate([
+        //         'message' => "⚠️ Baris {$rowNum}: Tanggal selisih 3 hari dengan Webconsole (Excel: {$formattedTglBeli}, WebC: {$webcTglService}).",
+        //     ]);
+        // }   
     }
 }
