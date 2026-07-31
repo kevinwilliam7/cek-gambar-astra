@@ -368,6 +368,8 @@ class ExportReportKpb extends Command
                         } else {
                         }
                     }
+                } else {
+                    throw new \Exception("Kolom keterangan tidak ada di file {$file->getFilename()}: " . json_encode($row));
                 }
                 $this->info("Berhasil baca file {$label} ke-{$fileKe}: " . $file->getFilename());
             } catch (\Throwable $e) {
