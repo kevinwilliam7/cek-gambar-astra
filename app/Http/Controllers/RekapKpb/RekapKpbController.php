@@ -80,7 +80,7 @@ class RekapKpbController extends Controller
         $jenis_dealer = Ahass::select('jenis_dealer')
             ->distinct()
             ->pluck('jenis_dealer');
-        $latestMonth = RekapKpb::orderBy('id', 'desc')->value('month');
+        $latestMonth = RekapKpb::orderBy('ttpk_date', 'desc')->value('month');
         $jumlahTtpk = 0;
         $listTtpkDateDealer = [];
         $listTtpkDateSO = [];
