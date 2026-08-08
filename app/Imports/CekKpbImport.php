@@ -351,9 +351,22 @@ class CekKpbImport implements ToCollection, WithMultipleSheets, WithHeadingRow
                         'user_id' => $this->user_id,
                     ]
                 );
-                $cekKpb->notes()->updateOrCreate([
-                    'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli tidak sesuai (DB: {$rekap_kpbs->buy_date}, Excel: {$formattedTglBeli})",
-                ]);
+
+                $enginePrefix = substr($data['no_engine'], 0, 5);
+                $kriteriaKpb = $this->kpbKriteriaCache->get($enginePrefix . '|' . 'KPB '.$data['service_ke']);
+                $selisihObj = (new \DateTime($rekap_kpbs->buy_date))->diff(new \DateTime($formattedTglService));
+                $selisihHari = $selisihObj->days * ($selisihObj->invert ? -1 : 1);
+                $selisihHari = $selisihHari + 1; // Tambahkan 1 hari untuk menghitung inklusif
+                if($selisihHari > $kriteriaKpb->hari_maksimum) {
+                    $cekKpb->notes()->updateOrCreate([
+                        'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli tidak sesuai (DB: {$rekap_kpbs->buy_date}, Excel: {$formattedTglBeli}) 
+                        *Jika menggunakan tgl beli {$rekap_kpbs->buy_date} maka Selisih Hari ($selisihHari hari) melebihi batas maksimum ({$kriteriaKpb->hari_maksimum} hari)",
+                    ]);
+                } else {
+                    $cekKpb->notes()->updateOrCreate([
+                        'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli tidak sesuai (DB: {$rekap_kpbs->buy_date}, Excel: {$formattedTglBeli})",
+                    ]);
+                }
             }
         }
 

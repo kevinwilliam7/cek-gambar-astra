@@ -244,6 +244,7 @@ class CekKpbController extends Controller
             }
         });
         return DataTables::of($data)
+            ->rawColumns(['notes'])
             ->make(true);
     }
 
