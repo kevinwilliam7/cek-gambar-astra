@@ -13,6 +13,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Carbon\Carbon;
 
 class CekKpbImport implements ToCollection, WithMultipleSheets, WithHeadingRow
 {
@@ -85,6 +86,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets, WithHeadingRow
                     $this->checkBuyDateEqualsServiceDate($data, $rowNum, $formattedTglBeli, $formattedTglService);
                     $this->checkServiceDateExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
                     $this->checkKmExceedsMaxLimit($data, $rowNum, $formattedTglBeli, $formattedTglService);
+                    $this->checkExpiredDate($data, $rowNum, $formattedTglBeli, $formattedTglService);
                 }
             }
         });
@@ -625,6 +627,72 @@ class CekKpbImport implements ToCollection, WithMultipleSheets, WithHeadingRow
                         'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KM Service di Excel ({$data['km']}) tidak valid.",
                     ]);
                 }
+            }
+        }
+    }
+
+    /**
+     * Untuk mengecek KPB yang sudah melewati tanggal penagihan / expired
+     */
+    private function checkExpiredDate($data, $rowNum, $formattedTglBeli, $formattedTglService)
+    {
+        $enginePrefix = substr($data['no_engine'], 0, 5);
+        $kriteriaKpb  = $this->kpbKriteriaCache->get($enginePrefix . '|' . 'KPB ' . $data['service_ke']);
+
+        // Cek null DULU, sebelum mengakses properti $kriteriaKpb
+        if ($kriteriaKpb === null) {
+            if ($this->context instanceof Command) {
+                $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Kriteria KPB tidak ditemukan untuk pengecekan tanggal penagihan melebihi batas waktu / expired.");
+            } else {
+                $cekKpb = CekKpb::updateOrCreate(
+                    [
+                        'engine'     => $data['no_engine'],
+                        'service_id' => $data['service_ke'],
+                        'file_name'  => $this->fileName,
+                    ],
+                    [
+                        'buy_date'     => $formattedTglBeli,
+                        'service_date' => $formattedTglService,
+                        'km'           => $data['km'],
+                        'user_id'      => $this->user_id,
+                    ]
+                );
+                $cekKpb->notes()->updateOrCreate([
+                    'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Kriteria KPB tidak ditemukan untuk pengecekan tanggal penagihan melebihi batas waktu / expired.",
+                ]);
+            }
+
+            return;
+        }
+
+        // hari_maksimum di DB sudah ditambah buffer 15 hari saat disimpan -> kurangi dulu
+        $hariMaksimumAsli = $kriteriaKpb->hari_maksimum - 15;
+        $bulanMaksimumAsli = ($hariMaksimumAsli / 30);
+
+        // Buffer tetap (4 bulan + bulan maks dari kriteria_kpbs) yang selalu ditambahkan ke semua KPB
+        $tanggalExp = Carbon::now()
+            ->subMonthsNoOverflow(4+$bulanMaksimumAsli);
+
+        if (Carbon::parse($formattedTglBeli)->lessThan($tanggalExp)) {
+            if ($this->context instanceof Command) {
+                $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KPB sudah mencapai batas akhir penagihan periode {$tanggalExp->format('M')} tahun {$tanggalExp->format('Y')} (EXPIRED).");
+            } else {    
+                $cekKpb = CekKpb::updateOrCreate(
+                    [
+                        'engine'     => $data['no_engine'],
+                        'service_id' => $data['service_ke'],
+                        'file_name'  => $this->fileName,
+                    ],
+                    [
+                        'buy_date'     => $formattedTglBeli,
+                        'service_date' => $formattedTglService,
+                        'km'           => $data['km'],
+                        'user_id'      => $this->user_id,
+                    ]
+                );
+                $cekKpb->notes()->updateOrCreate([
+                    'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KPB sudah mencapai batas akhir penagihan periode {$tanggalExp->format('M')} tahun {$tanggalExp->format('Y')} (EXPIRED).",
+                ]);
             }
         }
     }
