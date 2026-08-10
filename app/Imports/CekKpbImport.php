@@ -361,7 +361,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets, WithHeadingRow
                 $selisihHari = $selisihHari + 1; // Tambahkan 1 hari untuk menghitung inklusif
                 if($selisihHari > $kriteriaKpb->hari_maksimum) {
                     $cekKpb->notes()->updateOrCreate([
-                        'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli tidak sesuai (DB: {$rekap_kpbs->buy_date}, Excel: {$formattedTglBeli}) 
+                        'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - Tgl Beli tidak sesuai (DB: {$rekap_kpbs->buy_date}, Excel: {$formattedTglBeli})
                         *Jika menggunakan tgl beli {$rekap_kpbs->buy_date} maka Selisih Hari ($selisihHari hari) melebihi batas maksimum ({$kriteriaKpb->hari_maksimum} hari)",
                     ]);
                 } else {
@@ -673,10 +673,10 @@ class CekKpbImport implements ToCollection, WithMultipleSheets, WithHeadingRow
         $tanggalExp = Carbon::now()
             ->subMonthsNoOverflow(4+$bulanMaksimumAsli);
 
-        if (Carbon::parse($formattedTglBeli)->lessThan($tanggalExp)) {
+        if (Carbon::parse($formattedTglBeli)->format('Y-m') <= $tanggalExp->format('Y-m')) {
             if ($this->context instanceof Command) {
-                $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KPB sudah mencapai batas akhir penagihan periode {$tanggalExp->format('M')} tahun {$tanggalExp->format('Y')} (EXPIRED).");
-            } else {    
+                $this->log("⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KPB sudah mencapai batas akhir penagihan periode {$tanggalExp->format('M')} tahun {$tanggalExp->format('Y')} (KPB EXPIRED).");
+            } else {
                 $cekKpb = CekKpb::updateOrCreate(
                     [
                         'engine'     => $data['no_engine'],
@@ -691,7 +691,7 @@ class CekKpbImport implements ToCollection, WithMultipleSheets, WithHeadingRow
                     ]
                 );
                 $cekKpb->notes()->updateOrCreate([
-                    'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KPB sudah mencapai batas akhir penagihan periode {$tanggalExp->format('M')} tahun {$tanggalExp->format('Y')} (EXPIRED).",
+                    'message' => "⚠️ Baris {$rowNum}: No Engine {$data['no_engine']} - {$data['service_ke']} - KPB sudah mencapai batas akhir penagihan periode {$tanggalExp->format('M')} tahun {$tanggalExp->format('Y')} (KPB EXPIRED).",
                 ]);
             }
         }
