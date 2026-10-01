@@ -22,7 +22,7 @@ class GetHashWebc extends Command
         $perceptual_hash = new ImageHash(new PerceptualHash());
         $difference_hash = new ImageHash(new DifferenceHash());
         $data = AstraWebc::where(function($q){
-            $q->whereNull('dhash')->orWhereNull('phash');
+            $q->where('kode_ahass', '00728')->whereNull('phash');
         })
         ->get();
         foreach ($data as $key => $item) {
